@@ -257,3 +257,17 @@
   font-size: var(--text-sm);
   color: var(--ink-soft);
 }
+
+/* The whole tile is the link, so the focus ring lands on the card rather than
+   on three words inside it. */
+.tile { padding: 0; }
+.tile__link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  color: var(--ink);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+}
+.tile__link h3 { color: var(--ink); }

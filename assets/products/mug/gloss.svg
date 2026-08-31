@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" width="900" height="700">
+<!-- Gloss pass. Composited with screen AFTER the tint and after the artwork, so
+     a dark mug still reads as glazed ceramic and the print looks like it is
+     under the glaze rather than stuck on top of it. -->
+<defs>
+  <linearGradient id="spec" x1="240" y1="0" x2="330" y2="0" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+    <stop offset="0.5" stop-color="#fff" stop-opacity="0.42"/>
+    <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="spec2" x1="560" y1="0" x2="625" y2="0" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+    <stop offset="0.6" stop-color="#fff" stop-opacity="0.16"/>
+    <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+  </linearGradient>
+  <clipPath id="bodyClip">
+    <path d="M200 140 L200 553 A220 34 0 0 0 640 553 L640 140 Z"/>
+  </clipPath>
+</defs>
+<g clip-path="url(#bodyClip)">
+  <rect x="240" y="150" width="90" height="410" fill="url(#spec)"/>
+  <rect x="560" y="150" width="65" height="410" fill="url(#spec2)"/>
+</g>
+</svg>

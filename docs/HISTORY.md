@@ -116,3 +116,106 @@ which follows `border-radius` on its own. The checker now fails the build if the
 - Bricolage at 131KB is the largest asset on the page. Pinning the width and
   optical size axes with a font instancer would cut it, and that is a P5
   performance job, not a P1 one.
+
+### v0.1.0 deployed
+
+Pushed 2026-08-31. First run failed at `actions/configure-pages` with "Create Pages
+site failed. Resource not accessible by integration": `enablement: true` cannot
+create a Pages site with the default `GITHUB_TOKEN`. Created it once out of band
+with `gh api -X POST repos/OWNER/REPO/pages -f build_type=workflow`, re-ran, green.
+
+`CNAME` is deliberately held out of the `cp` allowlist while `giftylb.com` has no
+DNS. Shipping it would set a custom domain that fails verification, and Pages then
+redirects the working `github.io` URL to a dead one. `index.html` carries `noindex`
+and has its `canonical` commented out for the same reason. All three revert together
+the day the domain resolves.
+
+Live at https://chaos-961.github.io/giftylb-website/ . Eleven files in the artifact,
+every asset 200, a missing path 404s, and the 375px pass was repeated against the
+live URL rather than only against localhost.
+
+---
+
+## v0.2.1 . P2 customizer engine, all five products
+
+2026-08-31. One engine, five products, driven entirely by recipes.
+
+### The shape of it
+
+- `js/recipe.js` loads and **validates** a product recipe, and is the only file
+  that knows where recipes come from. Moving the catalog into a database later
+  is a change to `R.load` and nothing else.
+- `js/engine/warp.js` is the whole surface story. There is exactly one warp: a
+  per pixel gather. Every surface is expressed as a uv map, "for this screen
+  pixel, which point of the artwork belongs here". A cylinder builds that from a
+  formula, a flat panel from an inverse bilinear solve, a photographed product
+  from an image. All three feed the same bilinear sampler. Coverage is
+  supersampled 2x2 at build time and baked in, which is what stops the edge of a
+  mug wrap crawling with jaggies.
+- `js/engine/render.js` composites: grayscale base, colour parts tinted through
+  their masks with `multiply`, print zones warped in and then shaded by the
+  product's own luminance, then a `screen` gloss pass.
+- `js/engine/design.js` renders the flat artwork in print space, in real
+  millimetres, which is what makes the resolution gate honest and lets P4 export
+  a print file from the same code path as the preview.
+- `js/engine/photo.js`, `state.js`, `price.js` cover intake and the DPI gate,
+  undo and autosave, and live pricing.
+
+### Warp maps are built once
+
+The uv map and the shading lookup depend only on the recipe, never on the
+buyer's choices, so they are built once per product and only the gather runs per
+frame. During a drag the gather runs at `step` 2 and fills blocks, then a clean
+frame follows 90ms after the finger settles. The preview tracks the finger
+rather than lagging it.
+
+### Two photos of every upload
+
+The working image stays full resolution for the preview and for the print file.
+A copy downscaled to 1800px on the long edge is what autosave puts in
+localStorage, because a phone camera JPEG does not fit and a silently failed
+save is worse than a smaller one. On restore, `natW/natH` are taken from the
+copy that actually survived, so the resolution gate reports what will really
+print rather than what was originally uploaded.
+
+### Bugs found by verifying
+
+- **Every product priced at $12.** The price was only ever computed from a change
+  handler, so before the first interaction the markup's placeholder stood as the
+  price of the whole catalog. Now priced on boot.
+- **The canvas was blank in a background tab.** The first draw went through
+  `requestAnimationFrame`, which does not fire in a hidden tab. Draw directly on
+  boot instead.
+- **Every tab panel visible at once.** `.cz-panel { display: flex }` silently
+  outranks the user agent's `[hidden]` rule. Fixed globally in `base.css` with
+  `[hidden] { display: none !important }`, because this bites any component that
+  sets `display`.
+- **A white mug rendered grey.** The grayscale cylinder falloff sat in the mid
+  greys, and `multiply` by `#FFFFFF` is a no-op, so the lightest colour in the
+  palette showed the raw art. The base art now runs light and every darker colour
+  multiplies down from there.
+- **Stale controls after undo.** Undo moved the design back but left the colour
+  swatch still showing the old selection, which is a lie about the state. Every
+  control now re-syncs from the design.
+- **The canvas overflowed the stage on short viewports.** `max-block-size: 100%`
+  on a canvas with an intrinsic ratio does not reliably contain it. Absolute
+  positioning plus `object-fit: contain` does.
+
+### Gate
+
+Renderer snapshotted while the mug was the only product, then cap, bottle, tote
+and photo block were added as recipes and art. `diff` of `js/engine/` and
+`js/recipe.js` is **empty**, and all seven sha256 hashes are unchanged.
+
+The UI grew a zone picker and `accepts` aware tabs, which is `js/customize.js`,
+not the renderer. The photo block needs it: it has two print zones, a UV printed
+acrylic face and an engraved caption on the base.
+
+### Release checks added
+
+`check-release.mjs` now also parses every recipe and fails when an asset a recipe
+names is missing or absent from the `cp` allowlist. Nothing else could catch it,
+because recipes are fetched by JS. It also proves `<meta name="version">` matches
+`VERSION`, since that meta is what stamps `?v=` onto recipe assets. Page to page
+`.html` links are exempt from cache busting: a document is an entry point, and
+busting it would only break bookmarks.

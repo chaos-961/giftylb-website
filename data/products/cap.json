@@ -1,0 +1,125 @@
+{
+  "id": "cap",
+  "name": "Cap",
+  "blurb": "Choose the color of every panel, then a name embroidered on the front.",
+  "method": "embroidery",
+  "basePrice": 16,
+  "currency": "USD",
+  "leadTimeDays": 3,
+
+  "views": [
+    {
+      "id": "front",
+      "label": "Front",
+      "w": 900,
+      "h": 700,
+      "baseImage": "assets/products/cap/base.svg"
+    }
+  ],
+
+  "colorParts": [
+    {
+      "id": "crown",
+      "name": "Crown",
+      "viewId": "front",
+      "maskUrl": "assets/products/cap/mask-crown.svg",
+      "default": "#14201F",
+      "palette": [
+        { "hex": "#14201F", "name": "Black" },
+        { "hex": "#FFFFFF", "name": "White" },
+        { "hex": "#0F766E", "name": "Deep teal" },
+        { "hex": "#1E3A8A", "name": "Navy" },
+        { "hex": "#B91C1C", "name": "Red" },
+        { "hex": "#D97706", "name": "Amber" }
+      ]
+    },
+    {
+      "id": "panels",
+      "name": "Front panels",
+      "viewId": "front",
+      "maskUrl": "assets/products/cap/mask-panels.svg",
+      "default": "#14201F",
+      "palette": [
+        { "hex": "#14201F", "name": "Black" },
+        { "hex": "#FFFFFF", "name": "White" },
+        { "hex": "#0F766E", "name": "Deep teal" },
+        { "hex": "#1E3A8A", "name": "Navy" },
+        { "hex": "#B91C1C", "name": "Red" }
+      ]
+    },
+    {
+      "id": "brim",
+      "name": "Brim",
+      "viewId": "front",
+      "maskUrl": "assets/products/cap/mask-brim.svg",
+      "default": "#14201F",
+      "palette": [
+        { "hex": "#14201F", "name": "Black" },
+        { "hex": "#FFFFFF", "name": "White" },
+        { "hex": "#0F766E", "name": "Deep teal" },
+        { "hex": "#1E3A8A", "name": "Navy" },
+        { "hex": "#B91C1C", "name": "Red" },
+        { "hex": "#D97706", "name": "Amber" }
+      ]
+    },
+    {
+      "id": "button",
+      "name": "Top button",
+      "viewId": "front",
+      "maskUrl": "assets/products/cap/mask-button.svg",
+      "default": "#14201F",
+      "palette": [
+        { "hex": "#14201F", "name": "Black" },
+        { "hex": "#FFFFFF", "name": "White" },
+        { "hex": "#0F766E", "name": "Deep teal" },
+        { "hex": "#B91C1C", "name": "Red" }
+      ]
+    }
+  ],
+
+  "printZones": [
+    {
+      "id": "front-panel",
+      "name": "Front panel",
+      "viewId": "front",
+      "rect": { "x": 366, "y": 268, "w": 190, "h": 150 },
+      "warp": {
+        "type": "quad",
+        "quad": [[372, 286], [552, 286], [548, 424], [376, 424]]
+      },
+      "widthMm": 90,
+      "heightMm": 55,
+      "minDpi": 200,
+      "bleedMm": 0,
+      "accepts": ["text"],
+      "background": null
+    }
+  ],
+
+  "textRules": [
+    {
+      "zoneId": "front-panel",
+      "maxChars": 12,
+      "maxLines": 1,
+      "allowedFonts": ["display", "ui"],
+      "defaultFont": "display",
+      "engraved": false,
+      "colorLocked": false,
+      "defaultColor": "#FFFFFF",
+      "palette": [
+        { "hex": "#FFFFFF", "name": "White" },
+        { "hex": "#14201F", "name": "Black" },
+        { "hex": "#D97706", "name": "Gold" },
+        { "hex": "#0F766E", "name": "Deep teal" },
+        { "hex": "#B91C1C", "name": "Red" }
+      ]
+    }
+  ],
+
+  "pricing": [
+    { "id": "textline", "label": "Embroidered line", "amount": 4, "when": { "perTextLine": "front-panel" } },
+    { "id": "crown", "label": "Crown colour", "amount": 0, "when": { "partNotDefault": "crown" } },
+    { "id": "panels", "label": "Contrast panels", "amount": 2, "when": { "partNotDefault": "panels" } },
+    { "id": "brim", "label": "Contrast brim", "amount": 2, "when": { "partNotDefault": "brim" } }
+  ]
+}

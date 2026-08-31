@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" width="900" height="700">
+<!-- Acrylic photo block in a wood base. Grayscale. The acrylic is the print
+     surface, the base carries an engraved caption. -->
+<defs>
+  <linearGradient id="acr" x1="0" y1="120" x2="0" y2="470" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#fdfdfd"/><stop offset="0.5" stop-color="#ededed"/>
+    <stop offset="1" stop-color="#dcdcdc"/>
+  </linearGradient>
+  <linearGradient id="wood" x1="0" y1="474" x2="0" y2="546" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#d9d9d9"/><stop offset="0.35" stop-color="#bcbcbc"/>
+    <stop offset="1" stop-color="#8e8e8e"/>
+  </linearGradient>
+  <radialGradient id="dropP" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#000" stop-opacity="0.26"/><stop offset="1" stop-color="#000" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+<ellipse cx="450" cy="566" rx="240" ry="24" fill="url(#dropP)"/>
+<rect x="268" y="120" width="364" height="356" rx="6" fill="url(#acr)"/>
+<rect x="268" y="120" width="364" height="356" rx="6" fill="none" stroke="#c4c4c4" stroke-width="3"/>
+<path d="M268 120 h26 v356 h-26 z" fill="#fff" opacity="0.5"/>
+<rect x="238" y="474" width="424" height="72" rx="10" fill="url(#wood)"/>
+<rect x="238" y="474" width="424" height="10" fill="#fff" opacity="0.28"/>
+</svg>

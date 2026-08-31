@@ -11,12 +11,12 @@
      together with the rest of the meta and OG work, when the domain is live. -->
 <meta name="robots" content="noindex">
 
-<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.1.0" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.1.0" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.2.1" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.2.1" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="css/tokens.css?v=0.1.0">
-<link rel="stylesheet" href="css/base.css?v=0.1.0">
-<link rel="stylesheet" href="css/home.css?v=0.1.0">
+<link rel="stylesheet" href="css/tokens.css?v=0.2.1">
+<link rel="stylesheet" href="css/base.css?v=0.2.1">
+<link rel="stylesheet" href="css/home.css?v=0.2.1">
 <script>
 /* Decide the reveal path before anything paints. Only arm the observer path,
    and only when it will really run. Nothing is hidden otherwise. */
@@ -88,7 +88,7 @@ if(!ok&&!red&&'IntersectionObserver' in w)d.documentElement.classList.add('revea
           <a class="btn btn--primary" href="#products">See what we make</a>
           <a class="btn btn--quiet" href="#how">How it works</a>
         </div>
-        <p class="hero__note">Ordering opens soon. The shop is being built right now.</p>
+        <p class="hero__note">Try the customizer now. Ordering opens soon.</p>
       </div>
 
       <div class="stage" role="img" aria-label="A mug with a photo printed on it and a name underneath">
@@ -115,29 +115,39 @@ if(!ok&&!red&&'IntersectionObserver' in w)d.documentElement.classList.add('revea
 
       <ul class="grid-products" role="list">
         <li class="tile reveal">
+          <a class="tile__link" href="customize.html?p=mug">
           <span class="tile__art"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href="#i-mug"/></svg></span>
           <h3>Mug</h3>
           <p>Your photo wrapped right around it. Sublimation print, dishwasher safe.</p>
+          </a>
         </li>
         <li class="tile reveal">
+          <a class="tile__link" href="customize.html?p=cap">
           <span class="tile__art"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href="#i-cap"/></svg></span>
           <h3>Cap</h3>
           <p>Choose the color of every panel, then a name embroidered on the front.</p>
+          </a>
         </li>
         <li class="tile reveal">
+          <a class="tile__link" href="customize.html?p=bottle">
           <span class="tile__art"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href="#i-bottle"/></svg></span>
           <h3>Bottle</h3>
           <p>Body, lid and band in the colors you pick. Name laser engraved into the coat.</p>
+          </a>
         </li>
         <li class="tile reveal">
+          <a class="tile__link" href="customize.html?p=tote">
           <span class="tile__art"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href="#i-tote"/></svg></span>
           <h3>Tote bag</h3>
           <p>A big flat print area. Lead with a photo or lead with the type.</p>
+          </a>
         </li>
         <li class="tile reveal">
+          <a class="tile__link" href="customize.html?p=photo-block">
           <span class="tile__art"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href="#i-block"/></svg></span>
           <h3>Photo block</h3>
           <p>Printed straight onto acrylic, with a short caption engraved on the base.</p>
+          </a>
         </li>
       </ul>
 
@@ -208,7 +218,7 @@ if(!ok&&!red&&'IntersectionObserver' in w)d.documentElement.classList.add('revea
   </div>
 </footer>
 
-<script defer src="js/firebase-config.js?v=0.1.0"></script>
-<script defer src="js/main.js?v=0.1.0"></script>
+<script defer src="js/firebase-config.js?v=0.2.1"></script>
+<script defer src="js/main.js?v=0.2.1"></script>
 </body>
 </html>

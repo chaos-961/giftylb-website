@@ -1,0 +1,55 @@
+{
+  "id": "bottle",
+  "name": "Bottle",
+  "blurb": "Body, lid and band in the colors you pick. Name laser engraved into the coat.",
+  "method": "powder coat and laser engrave",
+  "basePrice": 22,
+  "currency": "USD",
+  "leadTimeDays": 3,
+
+  "views": [
+    { "id": "front", "label": "Front", "w": 900, "h": 700,
+      "baseImage": "assets/products/bottle/base.svg" }
+  ],
+
+  "colorParts": [
+    { "id": "body", "name": "Body", "viewId": "front",
+      "maskUrl": "assets/products/bottle/mask-body.svg", "default": "#14201F",
+      "palette": [
+        { "hex": "#14201F", "name": "Black" }, { "hex": "#FFFFFF", "name": "White" },
+        { "hex": "#0F766E", "name": "Deep teal" }, { "hex": "#1E3A8A", "name": "Navy" },
+        { "hex": "#B91C1C", "name": "Red" }, { "hex": "#DB2777", "name": "Pink" },
+        { "hex": "#D97706", "name": "Amber" } ] },
+    { "id": "lid", "name": "Lid", "viewId": "front",
+      "maskUrl": "assets/products/bottle/mask-lid.svg", "default": "#14201F",
+      "palette": [
+        { "hex": "#14201F", "name": "Black" }, { "hex": "#FFFFFF", "name": "White" },
+        { "hex": "#0F766E", "name": "Deep teal" }, { "hex": "#D97706", "name": "Amber" } ] },
+    { "id": "band", "name": "Band", "viewId": "front",
+      "maskUrl": "assets/products/bottle/mask-band.svg", "default": "#14201F",
+      "palette": [
+        { "hex": "#14201F", "name": "Black" }, { "hex": "#FFFFFF", "name": "White" },
+        { "hex": "#0F766E", "name": "Deep teal" }, { "hex": "#B91C1C", "name": "Red" },
+        { "hex": "#D97706", "name": "Amber" } ] }
+  ],
+
+  "printZones": [
+    { "id": "engrave", "name": "Engraving", "viewId": "front",
+      "rect": { "x": 360, "y": 250, "w": 182, "h": 150 },
+      "warp": { "type": "cylinder", "wrapDeg": 210, "bowPx": 0 },
+      "widthMm": 70, "heightMm": 58, "minDpi": 300, "bleedMm": 0,
+      "accepts": ["text"], "background": null }
+  ],
+
+  "textRules": [
+    { "zoneId": "engrave", "maxChars": 16, "maxLines": 2,
+      "allowedFonts": ["display", "ui", "hand"], "defaultFont": "ui",
+      "engraved": true, "colorLocked": true, "defaultColor": "#FFFFFF" }
+  ],
+
+  "pricing": [
+    { "id": "textline", "label": "Engraved line", "amount": 3, "when": { "perTextLine": "engrave" } },
+    { "id": "lid", "label": "Contrast lid", "amount": 2, "when": { "partNotDefault": "lid" } },
+    { "id": "band", "label": "Contrast band", "amount": 2, "when": { "partNotDefault": "band" } }
+  ]
+}

@@ -30,10 +30,14 @@ jobs:
       - name: Assemble the site
         run: |
           set -euo pipefail
-          mkdir -p _site _site/css _site/js _site/fonts
+          mkdir -p _site _site/css _site/js _site/js/engine _site/fonts
+          mkdir -p _site/data/products
+          mkdir -p _site/assets/products/mug _site/assets/products/cap
+          mkdir -p _site/assets/products/bottle _site/assets/products/tote _site/assets/products/photo-block
 
           cp index.html _site/index.html
           cp 404.html _site/404.html
+          cp customize.html _site/customize.html
           cp .nojekyll _site/.nojekyll
 
           # CNAME is deliberately NOT copied yet. giftylb.com has no DNS records,
@@ -46,9 +50,45 @@ jobs:
           cp css/tokens.css _site/css/tokens.css
           cp css/base.css _site/css/base.css
           cp css/home.css _site/css/home.css
+          cp css/customize.css _site/css/customize.css
 
           cp js/firebase-config.js _site/js/firebase-config.js
           cp js/main.js _site/js/main.js
+          cp js/recipe.js _site/js/recipe.js
+          cp js/customize.js _site/js/customize.js
+          cp js/engine/warp.js _site/js/engine/warp.js
+          cp js/engine/design.js _site/js/engine/design.js
+          cp js/engine/render.js _site/js/engine/render.js
+          cp js/engine/state.js _site/js/engine/state.js
+          cp js/engine/photo.js _site/js/engine/photo.js
+          cp js/engine/price.js _site/js/engine/price.js
+
+          cp data/products/mug.json _site/data/products/mug.json
+          cp data/products/cap.json _site/data/products/cap.json
+          cp data/products/bottle.json _site/data/products/bottle.json
+          cp data/products/tote.json _site/data/products/tote.json
+          cp data/products/photo-block.json _site/data/products/photo-block.json
+
+          cp assets/products/mug/base.svg _site/assets/products/mug/base.svg
+          cp assets/products/mug/mask-body.svg _site/assets/products/mug/mask-body.svg
+          cp assets/products/mug/gloss.svg _site/assets/products/mug/gloss.svg
+
+          cp assets/products/cap/base.svg _site/assets/products/cap/base.svg
+          cp assets/products/cap/mask-crown.svg _site/assets/products/cap/mask-crown.svg
+          cp assets/products/cap/mask-panels.svg _site/assets/products/cap/mask-panels.svg
+          cp assets/products/cap/mask-brim.svg _site/assets/products/cap/mask-brim.svg
+          cp assets/products/cap/mask-button.svg _site/assets/products/cap/mask-button.svg
+
+          cp assets/products/bottle/base.svg _site/assets/products/bottle/base.svg
+          cp assets/products/bottle/mask-body.svg _site/assets/products/bottle/mask-body.svg
+          cp assets/products/bottle/mask-lid.svg _site/assets/products/bottle/mask-lid.svg
+          cp assets/products/bottle/mask-band.svg _site/assets/products/bottle/mask-band.svg
+
+          cp assets/products/tote/base.svg _site/assets/products/tote/base.svg
+          cp assets/products/tote/mask-body.svg _site/assets/products/tote/mask-body.svg
+
+          cp assets/products/photo-block/base.svg _site/assets/products/photo-block/base.svg
+          cp assets/products/photo-block/mask-base.svg _site/assets/products/photo-block/mask-base.svg
 
           cp fonts/bricolage-grotesque-var-latin.woff2 _site/fonts/bricolage-grotesque-var-latin.woff2
           cp fonts/inter-var-latin.woff2 _site/fonts/inter-var-latin.woff2
@@ -57,9 +97,12 @@ jobs:
       - name: Show what is shipping
         run: find _site -type f | sort
 
-      # enablement turns Pages on for the repo on the first run. Without it the
-      # first deploy fails with "Get Pages site failed" and Pages has to be
-      # switched on by hand in the repo settings before anything can ship.
+      # enablement only works once the Pages site already exists. Creating it
+      # with the default GITHUB_TOKEN fails with "Resource not accessible by
+      # integration", which is exactly how the first run of this workflow died.
+      # Pages was created once, out of band, with an account that has admin:
+      #   gh api -X POST repos/chaos-961/giftylb-website/pages -f build_type=workflow
+      # The flag stays because it is harmless now and covers a repo recreation.
       - uses: actions/configure-pages@v5
         with:
           enablement: true

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" width="900" height="700">
+<!-- Cap, three quarter front. Grayscale. Five colourable parts, which is the
+     point of this product: it proves multi part colorways on one engine. -->
+<defs>
+  <radialGradient id="crownG" cx="0.38" cy="0.24" r="0.85">
+    <stop offset="0" stop-color="#ffffff"/><stop offset="0.45" stop-color="#e2e2e2"/>
+    <stop offset="1" stop-color="#9d9d9d"/>
+  </radialGradient>
+  <linearGradient id="panelG" x1="330" y1="0" x2="600" y2="0" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#cfcfcf"/><stop offset="0.5" stop-color="#f2f2f2"/>
+    <stop offset="1" stop-color="#b6b6b6"/>
+  </linearGradient>
+  <linearGradient id="brimG" x1="0" y1="430" x2="0" y2="530" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#e8e8e8"/><stop offset="1" stop-color="#9a9a9a"/>
+  </linearGradient>
+  <radialGradient id="dropC" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#000" stop-opacity="0.26"/>
+    <stop offset="1" stop-color="#000" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+
+<ellipse cx="450" cy="556" rx="270" ry="34" fill="url(#dropC)"/>
+
+<!-- brim -->
+<path d="M262 452 C 300 520, 620 534, 700 486 C 712 478, 706 458, 686 456
+         C 560 470, 360 462, 300 436 Z" fill="url(#brimG)"/>
+<!-- crown -->
+<path d="M250 452 C 250 300, 340 208, 462 208 C 592 208, 668 306, 664 452
+         C 600 470, 320 470, 250 452 Z" fill="url(#crownG)"/>
+<!-- front panels, the seam either side of the print area -->
+<path d="M366 452 C 358 300, 400 214, 462 209 C 470 300, 470 380, 470 456 Z" fill="url(#panelG)" opacity="0.55"/>
+<path d="M556 452 C 562 300, 524 214, 462 209 C 456 300, 456 380, 456 456 Z" fill="url(#panelG)" opacity="0.4"/>
+<!-- seams -->
+<path d="M462 209 C 400 300, 372 372, 366 452" fill="none" stroke="#8f8f8f" stroke-width="3" stroke-opacity="0.55"/>
+<path d="M462 209 C 524 300, 552 372, 556 452" fill="none" stroke="#8f8f8f" stroke-width="3" stroke-opacity="0.55"/>
+<!-- button -->
+<circle cx="462" cy="208" r="16" fill="#d4d4d4"/>
+<circle cx="458" cy="203" r="7" fill="#f2f2f2"/>
+<!-- crown shadow onto the brim -->
+<path d="M262 452 C 340 476, 600 476, 664 452 C 600 468, 320 468, 262 452 Z" fill="#000" opacity="0.18"/>
+</svg>

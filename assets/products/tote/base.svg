@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" width="900" height="700">
+<!-- Cotton tote, flat on. Grayscale, with woven texture and soft folds so the
+     DTF print picks up cloth shading instead of sitting flat. -->
+<defs>
+  <linearGradient id="cloth" x1="250" y1="0" x2="650" y2="0" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#c8c8c8"/><stop offset="0.18" stop-color="#eeeeee"/>
+    <stop offset="0.45" stop-color="#fbfbfb"/><stop offset="0.75" stop-color="#e6e6e6"/>
+    <stop offset="1" stop-color="#c2c2c2"/>
+  </linearGradient>
+  <pattern id="weave" width="6" height="6" patternUnits="userSpaceOnUse">
+    <rect width="6" height="6" fill="none"/>
+    <path d="M0 3h6M3 0v6" stroke="#000" stroke-opacity="0.045" stroke-width="1"/>
+  </pattern>
+  <radialGradient id="dropT" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#000" stop-opacity="0.22"/><stop offset="1" stop-color="#000" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+<ellipse cx="450" cy="612" rx="230" ry="26" fill="url(#dropT)"/>
+<path d="M320 176 v-14 a58 58 0 0 1 116 0 v14" fill="none" stroke="#b0b0b0" stroke-width="15" stroke-linecap="round"/>
+<path d="M470 176 v-14 a58 58 0 0 1 116 0 v14" fill="none" stroke="#b0b0b0" stroke-width="15" stroke-linecap="round"/>
+<path d="M258 176 h384 l16 400 a14 14 0 0 1 -14 15 h-388 a14 14 0 0 1 -14 -15 z" fill="url(#cloth)"/>
+<path d="M258 176 h384 l16 400 a14 14 0 0 1 -14 15 h-388 a14 14 0 0 1 -14 -15 z" fill="url(#weave)"/>
+<path d="M300 180 c 18 160, 6 300, -8 406" fill="none" stroke="#000" stroke-opacity="0.05" stroke-width="24"/>
+<path d="M604 180 c -18 160, -6 300, 8 406" fill="none" stroke="#000" stroke-opacity="0.05" stroke-width="24"/>
+<path d="M258 176 h384" fill="none" stroke="#a9a9a9" stroke-width="6"/>
+</svg>

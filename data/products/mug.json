@@ -1,0 +1,86 @@
+{
+  "id": "mug",
+  "name": "Mug",
+  "blurb": "Your photo wrapped right around it. Sublimation print, dishwasher safe.",
+  "method": "sublimation",
+  "basePrice": 12,
+  "currency": "USD",
+  "leadTimeDays": 2,
+
+  "views": [
+    {
+      "id": "front",
+      "label": "Front",
+      "w": 900,
+      "h": 700,
+      "baseImage": "assets/products/mug/base.svg",
+      "glossImage": "assets/products/mug/gloss.svg",
+      "glossBlend": "screen"
+    }
+  ],
+
+  "colorParts": [
+    {
+      "id": "body",
+      "name": "Mug colour",
+      "viewId": "front",
+      "maskUrl": "assets/products/mug/mask-body.svg",
+      "default": "#FFFFFF",
+      "palette": [
+        { "hex": "#FFFFFF", "name": "White" },
+        { "hex": "#14201F", "name": "Black" },
+        { "hex": "#0F766E", "name": "Deep teal" },
+        { "hex": "#1E3A8A", "name": "Navy" },
+        { "hex": "#B91C1C", "name": "Red" },
+        { "hex": "#DB2777", "name": "Pink" },
+        { "hex": "#D97706", "name": "Amber" }
+      ]
+    }
+  ],
+
+  "printZones": [
+    {
+      "id": "wrap",
+      "name": "The wrap",
+      "viewId": "front",
+      "rect": { "x": 200, "y": 212, "w": 440, "h": 286 },
+      "warp": {
+        "type": "cylinder",
+        "wrapDeg": 200,
+        "bowPx": 34
+      },
+      "widthMm": 200,
+      "heightMm": 95,
+      "minDpi": 150,
+      "bleedMm": 2,
+      "accepts": ["photo", "text"],
+      "background": null
+    }
+  ],
+
+  "textRules": [
+    {
+      "zoneId": "wrap",
+      "maxChars": 22,
+      "maxLines": 2,
+      "allowedFonts": ["display", "ui", "hand"],
+      "defaultFont": "display",
+      "engraved": false,
+      "colorLocked": false,
+      "defaultColor": "#14201F",
+      "palette": [
+        { "hex": "#14201F", "name": "Ink" },
+        { "hex": "#FFFFFF", "name": "White" },
+        { "hex": "#0F766E", "name": "Deep teal" },
+        { "hex": "#B91C1C", "name": "Red" },
+        { "hex": "#D97706", "name": "Amber" }
+      ]
+    }
+  ],
+
+  "pricing": [
+    { "id": "photo", "label": "Photo print", "amount": 3, "when": { "zoneHasPhoto": "wrap" } },
+    { "id": "textline", "label": "Text line", "amount": 1.5, "when": { "perTextLine": "wrap" } },
+    { "id": "colour", "label": "Coloured mug", "amount": 2, "when": { "partNotDefault": "body" } }
+  ]
+}

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" width="900" height="700">
+<!-- Insulated bottle, straight on. Grayscale. Three component colourways plus a
+     laser engraved band, which is what this product proves. -->
+<defs>
+  <linearGradient id="bodyC" x1="356" y1="0" x2="544" y2="0" gradientUnits="userSpaceOnUse">
+    <stop offset="0.00" stop-color="#8d8d8d"/><stop offset="0.07" stop-color="#b4b4b4"/>
+    <stop offset="0.20" stop-color="#f0f0f0"/><stop offset="0.30" stop-color="#ffffff"/>
+    <stop offset="0.46" stop-color="#e2e2e2"/><stop offset="0.66" stop-color="#d2d2d2"/>
+    <stop offset="0.86" stop-color="#aeaeae"/><stop offset="1.00" stop-color="#868686"/>
+  </linearGradient>
+  <linearGradient id="lidC" x1="374" y1="0" x2="526" y2="0" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#8a8a8a"/><stop offset="0.28" stop-color="#e6e6e6"/>
+    <stop offset="0.62" stop-color="#c4c4c4"/><stop offset="1" stop-color="#7f7f7f"/>
+  </linearGradient>
+  <linearGradient id="bandC" x1="356" y1="0" x2="544" y2="0" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#7f7f7f"/><stop offset="0.3" stop-color="#dcdcdc"/>
+    <stop offset="1" stop-color="#7a7a7a"/>
+  </linearGradient>
+  <radialGradient id="dropB" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#000" stop-opacity="0.28"/><stop offset="1" stop-color="#000" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+<ellipse cx="450" cy="622" rx="150" ry="26" fill="url(#dropB)"/>
+<rect x="374" y="86" width="152" height="76" rx="16" fill="url(#lidC)"/>
+<rect x="386" y="74" width="128" height="22" rx="11" fill="#9c9c9c"/>
+<path d="M360 158 h180 l10 400 a24 20 0 0 1 -24 22 h-152 a24 20 0 0 1 -24 -22 z" fill="url(#bodyC)"/>
+<rect x="357" y="452" width="186" height="54" fill="url(#bandC)"/>
+<path d="M366 578 a24 20 0 0 0 24 22 h120 a24 20 0 0 0 24 -22" fill="none" stroke="#6f6f6f" stroke-width="5" stroke-opacity="0.45"/>
+</svg>

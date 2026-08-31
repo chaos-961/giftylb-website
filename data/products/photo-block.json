@@ -1,0 +1,50 @@
+{
+  "id": "photo-block",
+  "name": "Photo block",
+  "blurb": "Printed straight onto acrylic, with a short caption engraved on the base.",
+  "method": "UV print on acrylic",
+  "basePrice": 26,
+  "currency": "USD",
+  "leadTimeDays": 4,
+
+  "views": [
+    { "id": "front", "label": "Front", "w": 900, "h": 700,
+      "baseImage": "assets/products/photo-block/base.svg" }
+  ],
+
+  "colorParts": [
+    { "id": "base", "name": "Base", "viewId": "front",
+      "maskUrl": "assets/products/photo-block/mask-base.svg", "default": "#D9A066",
+      "palette": [
+        { "hex": "#D9A066", "name": "Oak" }, { "hex": "#8B5E34", "name": "Walnut" },
+        { "hex": "#14201F", "name": "Black" }, { "hex": "#FFFFFF", "name": "White" } ] }
+  ],
+
+  "printZones": [
+    { "id": "acrylic", "name": "The photo", "viewId": "front",
+      "rect": { "x": 268, "y": 120, "w": 364, "h": 356 },
+      "warp": { "type": "quad", "quad": [[268, 120], [632, 120], [632, 476], [268, 476]] },
+      "widthMm": 150, "heightMm": 147, "minDpi": 200, "bleedMm": 0,
+      "accepts": ["photo"], "background": null },
+    { "id": "caption", "name": "Engraved caption", "viewId": "front",
+      "rect": { "x": 238, "y": 486, "w": 424, "h": 50 },
+      "warp": { "type": "quad", "quad": [[248, 490], [652, 490], [652, 534], [248, 534]] },
+      "widthMm": 170, "heightMm": 20, "minDpi": 300, "bleedMm": 0,
+      "accepts": ["text"], "background": null }
+  ],
+
+  "textRules": [
+    { "zoneId": "acrylic", "maxChars": 0, "maxLines": 0,
+      "allowedFonts": [], "defaultFont": "ui", "engraved": false,
+      "colorLocked": true, "defaultColor": "#14201F" },
+    { "zoneId": "caption", "maxChars": 30, "maxLines": 1,
+      "allowedFonts": ["ui", "display", "hand"], "defaultFont": "ui",
+      "engraved": true, "colorLocked": true, "defaultColor": "#FFFFFF" }
+  ],
+
+  "pricing": [
+    { "id": "photo", "label": "Photo print", "amount": 0, "when": { "zoneHasPhoto": "acrylic" } },
+    { "id": "caption", "label": "Engraved caption", "amount": 3, "when": { "perTextLine": "caption" } },
+    { "id": "base", "label": "Base finish", "amount": 2, "when": { "partNotDefault": "base" } }
+  ]
+}

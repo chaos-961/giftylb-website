@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Make it yours. Gifty</title>
+<meta name="description" content="Put your photo and your name on it, and watch it change as you go.">
+<meta name="theme-color" content="#14B8A6">
+<meta name="robots" content="noindex">
+<meta name="version" content="0.2.1">
+
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.2.1" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.2.1" as="font" type="font/woff2" crossorigin>
+
+<link rel="stylesheet" href="css/tokens.css?v=0.2.1">
+<link rel="stylesheet" href="css/base.css?v=0.2.1">
+<link rel="stylesheet" href="css/customize.css?v=0.2.1">
+</head>
+<body class="customizer">
+
+<a class="skip-link" href="#dock">Skip to the controls</a>
+
+<header class="cz-top">
+  <a class="cz-back" href="./" aria-label="Back to the homepage">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+  </a>
+  <h1 class="cz-title" id="productName">Mug</h1>
+  <button class="cz-icon" id="undoBtn" type="button" disabled aria-label="Undo the last change">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h11a5 5 0 0 1 0 10h-4"/><path d="M8 5L4 9l4 4"/></svg>
+  </button>
+</header>
+
+<main class="cz-main">
+
+  <section class="cz-stage" aria-label="Preview">
+    <div class="cz-canvas-wrap">
+      <canvas id="preview" width="900" height="700" role="img"
+              aria-label="Live preview of your design"></canvas>
+      <p class="cz-loading" id="loading">Getting the mug ready</p>
+    </div>
+
+    <p class="cz-chip cz-chip--restored" id="restoredChip" hidden>
+      We kept your design.
+      <button type="button" class="cz-linkbtn" id="startOver">Start fresh</button>
+    </p>
+
+    <p class="cz-chip cz-chip--warn" id="dpiChip" hidden></p>
+  </section>
+
+  <section class="cz-dock" id="dock" aria-label="Controls">
+
+    <div class="cz-zones" id="zonePicker" role="group" aria-label="Which part to design" hidden></div>
+
+    <div class="cz-tabs" role="tablist" aria-label="What to change">
+      <button class="cz-tab" role="tab" id="tab-photo" aria-controls="panel-photo" aria-selected="true" type="button">Photo</button>
+      <button class="cz-tab" role="tab" id="tab-text" aria-controls="panel-text" aria-selected="false" type="button">Text</button>
+      <button class="cz-tab" role="tab" id="tab-colour" aria-controls="panel-colour" aria-selected="false" type="button">Colour</button>
+    </div>
+
+    <div class="cz-panels">
+
+      <div class="cz-panel" id="panel-photo" role="tabpanel" aria-labelledby="tab-photo">
+        <div class="cz-row cz-row--cta">
+          <label class="btn btn--primary cz-file">
+            <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp,image/avif" hidden>
+            <span id="photoBtnLabel">Add a photo</span>
+          </label>
+          <button class="btn btn--quiet" type="button" id="removePhoto" hidden>Remove</button>
+        </div>
+
+        <p class="cz-hint" id="photoHint">Pick a photo from your phone. Drag it on the preview to move it.</p>
+
+        <div class="cz-photo-controls" id="photoControls" hidden>
+          <label class="cz-field">
+            <span class="cz-label">Zoom</span>
+            <input type="range" id="zoom" min="100" max="400" value="100" step="1" aria-describedby="dpiChip">
+          </label>
+          <label class="cz-field">
+            <span class="cz-label">Move across</span>
+            <input type="range" id="panX" min="0" max="100" value="50" step="1">
+          </label>
+          <label class="cz-field">
+            <span class="cz-label">Move up and down</span>
+            <input type="range" id="panY" min="0" max="100" value="50" step="1">
+          </label>
+          <button class="btn btn--quiet cz-wide" type="button" id="recentre">Centre it again</button>
+        </div>
+      </div>
+
+      <div class="cz-panel" id="panel-text" role="tabpanel" aria-labelledby="tab-text" hidden>
+        <label class="cz-field">
+          <span class="cz-label">Your words <span class="cz-count" id="charCount"></span></span>
+          <input type="text" id="textInput" placeholder="A name, a date, a line" autocomplete="off">
+        </label>
+
+        <div class="cz-field">
+          <span class="cz-label">Style</span>
+          <div class="cz-chips" id="fontChips" role="group" aria-label="Text style"></div>
+        </div>
+
+        <div class="cz-field" id="textColourField">
+          <span class="cz-label">Text colour</span>
+          <div class="cz-swatches" id="textColours" role="group" aria-label="Text colour"></div>
+        </div>
+
+        <label class="cz-field">
+          <span class="cz-label">Size</span>
+          <input type="range" id="textSize" min="8" max="34" value="20" step="1">
+        </label>
+        <label class="cz-field">
+          <span class="cz-label">Height on the mug</span>
+          <input type="range" id="textY" min="10" max="90" value="50" step="1">
+        </label>
+      </div>
+
+      <div class="cz-panel" id="panel-colour" role="tabpanel" aria-labelledby="tab-colour" hidden>
+        <div id="colourParts"></div>
+      </div>
+
+    </div>
+
+    <div class="cz-pricebar">
+      <div class="cz-price">
+        <span class="cz-price__amount" id="priceAmount">$12</span>
+        <button class="cz-linkbtn" type="button" id="priceBreakdownBtn" aria-expanded="false">What is in the price</button>
+      </div>
+      <button class="btn btn--primary" type="button" id="addBtn" disabled>Ordering opens soon</button>
+    </div>
+    <ul class="cz-breakdown" id="priceBreakdown" role="list" hidden></ul>
+
+  </section>
+</main>
+
+<script defer src="js/recipe.js?v=0.2.1"></script>
+<script defer src="js/engine/warp.js?v=0.2.1"></script>
+<script defer src="js/engine/design.js?v=0.2.1"></script>
+<script defer src="js/engine/render.js?v=0.2.1"></script>
+<script defer src="js/engine/state.js?v=0.2.1"></script>
+<script defer src="js/engine/photo.js?v=0.2.1"></script>
+<script defer src="js/engine/price.js?v=0.2.1"></script>
+<script defer src="js/customize.js?v=0.2.1"></script>
+</body>
+</html>

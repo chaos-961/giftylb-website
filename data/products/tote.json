@@ -1,0 +1,47 @@
+{
+  "id": "tote",
+  "name": "Tote bag",
+  "blurb": "A big flat print area. Lead with a photo or lead with the type.",
+  "method": "DTF print",
+  "basePrice": 14,
+  "currency": "USD",
+  "leadTimeDays": 2,
+
+  "views": [
+    { "id": "front", "label": "Front", "w": 900, "h": 700,
+      "baseImage": "assets/products/tote/base.svg" }
+  ],
+
+  "colorParts": [
+    { "id": "cloth", "name": "Bag colour", "viewId": "front",
+      "maskUrl": "assets/products/tote/mask-body.svg", "default": "#FFFFFF",
+      "palette": [
+        { "hex": "#FFFFFF", "name": "Natural" }, { "hex": "#14201F", "name": "Black" },
+        { "hex": "#0F766E", "name": "Deep teal" }, { "hex": "#1E3A8A", "name": "Navy" },
+        { "hex": "#B91C1C", "name": "Red" }, { "hex": "#D97706", "name": "Amber" } ] }
+  ],
+
+  "printZones": [
+    { "id": "front-print", "name": "Print area", "viewId": "front",
+      "rect": { "x": 300, "y": 240, "w": 300, "h": 290 },
+      "warp": { "type": "quad", "quad": [[306, 246], [598, 242], [606, 528], [312, 524]] },
+      "widthMm": 240, "heightMm": 230, "minDpi": 150, "bleedMm": 3,
+      "accepts": ["photo", "text"], "background": null }
+  ],
+
+  "textRules": [
+    { "zoneId": "front-print", "maxChars": 28, "maxLines": 3,
+      "allowedFonts": ["display", "ui", "hand"], "defaultFont": "display",
+      "engraved": false, "colorLocked": false, "defaultColor": "#14201F",
+      "palette": [
+        { "hex": "#14201F", "name": "Ink" }, { "hex": "#FFFFFF", "name": "White" },
+        { "hex": "#0F766E", "name": "Deep teal" }, { "hex": "#B91C1C", "name": "Red" },
+        { "hex": "#D97706", "name": "Amber" } ] }
+  ],
+
+  "pricing": [
+    { "id": "photo", "label": "Photo print", "amount": 4, "when": { "zoneHasPhoto": "front-print" } },
+    { "id": "textline", "label": "Text line", "amount": 1.5, "when": { "perTextLine": "front-print" } },
+    { "id": "cloth", "label": "Coloured bag", "amount": 2, "when": { "partNotDefault": "cloth" } }
+  ]
+}

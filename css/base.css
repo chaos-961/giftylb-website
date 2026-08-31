@@ -4,6 +4,11 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* The hidden attribute must win. Any component that sets display (a flex panel,
+   a grid cell) silently outranks the user agent's [hidden] rule, which shows
+   every tab panel at once and looks like a broken page rather than a CSS bug. */
+[hidden] { display: none !important; }
+
 * { margin: 0; }
 
 html {
