@@ -218,23 +218,27 @@
        said the design is right, so they are built and uploaded here and not a
        moment earlier. */
     var uploads = items.map(function (it) {
-      var proof = G.Proof.proof(it.recipe, it.cache, it.images, it.state);
-      var print = G.Proof.printFile(it.recipe, it.state);
-      return G.Proof.upload(proof, it.recipe.id + '-proof', turnstileToken)
-        .then(function (proofUrl) {
-          if (!print) return { proofUrl: proofUrl, printFileUrl: '' };
-          return G.Proof.upload(print, it.recipe.id + '-print', turnstileToken)
-            .then(function (printUrl) { return { proofUrl: proofUrl, printFileUrl: printUrl }; });
-        })
-        .then(function (urls) {
-          return {
-            productId: it.cart.productId,
-            qty: it.cart.qty,
-            unitPrice: it.cart.unitPrice,
-            config: forWire(it.state),
-            proofUrl: urls.proofUrl,
-            printFileUrl: urls.printFileUrl
-          };
+      return G.Design.ready()
+        .then(function () { return uploadPhotos(it); })
+        .then(function (photoUrls) {
+          var proof = G.Proof.proof(it.recipe, it.cache, it.images, it.state);
+          var print = G.Proof.printFile(it.recipe, it.state);
+          return G.Proof.upload(proof, it.recipe.id + '-proof', turnstileToken)
+            .then(function (proofUrl) {
+              if (!print) return { proofUrl: proofUrl, printFileUrl: '' };
+              return G.Proof.upload(print, it.recipe.id + '-print', turnstileToken)
+                .then(function (printUrl) { return { proofUrl: proofUrl, printFileUrl: printUrl }; });
+            })
+            .then(function (urls) {
+              return {
+                productId: it.cart.productId,
+                qty: it.cart.qty,
+                unitPrice: it.cart.unitPrice,
+                config: forWire(it.state, photoUrls),
+                proofUrl: urls.proofUrl,
+                printFileUrl: urls.printFileUrl
+              };
+            });
         });
     });
 
@@ -277,10 +281,28 @@
       });
   }
 
-  /* Firestore keeps no bitmaps. The photo has already been uploaded, so the
-     design travels as its URL and its crop, which is everything the print file
-     was built from and everything the admin needs to rebuild it. */
-  function forWire(state) {
+  /* The buyer's own photo goes up alongside the proof and the print file. The
+     print file is what the press needs, but without the original the shop can
+     never re-crop or reprint at another size without asking the buyer for the
+     picture again. One upload per photo, once, at order time. */
+  function uploadPhotos(it) {
+    var jobs = [];
+    var urls = {};
+    Object.keys(it.state.zones || {}).forEach(function (id) {
+      var photo = it.state.zones[id].photo;
+      if (!photo || !photo.saveSrc) return;
+      jobs.push(
+        G.Proof.upload(photo.saveSrc, it.recipe.id + '-' + id + '-photo', turnstileToken)
+          .then(function (url) { urls[id] = url; })
+      );
+    });
+    return Promise.all(jobs).then(function () { return urls; });
+  }
+
+  /* The database keeps no bitmaps. The design travels as the photo's URL plus
+     its crop, which is everything the print file was built from and everything
+     the shop needs to rebuild it. */
+  function forWire(state, photoUrls) {
     var out = { productId: state.productId, colors: {}, zones: {} };
     Object.keys(state.colors || {}).forEach(function (k) { out.colors[k] = state.colors[k]; });
     Object.keys(state.zones || {}).forEach(function (id) {
@@ -291,7 +313,7 @@
           size: z.text.size, y: z.text.y
         } : null,
         photo: z.photo ? {
-          url: z.photo.url || '',
+          url: (photoUrls && photoUrls[id]) || z.photo.url || '',
           natW: z.photo.natW, natH: z.photo.natH,
           k: z.photo.k, ox: z.photo.ox, oy: z.photo.oy
         } : null
@@ -365,10 +387,12 @@
         if (cart.length > (s.maxCartItems || 6)) {
           throw new Error('An order can hold ' + (s.maxCartItems || 6) + ' things.');
         }
-        return Promise.all(cart.map(loadItem));
+        /* Every face the renderer can draw, before anything is drawn. The
+           proof is what the buyer approves, so it cannot be in a fallback. */
+        return Promise.all([G.Design.ready()].concat(cart.map(loadItem)));
       })
       .then(function (loaded) {
-        items = loaded;
+        items = loaded.slice(1);
         $('checkout').hidden = false;
         paintProofs();
         buildZone();

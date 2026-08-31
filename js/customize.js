@@ -605,7 +605,7 @@
       })
       .then(function (imgs) {
         images = imgs;
-        return document.fonts ? document.fonts.ready : null;
+        return G.Design.ready();
       })
       .then(function () {
         cache = G.Render.prepare(recipe, images);

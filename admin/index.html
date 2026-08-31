@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gifty</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+
+<link rel="stylesheet" href="../css/tokens.css?v=0.2.5">
+<link rel="stylesheet" href="../css/base.css?v=0.2.5">
+
+<style>
+  body { display: grid; place-items: center; min-block-size: 100svb; background: var(--paper-warm); }
+  .gate {
+    inline-size: min(22rem, calc(100vw - 2rem));
+    padding: var(--space-7);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--elev-2);
+  }
+  .gate h1 {
+    font-size: var(--text-xl);
+    letter-spacing: -0.03em;
+    margin-block-end: var(--space-5);
+  }
+  .gate h1 span { color: var(--teal-deep); }
+  .gate label { display: block; font-size: var(--text-sm); font-weight: 600; margin-block-end: var(--space-2); }
+  .gate input {
+    inline-size: 100%;
+    min-block-size: 48px;
+    padding-inline: var(--space-3);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--paper);
+    font-size: var(--text-base);
+  }
+  .gate .btn { inline-size: 100%; margin-block-start: var(--space-4); }
+  .gate p {
+    margin-block-start: var(--space-4);
+    font-size: var(--text-sm);
+    min-block-size: 1.4em;
+    color: var(--signal);      /* 4.53:1 */
+  }
+</style>
+</head>
+<body>
+
+<form class="gate" id="gate" autocomplete="off">
+  <h1>Gift<span>y</span></h1>
+  <label for="pw">Password</label>
+  <input type="password" id="pw" autocomplete="current-password" autofocus>
+  <button class="btn btn--primary" type="submit" id="go">Open</button>
+  <p id="msg" role="status"></p>
+</form>
+
+<script defer src="payload.js?v=0.2.5"></script>
+<script>
+/* The gate. Derives a key from the password, decrypts the dashboard, and hands
+   the document over to it. A wrong password fails at the cipher, so there is
+   nothing here to compare against and nothing to leak.
+
+   This is not the access control. The access control is the rule on the data
+   that names exactly one account. This keeps the shop's screens, its address
+   and its number out of a public repository. */
+(function () {
+  'use strict';
+
+  var form = document.getElementById('gate');
+  var msg = document.getElementById('msg');
+  var go = document.getElementById('go');
+
+  var bytes = function (b64) {
+    var bin = atob(b64);
+    var out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  };
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var payload = window.GIFTY_ADMIN_PAYLOAD;
+    if (!payload) { msg.textContent = 'This page did not load fully. Reload it.'; return; }
+
+    var pw = document.getElementById('pw').value;
+    if (!pw) return;
+
+    go.disabled = true;
+    msg.textContent = 'Opening';
+
+    var enc = new TextEncoder();
+    crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey'])
+      .then(function (base) {
+        return crypto.subtle.deriveKey(
+          { name: 'PBKDF2', salt: bytes(payload.salt), iterations: payload.kdf.iterations, hash: payload.kdf.hash },
+          base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']);
+      })
+      .then(function (key) {
+        return crypto.subtle.decrypt({ name: 'AES-GCM', iv: bytes(payload.iv) }, key, bytes(payload.ct));
+      })
+      .then(function (plain) {
+        var html = new TextDecoder().decode(plain);
+        /* The dashboard signs in with the same password, so hand it over in
+           memory rather than making anyone type it twice. */
+        window.__pw = pw;
+        document.open();
+        document.write(html);
+        document.close();
+      })
+      .catch(function () {
+        go.disabled = false;
+        msg.textContent = 'That password does not open it.';
+        document.getElementById('pw').select();
+      });
+  });
+})();
+</script>
+</body>
+</html>

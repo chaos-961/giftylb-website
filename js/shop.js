@@ -13,6 +13,7 @@
   var $ = function (id) { return document.getElementById(id); };
 
   var settings = null;
+  var order = [];             /* product ids, in the order the shop shows them */
   var recipes = {};          /* id -> recipe */
   var templates = [];
   var prepared = {};         /* id -> { images, cache } */
@@ -299,12 +300,15 @@
         templates = all[1];
         all[2].forEach(function (r) { recipes[r.id] = r; });
         /* settings.products is the order the shop shows them in, so a product
-           the catalogue has but settings does not list simply is not offered. */
-        settings.products = settings.products.filter(function (id) { return recipes[id]; });
+           the catalogue has but settings does not list simply is not offered.
+           Kept beside the settings rather than written back into them: that
+           object is the cached one, and editing it would quietly drop the
+           product from every other screen too. */
+        order = settings.products.filter(function (id) { return recipes[id]; });
 
         chipRow($('filterOccasion'), settings.occasions, 'occasion');
         chipRow($('filterRecipient'), settings.recipients, 'recipient');
-        chipRow($('filterProduct'), settings.products.map(function (id) {
+        chipRow($('filterProduct'), order.map(function (id) {
           return { id: id, name: recipes[id].name };
         }), 'product');
 
@@ -312,8 +316,9 @@
         buildBlankRow();
 
         /* Text on a card is drawn into a canvas, and a canvas does not restyle
-           itself when a webfont arrives. So wait for the faces first. */
-        return document.fonts ? document.fonts.ready : null;
+           itself when a webfont arrives. So wait for the faces first, by name:
+           an unused @font-face is never fetched at all. */
+        return G.Design.ready();
       })
       .then(function () {
         renderResults();
@@ -328,7 +333,7 @@
       filters.occasion = filters.recipient = filters.product = null;
       chipRow($('filterOccasion'), settings.occasions, 'occasion');
       chipRow($('filterRecipient'), settings.recipients, 'recipient');
-      chipRow($('filterProduct'), settings.products.map(function (id) {
+      chipRow($('filterProduct'), order.map(function (id) {
         return { id: id, name: recipes[id].name };
       }), 'product');
       syncUrl();
@@ -339,7 +344,7 @@
   function buildBlankRow() {
     var row = $('blankRow');
     row.textContent = '';
-    settings.products.forEach(function (id) {
+    order.forEach(function (id) {
       var r = recipes[id];
       var a = document.createElement('a');
       a.href = 'customize.html?p=' + encodeURIComponent(id);

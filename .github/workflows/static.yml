@@ -30,8 +30,7 @@ jobs:
       - name: Assemble the site
         run: |
           set -euo pipefail
-          mkdir -p _site _site/css _site/js _site/js/engine _site/fonts
-          mkdir -p _site/data/products
+          mkdir -p _site/css _site/js _site/js/engine _site/fonts _site/admin
           mkdir -p _site/assets/products/mug _site/assets/products/cap
           mkdir -p _site/assets/products/bottle _site/assets/products/tote _site/assets/products/photo-block
 
@@ -40,6 +39,10 @@ jobs:
           cp customize.html _site/customize.html
           cp shop.html _site/shop.html
           cp cart.html _site/cart.html
+          cp checkout.html _site/checkout.html
+          cp track.html _site/track.html
+          cp admin/index.html _site/admin/index.html
+          cp admin/payload.js _site/admin/payload.js
           cp .nojekyll _site/.nojekyll
 
           # CNAME is deliberately NOT copied yet. giftylb.com has no DNS records,
@@ -54,16 +57,21 @@ jobs:
           cp css/chrome.css _site/css/chrome.css
           cp css/home.css _site/css/home.css
           cp css/shop.css _site/css/shop.css
+          cp css/checkout.css _site/css/checkout.css
           cp css/customize.css _site/css/customize.css
 
           cp js/firebase-config.js _site/js/firebase-config.js
           cp js/main.js _site/js/main.js
+          cp js/data.js _site/js/data.js
           cp js/recipe.js _site/js/recipe.js
+          cp js/proof.js _site/js/proof.js
           cp js/customize.js _site/js/customize.js
           cp js/delivery.js _site/js/delivery.js
           cp js/cart.js _site/js/cart.js
           cp js/cart-page.js _site/js/cart-page.js
           cp js/shop.js _site/js/shop.js
+          cp js/checkout.js _site/js/checkout.js
+          cp js/track.js _site/js/track.js
           cp js/engine/warp.js _site/js/engine/warp.js
           cp js/engine/design.js _site/js/engine/design.js
           cp js/engine/render.js _site/js/engine/render.js
@@ -71,13 +79,10 @@ jobs:
           cp js/engine/photo.js _site/js/engine/photo.js
           cp js/engine/price.js _site/js/engine/price.js
 
-          cp data/settings.json _site/data/settings.json
-          cp data/templates.json _site/data/templates.json
-          cp data/products/mug.json _site/data/products/mug.json
-          cp data/products/cap.json _site/data/products/cap.json
-          cp data/products/bottle.json _site/data/products/bottle.json
-          cp data/products/tote.json _site/data/products/tote.json
-          cp data/products/photo-block.json _site/data/products/photo-block.json
+          # data/ is NOT copied. Since P4 the catalogue lives in the database and
+          # the shop reads it from there, so these files are the seed that
+          # tools/seed-firestore.mjs pushes once. Shipping them would publish a
+          # second, slowly rotting answer to what a mug costs.
 
           cp assets/products/mug/base.svg _site/assets/products/mug/base.svg
           cp assets/products/mug/mask-body.svg _site/assets/products/mug/mask-body.svg

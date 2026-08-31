@@ -20,6 +20,22 @@
 
   Design.families = FAMILIES;
 
+  /* An @font-face the page never uses is never fetched, so document.fonts.ready
+     resolves happily without it. No rule on the shop, the customizer or the
+     checkout sets the handwriting face, and a canvas asked for a family it does
+     not have falls back without a word. The buyer would approve a proof in the
+     wrong lettering and the workshop would print it.
+
+     So ask for every face the renderer can draw, by name, and wait. */
+  Design.ready = function () {
+    if (!document.fonts || !document.fonts.load) return Promise.resolve();
+    var wanted = Object.keys(FAMILIES).map(function (k) {
+      return document.fonts.load('700 40px ' + FAMILIES[k])
+        .catch(function () { /* a missing face must not stop the screen */ });
+    });
+    return Promise.all(wanted).then(function () {});
+  };
+
   var MM_PER_IN = 25.4;
 
   /* Working resolution for the preview. The print file in P4 rebuilds the same

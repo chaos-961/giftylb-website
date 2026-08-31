@@ -1,0 +1,32 @@
+name = "gifty-api"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+
+# Everything below is public. Every secret is set with `wrangler secret put`
+# and never appears in this file or anywhere else in the repository.
+[vars]
+FIREBASE_PROJECT_ID = "giftylb"
+FIREBASE_API_KEY = "AIzaSyDgiZPH8bepbib5k3AmfS8YX8jY_RZRTos"
+SITE_ORIGIN = "https://chaos-961.github.io/giftylb-website"
+ALLOWED_ORIGINS = "https://chaos-961.github.io,https://giftylb.com,https://www.giftylb.com"
+FROM_EMAIL = "orders@giftylb.com"
+
+# Secrets, set once each:
+#
+#   wrangler secret put TURNSTILE_SECRET     from the Turnstile widget
+#   wrangler secret put IMGBB_API_KEY        from the image host dashboard
+#   wrangler secret put RESEND_API_KEY       from the mail sender
+#   wrangler secret put SERVER_EMAIL         the order writing account
+#   wrangler secret put SERVER_PASSWORD      its password
+#
+# SERVER_EMAIL is a Firebase user created for this Worker and nothing else. Its
+# uid goes into firestore.rules as REPLACE_ME_SERVER_UID. It can create an
+# order and read one back. It cannot touch the catalogue and it cannot change
+# an order once it exists.
+#
+# DEBUG is deliberately unset. With it on, refusals carry the underlying
+# message, which is useful locally and is noise a stranger should never see.
+
+[[routes]]
+pattern = "api.giftylb.com"
+custom_domain = true

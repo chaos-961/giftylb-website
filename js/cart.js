@@ -152,7 +152,13 @@
     };
     state().items.push(entry);
     return persist().then(function (ok) {
-      if (!ok) { data.items.pop(); write(); }
+      if (!ok) {
+        /* Put the cart back the way it was. The write that failed is the same
+           write that would fail again here, so it is allowed to fail quietly:
+           memory is already correct and the buyer is about to be told. */
+        data.items.pop();
+        try { write(); } catch (e) {}
+      }
       announce();
       return ok ? entry : null;
     });

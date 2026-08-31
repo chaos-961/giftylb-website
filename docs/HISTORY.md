@@ -349,3 +349,221 @@ The storefront budget is 120KB.
   indicator. Moved above it.
 - Two mugs in a cart looked identical. The row now leads with the design's own
   words and falls back to the price breakdown only when there are none.
+
+---
+
+## v0.2.4 . P4 proof, orders, and admin
+
+2026-08-31. A buyer can approve a proof and place an order. The shop can see it,
+move it, message the buyer and print it. Nothing about the money is taken from
+the browser.
+
+### The catalogue moved into the database
+
+P2 said moving the catalogue would be a change to `loadRecipe` and nothing else.
+That held. `js/data.js` reads the REST endpoint directly, no SDK, and decodes
+the wire format; `Recipe.load`, `Recipe.all`, `Delivery.load` and the template
+lookup now go through it. The shop route grew from 20.3KB to 23.4KB gzipped for
+the whole change.
+
+It had to move. The order rule prices from a products read, and the admin
+recipe editor writes products. A copy in the repo would have been a second
+answer to what a mug costs, and the two would have parted on the first edit. So
+`data/` is now the **seed**, pushed once by `tools/seed-firestore.mjs`, and it
+is deliberately **not deployed**: shipping it would publish a slowly rotting
+price list. `check-release.mjs` stopped treating `data/` as a runtime directory
+and kept validating it as the seed.
+
+Two things the wire format forced:
+
+- Firestore cannot nest an array in an array, and a quad is four pairs. Quads
+  are stored as four `{x,y}` maps and turned back into the engine's `[[x,y]]` in
+  `Recipe.normalize`. The renderer never sees the wire format. The encoder
+  throws on any other nested array rather than failing as an opaque 400.
+- The catalogue is cached for sixty seconds. Long enough that moving between
+  the shop, a design and the cart costs one read; short enough that a price edit
+  reaches buyers within a minute. A stale price is caught at order time, not
+  charged.
+
+### Who is allowed to write an order
+
+The brief sketched the browser writing the order with the rule policing the
+price. That leaves a public write path Turnstile cannot protect, because a bot
+skips the Worker and posts to the database directly. So the Worker signs in as
+its own account and the rule accepts a create only from that uid. There is now
+no public write path at all.
+
+Both layers still check the money independently, which is what the gate asks:
+
+- **The rule** validates shape, types, string lengths, the arithmetic in
+  `totals`, and a per item price bound read live from `products/{id}`. Rules
+  cannot loop, so they cannot evaluate a product's pricing clauses against a
+  buyer's configuration. They can bound it, between `basePrice` and
+  `basePrice + maxExtras`.
+- **The Worker** derives the exact figure from the same documents with the same
+  code the customizer priced with, plus the zone and fee from settings.
+
+`maxExtras` is derived, so it is recomputed on every catalogue write, by the
+seeder and by the admin. `tools/test-parity.mjs` proves the bound actually
+bounds: the dearest design a buyer can reach is inside the ceiling for all five
+products.
+
+The cart is capped at six because the rule does one `get()` per item and rules
+allow ten document accesses per request.
+
+### Two copies of the price, kept honest
+
+`js/engine/price.js` is a script tag IIFE and the Worker is a module, with no
+build step between them, so the price and the delivery date exist twice.
+`tools/test-parity.mjs` runs both files over every product, every template,
+every colour swatch, every line count and 400 days x 4 times of day:
+
+```
+93 designs priced by both, every total identical
+16000 dates computed by both, every label identical
+```
+
+It immediately earned its keep. The same `Intl` options render as `Fri 4 Sept`
+in Chrome and `Fri, 4 Sept` in Node, so the card said one thing and the
+confirmation email would have said another. Both now build the label from
+`formatToParts` instead of taking the formatted string.
+
+### The gate, run for real
+
+`tools/test-order.mjs` runs the real Worker source against a real database
+running the real `firestore.rules`, with only Turnstile, the image host and the
+mail sender stubbed. 38 checks, including the whole of the tamper story:
+
+```
+TAMPERED PRICES
+  ok  a tampered unit price is refused    409 price_changed was $1 now $16.5
+  ok  a tampered total is refused         409 total_changed was $1 now $20.5
+  ok  an order that claims no price at all is still priced by us   $20.5
+
+THE RULE ON ITS OWN, WORKER BYPASSED
+  ok  the rule refuses a price under the product base      403 PERMISSION_DENIED
+  ok  the rule refuses a price over the product ceiling    403 PERMISSION_DENIED
+  ok  the rule refuses totals that do not add up           403
+  ok  the rule refuses a product that is not in the catalogue  403
+  ok  an unauthenticated create is refused                 403
+  ok  even the shop account cannot create an order         403
+  ok  an order cannot be born already delivered            403
+  ok  the rule caps an order at six things                 403
+  ok  the same order number cannot be written twice        200 then 409
+```
+
+`createdAt` is a `REQUEST_TIME` transform, which is the only way it can equal
+`request.time` the way the rule insists, because the Worker cannot know the
+server's clock before it writes. `currentDocument.exists = false` makes a
+duplicate number a 409 rather than an overwrite.
+
+Then `tools/dev-worker.mjs` puts the same Worker on localhost so the real
+checkout screen could be driven in a real browser at 375px. That produced a real
+order: three uploads, two emails, one document.
+
+### Order numbers are five digits, not four
+
+The brief shows `GFT-4821`. The tracking link needs no login by design, so the
+number is the only thing between a stranger and someone else's order page. Five
+digits keeps it sayable over the phone and makes sweeping the space ten times
+the work. The lookup endpoint returns no address, no phone and no email either
+way, and the rule accepts four to six so nothing has to change if that is
+revisited.
+
+### Bugs found by verifying
+
+- **The admin encoder stripped `id` from nested maps.** A document's id is the
+  last part of its path, not a field, so the encoder dropped it. It dropped it
+  from every nested map too, and the first settings save silently deleted the id
+  off both delivery zones, every occasion and every colour part. The shop front
+  then refused every order with "please choose where it is going". Stripping now
+  happens once, at the top level, in `forSaving`.
+- **The buyer's own photo was not on the order.** Only the proof and the print
+  file went up, so the shop could print but never re-crop without asking the
+  buyer for the picture again. Photos now upload alongside, and the order
+  carries three distinct images per item.
+- **A missing `shopEmail` was silent.** Nobody in the workshop would have been
+  told an order existed. It is now reported back in the response.
+- **The supplier check was too broad, then too narrow.** No screen may name the
+  backend, but the dashboard has to call three service hostnames. The check now
+  strikes out those three and fails on any other mention. It caught its own
+  test edit, which is how it should behave.
+- **The secret hint fired on `env.TURNSTILE_SECRET`.** A name is not a secret.
+  The hints now require a name followed by a literal, and that was negative
+  tested with a real looking key.
+
+### Route JS, gzipped
+
+```
+homepage 4.3KB   shop 22.9KB   cart 13.6KB
+customizer 28.4KB   checkout 27.5KB   track 6.3KB
+```
+
+The storefront budget is 120KB.
+
+---
+
+## v0.2.5 . Seven bugs
+
+2026-08-31. A bug hunt over the P3 and P4 code. One of them was printing the
+wrong thing.
+
+### The proof was rendered in the wrong lettering
+
+The worst of them, and it had shipped. Three templates use the handwriting
+face, and `Caveat` was **not loaded on any page that draws text into a canvas**:
+
+```
+after document.fonts.ready resolved
+  shop        display true   ui true   hand FALSE
+  customizer  display true   ui true   hand FALSE
+  checkout    display true   ui true   hand FALSE
+```
+
+An `@font-face` that no CSS rule uses is never fetched, so `document.fonts.ready`
+resolves perfectly happily without it, and a canvas asked for a family it does
+not have falls back in silence. The shop card, the preview, the proof the buyer
+approves and the print file the workshop prints were all in a fallback cursive.
+Measured on a 60px line, the fallback was **139px wider than Caveat**, 36% out,
+which on the mug wrap means text that does not fit the zone it was laid out for.
+
+`document.fonts.ready` was never going to fix it. `Design.ready()` now asks for
+every face the renderer can draw, **by name**, which is what triggers the fetch,
+and the shop, the customizer and the checkout all wait on it. The checkout waits
+twice: once before showing the proof and once before turning it into files.
+
+```
+before Design.ready()   display false   ui true   hand false
+after  Design.ready()   display true    ui true   hand true
+```
+
+### The other six
+
+- **The cart's quota rollback could throw.** When the store was full, `Cart.add`
+  popped the item and wrote again, using the same write that had just failed.
+  That threw out of a promise nobody was catching and left the button stuck.
+- **The shop edited the cached settings.** `settings.products = filter(...)`
+  wrote back into the object held in the catalogue cache, so a product missing
+  once stayed missing on every screen for the life of that cache. It keeps its
+  own ordered list now.
+- **An order said the shop placed it.** `statusHistory[0].by` was `shop` on an
+  order the buyer had just placed.
+- **The admin's product picker gained a listener per refresh.** Three refreshes
+  and one pick redrew the form four times.
+- **The admin listed the newest 300 orders and said nothing about the rest.** A
+  silent cap reads as "that is all of them". It says so now when it is full.
+- **An order could be moved to a status nothing can draw.** The update rule
+  checked the money but not the status, so a typo in the admin would have put a
+  raw word in front of a buyer on the tracking page. The rule now holds it to
+  the six the tracking page knows.
+
+Three checks added to `tools/test-order.mjs` for the last one:
+
+```
+ok  the shop may move an order along
+ok  an order cannot be moved to a status nothing can draw
+ok  the server identity cannot move an order at all
+```
+
+`tools/test-order.mjs` 41 passed, 0 failed. `tools/test-parity.mjs` 16103
+agreed, 0 disagreed. `check-release.mjs` exits 0.

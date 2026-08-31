@@ -257,7 +257,7 @@ async function handleOrder(request, env, ctx) {
     totals,
     payment: { method: payment.id, reference: reference ? String(reference).trim() : null },
     notes: str(body.notes, 1, 600) ? String(body.notes).trim() : null,
-    statusHistory: [{ status: 'new', at: new Date().toISOString(), by: 'shop' }]
+    statusHistory: [{ status: 'new', at: new Date().toISOString(), by: 'buyer' }]
   };
 
   let created = null;

@@ -21,6 +21,12 @@ window.GIFTY_CONFIG = {
    it. Cloud Storage left the Spark plan on 2026-02-03, which is the whole
    reason customer uploads go to an image host through a worker instead. */
 
-/* Endpoint for the one worker that handles uploads, orders and order lookup.
-   Wired up in P4. */
+/* Endpoint for the one worker that handles uploads, orders and order lookup. */
 window.GIFTY_API = 'https://api.giftylb.com';
+
+/* Turnstile's site key is public by design, the same way the config above is.
+   Its secret half lives only in Wrangler. While this is empty the checkout
+   still renders the proof and says plainly that ordering is not on yet, so a
+   half configured site never silently drops an order on the floor. */
+window.GIFTY_CONFIG.turnstileSiteKey = '';
+
