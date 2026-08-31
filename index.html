@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gifty. Custom gifts you can see before you buy.</title>
+<meta name="description" content="Put your photo, a name, or your colors on a mug, cap, bottle, tote or photo block. See it before you buy it. Delivered anywhere in Lebanon.">
+<meta name="theme-color" content="#14B8A6">
+<!-- No canonical while this is served from the temporary github.io URL: pointing
+     it at giftylb.com would name a domain that does not resolve. Restored in P5
+     together with the rest of the meta and OG work, when the domain is live. -->
+<meta name="robots" content="noindex">
+
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.1.0" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.1.0" as="font" type="font/woff2" crossorigin>
+
+<link rel="stylesheet" href="css/tokens.css?v=0.1.0">
+<link rel="stylesheet" href="css/base.css?v=0.1.0">
+<link rel="stylesheet" href="css/home.css?v=0.1.0">
+<script>
+/* Decide the reveal path before anything paints. Only arm the observer path,
+   and only when it will really run. Nothing is hidden otherwise. */
+(function(w,d){var ok=w.CSS&&CSS.supports&&CSS.supports('animation-timeline','view()');
+var red=w.matchMedia&&w.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(!ok&&!red&&'IntersectionObserver' in w)d.documentElement.classList.add('reveal-js');})(window,document);
+</script>
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<svg class="visually-hidden" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <g id="i-mug" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11 15h21v18a7 7 0 0 1-7 7h-7a7 7 0 0 1-7-7z"/>
+      <path d="M32 20h4.5a5.5 5.5 0 0 1 0 11H32"/>
+      <path d="M11 21h21"/>
+    </g>
+    <g id="i-cap" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 31a10 10 0 0 1 20 0"/>
+      <path d="M14 31h20l4.6 1.4a2 2 0 0 1-.6 3.9H14z"/>
+      <path d="M24 21.5V31"/>
+      <circle cx="24" cy="21.2" r="1.2"/>
+    </g>
+    <g id="i-bottle" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="18" y="8" width="12" height="4.5" rx="1.6"/>
+      <path d="M19 12.5h10l1.4 23.6a3.2 3.2 0 0 1-3.2 3.4h-6.4a3.2 3.2 0 0 1-3.2-3.4z"/>
+      <path d="M18.4 24.5h11.2"/>
+    </g>
+    <g id="i-tote" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M13 18h22l1.8 20.8a3.2 3.2 0 0 1-3.2 3.4H14.4a3.2 3.2 0 0 1-3.2-3.4z"/>
+      <path d="M19 18v-3a5 5 0 0 1 10 0v3"/>
+      <rect x="18.5" y="25" width="11" height="9" rx="1.2"/>
+    </g>
+    <g id="i-block" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="11" y="9" width="26" height="23" rx="2.2"/>
+      <path d="M14.5 27l5.5-6 4 4.2 4-3.6 5.5 5.4"/>
+      <circle cx="29.6" cy="16.4" r="2"/>
+      <path d="M19 32v3.5M29 32v3.5"/>
+      <path d="M14 35.5h20a2 2 0 0 1 2 2V39H12v-1.5a2 2 0 0 1 2-2z"/>
+    </g>
+  </defs>
+</svg>
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="wordmark" href="./">Gift<span>y</span></a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="#products">What we make</a>
+      <a href="#how">How it works</a>
+      <a href="#delivery">Delivery</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero">
+    <div class="wrap hero__grid">
+      <div>
+        <p class="eyebrow">Custom gifts, made in Lebanon</p>
+        <h1>See your gift before you buy it.</h1>
+        <p class="lede hero__lede">
+          Put your photo, a name, or your colors on it, and watch it change as you go.
+          Then we deliver it anywhere in Lebanon.
+        </p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="#products">See what we make</a>
+          <a class="btn btn--quiet" href="#how">How it works</a>
+        </div>
+        <p class="hero__note">Ordering opens soon. The shop is being built right now.</p>
+      </div>
+
+      <div class="stage" role="img" aria-label="A mug with a photo printed on it and a name underneath">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M11 15h21v18a7 7 0 0 1-7 7h-7a7 7 0 0 1-7-7z"/>
+          <path d="M32 20h4.5a5.5 5.5 0 0 1 0 11H32"/>
+          <rect x="14.5" y="19" width="14" height="10" rx="1.2"/>
+          <path d="M15.5 27.5l3.6-4 2.7 2.9 2.7-2.4 3.5 3.5"/>
+          <circle cx="25" cy="22.4" r="1.4"/>
+          <path d="M16.5 34h12"/>
+        </svg>
+        <p class="stage__caption">Live preview, not a mockup sent later</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--warm" id="products">
+    <div class="wrap">
+      <p class="eyebrow reveal">The shop</p>
+      <h2 class="reveal section__title">What we make</h2>
+      <p class="lede reveal section__lede">
+        Five to start. Each one takes a photo, a name, your colors, or all three.
+      </p>
+
+      <ul class="grid-products" role="list">
+        <li class="tile reveal">
+          <span class="tile__art"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href="#i-mug"/></svg></span>
+          <h3>Mug</h3>
+          <p>Your photo wrapped right around it. Sublimation print, dishwasher safe.</p>
+        </li>
+        <li class="tile reveal">
+          <span class="tile__art"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href="#i-cap"/></svg></span>
+          <h3>Cap</h3>
+          <p>Choose the color of every panel, then a name embroidered on the front.</p>
+        </li>
+        <li class="tile reveal">
+          <span class="tile__art"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href="#i-bottle"/></svg></span>
+          <h3>Bottle</h3>
+          <p>Body, lid and band in the colors you pick. Name laser engraved into the coat.</p>
+        </li>
+        <li class="tile reveal">
+          <span class="tile__art"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href="#i-tote"/></svg></span>
+          <h3>Tote bag</h3>
+          <p>A big flat print area. Lead with a photo or lead with the type.</p>
+        </li>
+        <li class="tile reveal">
+          <span class="tile__art"><svg viewBox="0 0 48 48" aria-hidden="true" focusable="false"><use href="#i-block"/></svg></span>
+          <h3>Photo block</h3>
+          <p>Printed straight onto acrylic, with a short caption engraved on the base.</p>
+        </li>
+      </ul>
+
+      <p class="reveal footnote">
+        A gift box that holds two to four of these, with a ribbon and a printed card, comes after.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" id="how">
+    <div class="wrap">
+      <p class="eyebrow reveal">How it works</p>
+      <h2 class="reveal section__title">Three steps, about a minute.</h2>
+
+      <ol class="steps" role="list">
+        <li class="step reveal">
+          <span class="step__num" aria-hidden="true"></span>
+          <h3>Pick a thing</h3>
+          <p>Start from a ready made design or from a blank one. Both take the same time.</p>
+        </li>
+        <li class="step reveal">
+          <span class="step__num" aria-hidden="true"></span>
+          <h3>Make it yours</h3>
+          <p>Drop in a photo, type a name, choose your colors. The preview updates as you go, and so does the price.</p>
+        </li>
+        <li class="step reveal">
+          <span class="step__num" aria-hidden="true"></span>
+          <h3>Approve, then order</h3>
+          <p>You see the exact image that goes to print and approve it first. Cash on delivery, or pay by transfer.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section section--warm" id="delivery">
+    <div class="wrap">
+      <p class="eyebrow reveal">Delivery</p>
+      <h2 class="reveal section__title">You get a day, not a range.</h2>
+      <p class="lede reveal section__lede">
+        Every product shows the date it lands, worked out from how long it takes to make and where you are.
+      </p>
+
+      <div class="promise">
+        <div class="zone reveal">
+          <p class="zone__days">1 to 2 days</p>
+          <h3>Zone A</h3>
+          <p>Beirut, Jnah up to Dbayeh, and out to Baabda.</p>
+        </div>
+        <div class="zone reveal">
+          <p class="zone__days">2 to 3 days</p>
+          <h3>Zone B</h3>
+          <p>Everywhere else in Lebanon.</p>
+        </div>
+      </div>
+
+      <p class="reveal footnote">
+        Working days, Sundays skipped. The fee depends on the zone and it shows in the cart before you order.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap site-footer__inner">
+    <p>Gifty. Custom gifts, made in Beirut.</p>
+    <p><span id="year">2026</span> Gifty</p>
+  </div>
+</footer>
+
+<script defer src="js/firebase-config.js?v=0.1.0"></script>
+<script defer src="js/main.js?v=0.1.0"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+name: Deploy to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # The allowlist. Nothing reaches production unless it is copied here.
+      # A new runtime file that is missing from this list exists in the repo and
+      # 404s on the live site. tools/check-release.mjs fails the release if any
+      # file referenced by an HTML page is not listed below.
+      - name: Assemble the site
+        run: |
+          set -euo pipefail
+          mkdir -p _site _site/css _site/js _site/fonts
+
+          cp index.html _site/index.html
+          cp 404.html _site/404.html
+          cp .nojekyll _site/.nojekyll
+
+          # CNAME is deliberately NOT copied yet. giftylb.com has no DNS records,
+          # and shipping the file would set a custom domain that does not resolve,
+          # which makes Pages redirect the github.io URL to it and the site
+          # becomes unreachable. Restore this line the same day the domain is
+          # registered and pointed at Pages:
+          #   cp CNAME _site/CNAME
+
+          cp css/tokens.css _site/css/tokens.css
+          cp css/base.css _site/css/base.css
+          cp css/home.css _site/css/home.css
+
+          cp js/firebase-config.js _site/js/firebase-config.js
+          cp js/main.js _site/js/main.js
+
+          cp fonts/bricolage-grotesque-var-latin.woff2 _site/fonts/bricolage-grotesque-var-latin.woff2
+          cp fonts/inter-var-latin.woff2 _site/fonts/inter-var-latin.woff2
+          cp fonts/caveat-var-latin.woff2 _site/fonts/caveat-var-latin.woff2
+
+      - name: Show what is shipping
+        run: find _site -type f | sort
+
+      # enablement turns Pages on for the repo on the first run. Without it the
+      # first deploy fails with "Get Pages site failed" and Pages has to be
+      # switched on by hand in the repo settings before anything can ship.
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

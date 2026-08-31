@@ -1,0 +1,186 @@
+/* Gifty base layer. Reset, typography, primitives.
+   Logical properties only. Never margin-left, never text-align: right.
+   That one habit is what makes an Arabic build a dir="rtl" attribute later. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+* { margin: 0; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  min-block-size: 100svb;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  font-synthesis-weight: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img, svg, video, canvas { display: block; max-inline-size: 100%; block-size: auto; }
+
+input, button, textarea, select { font: inherit; color: inherit; }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  text-wrap: balance;
+}
+
+h1 { font-size: var(--text-4xl); }
+h2 { font-size: var(--text-3xl); }
+h3 { font-size: var(--text-xl); line-height: var(--leading-snug); }
+
+p { text-wrap: pretty; }
+
+a { color: var(--teal-deep); text-underline-offset: 0.16em; }
+
+ul[role="list"], ol[role="list"] { list-style: none; padding-inline-start: 0; }
+
+/* ---------- Focus. Visible, ours, never the browser default. ---------- */
+
+:focus-visible {
+  outline: var(--focus-width) solid var(--focus-color);
+  outline-offset: var(--focus-offset);
+}
+
+/* ---------- Layout primitives ---------- */
+
+.wrap {
+  inline-size: 100%;
+  max-inline-size: var(--page-max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section { padding-block: var(--section-y); }
+.section--warm { background: var(--paper-warm); }
+
+.stack > * + * { margin-block-start: var(--flow, var(--space-4)); }
+
+.eyebrow {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--teal-deep);
+}
+
+.lede {
+  font-size: var(--text-lg);
+  color: var(--ink-soft);
+  max-inline-size: var(--measure-short);
+}
+
+.visually-hidden {
+  position: absolute;
+  inline-size: 1px; block-size: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  inset-block-start: var(--space-2);
+  inset-inline-start: var(--space-2);
+  z-index: 50;
+  padding: var(--space-2) var(--space-4);
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--elev-2);
+  transform: translateY(-200%);
+  transition: transform var(--t-quick) var(--ease-out);
+}
+.skip-link:focus-visible { transform: translateY(0); }
+
+/* ---------- Buttons ----------
+   --teal fill takes --ink text (6.72:1). --teal-deep fill takes white (5.47:1).
+   White on --teal is 2.49:1 and is never used. */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  min-block-size: 48px;          /* thumb target */
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: var(--text-base);
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform var(--t-instant) var(--ease-out),
+              background-color var(--t-instant) var(--ease-out),
+              box-shadow var(--t-instant) var(--ease-out);
+}
+
+.btn:active { transform: scale(0.975); }   /* confirm */
+
+.btn--primary { background: var(--teal); color: var(--ink); box-shadow: var(--elev-1); }
+.btn--primary:hover { background: #10a595; }
+
+.btn--quiet {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--line);
+}
+.btn--quiet:hover { background: var(--paper-warm); }
+
+/* ---------- Scroll reveal ----------
+   Preferred path is the scroll driven animation, which runs off the main thread
+   and therefore holds 60fps on a cheap Android. Firefox still has it flagged, so
+   those browsers get an IntersectionObserver instead.
+
+   Both paths fail visible, and that is the whole point of how this is written.
+   The hidden state is never a plain static rule, because a ViewTimeline reports
+   currentTime null once its subject sits far outside the scrollport, and while
+   it is inactive the animation applies nothing. A static opacity: 0 underneath
+   it therefore wins, and jumping to the end of the page renders it blank. So the
+   hidden state comes only from a live animation, or from .reveal-js, which is
+   set synchronously in the head and only when the observer path will really run.
+   A browser that runs neither gets a finished page. */
+
+.reveal { opacity: 1; }
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 8% cover 26%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .reveal-js .reveal { opacity: 0; transform: translateY(14px); }
+  .reveal-js .reveal.is-in {
+    opacity: 1;
+    transform: none;
+    transition: opacity var(--t-reveal) var(--ease-out),
+                transform var(--t-reveal) var(--ease-out);
+  }
+}
+
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}

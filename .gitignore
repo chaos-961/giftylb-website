@@ -1,0 +1,29 @@
+# Local only. None of this is ever deployed or committed.
+CLAUDE.md
+docs/BRIEF.md
+tools/
+.env
+.env.*
+firebase.json
+.firebaserc
+firestore.rules
+firestore.indexes.json
+.firebase/
+
+# Worker (P4). Secrets live in Wrangler, never here.
+worker/.dev.vars
+worker/node_modules/
+.wrangler/
+
+# Admin plaintext source (P4). Only the encrypted payload is committed.
+tools/admin-src/
+
+# Junk
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+node_modules/
+
+# Local tooling
+.claude/
