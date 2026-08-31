@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your cart. Gifty</title>
+<meta name="description" content="What you have made so far, what it costs, and the day it lands.">
+<meta name="theme-color" content="#14B8A6">
+<meta name="robots" content="noindex">
+<meta name="version" content="0.2.3">
+
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.2.3" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.2.3" as="font" type="font/woff2" crossorigin>
+
+<link rel="stylesheet" href="css/tokens.css?v=0.2.3">
+<link rel="stylesheet" href="css/base.css?v=0.2.3">
+<link rel="stylesheet" href="css/chrome.css?v=0.2.3">
+<link rel="stylesheet" href="css/shop.css?v=0.2.3">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="wordmark" href="index.html">Gift<span>y</span></a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="site-nav__primary" href="shop.html">Shop</a>
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#delivery">Delivery</a>
+    </nav>
+    <a class="cart-link" href="cart.html" aria-label="Cart" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M5 8h14l1 12H4z"/>
+        <path d="M9 8V6a3 3 0 0 1 6 0v2"/>
+      </svg>
+      <span class="cart-link__count" data-cart-count hidden>0</span>
+    </a>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <div class="page-head">
+      <p class="eyebrow">Your cart</p>
+      <h1>What you have made.</h1>
+      <p class="lede" id="cartCount">Nothing in the cart yet.</p>
+    </div>
+
+    <p class="cart-error" id="cartError" hidden>
+      We could not work out the delivery date just now. That one is on us. Please try again in a moment.
+    </p>
+
+    <div class="cart-empty" id="cartEmpty" hidden>
+      <h2>Nothing in here yet.</h2>
+      <p>Pick a design, put your photo on it, and it lands here.</p>
+      <a class="btn btn--primary" href="shop.html">See the designs</a>
+    </div>
+
+    <div class="cart-layout" id="cartLayout" hidden>
+      <ul class="cart-list" id="cartList" role="list"></ul>
+
+      <aside class="cart-side" aria-label="Total and delivery">
+        <div class="cart-side__zone">
+          <h2>Where it is going</h2>
+          <label class="zone-pick">
+            <span class="visually-hidden">Delivery zone</span>
+            <span id="cartZone"></span>
+          </label>
+          <p class="cart-side__area" id="zoneArea"></p>
+        </div>
+
+        <p class="cart-promise" id="cartPromise"></p>
+
+        <div class="totals">
+          <div><span>Things</span><span id="totalItems"></span></div>
+          <div><span>Delivery</span><span id="totalDelivery"></span></div>
+          <div class="totals__grand"><span>Total</span><span id="totalGrand"></span></div>
+        </div>
+
+        <button class="btn btn--primary" type="button" disabled>Ordering opens soon</button>
+        <p class="cart-note">
+          No account needed, then or now. Your cart stays on this phone until you order,
+          and you pay cash on delivery or by transfer.
+        </p>
+      </aside>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap site-footer__inner">
+    <p>Gifty. Custom gifts, made in Beirut.</p>
+    <p><span id="year">2026</span> Gifty</p>
+  </div>
+</footer>
+
+<script defer src="js/recipe.js?v=0.2.3"></script>
+<script defer src="js/engine/price.js?v=0.2.3"></script>
+<script defer src="js/delivery.js?v=0.2.3"></script>
+<script defer src="js/cart.js?v=0.2.3"></script>
+<script defer src="js/cart-page.js?v=0.2.3"></script>
+<script defer src="js/main.js?v=0.2.3"></script>
+</body>
+</html>

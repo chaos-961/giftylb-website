@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check it, then order. Gifty</title>
+<meta name="description" content="See exactly what goes to print, approve it, and tell us where to send it.">
+<meta name="theme-color" content="#14B8A6">
+<meta name="robots" content="noindex">
+<meta name="version" content="0.2.3">
+
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.2.3" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.2.3" as="font" type="font/woff2" crossorigin>
+
+<link rel="stylesheet" href="css/tokens.css?v=0.2.3">
+<link rel="stylesheet" href="css/base.css?v=0.2.3">
+<link rel="stylesheet" href="css/chrome.css?v=0.2.3">
+<link rel="stylesheet" href="css/shop.css?v=0.2.3">
+<link rel="stylesheet" href="css/checkout.css?v=0.2.3">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="wordmark" href="index.html">Gift<span>y</span></a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="site-nav__primary" href="shop.html">Shop</a>
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#delivery">Delivery</a>
+    </nav>
+    <a class="cart-link" href="cart.html" aria-label="Cart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M5 8h14l1 12H4z"/>
+        <path d="M9 8V6a3 3 0 0 1 6 0v2"/>
+      </svg>
+      <span class="cart-link__count" data-cart-count hidden>0</span>
+    </a>
+  </div>
+</header>
+
+<main id="main">
+  <div class="wrap">
+
+    <!-- ------------------------------------------------------------ done -->
+    <section class="done" id="done" hidden>
+      <p class="done__tick" aria-hidden="true">
+        <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 25l8 8 16-18"/></svg>
+      </p>
+      <h1>That is on its way!</h1>
+      <p class="lede">Order <strong id="doneNumber"></strong>, arriving <strong id="doneDate"></strong>.</p>
+      <p class="done__note" id="doneNote"></p>
+      <p class="done__actions">
+        <a class="btn btn--primary" id="doneTrack" href="track.html">Follow your order</a>
+        <a class="btn btn--quiet" href="shop.html">Make another</a>
+      </p>
+    </section>
+
+    <!-- ----------------------------------------------------------- order -->
+    <div id="flow">
+
+      <div class="page-head">
+        <h1>Check it, then order.</h1>
+        <p class="lede">This is exactly what goes to print. Nothing is made until you say so.</p>
+      </div>
+
+      <p class="cart-empty" id="empty" hidden>
+        <span>There is nothing in the cart.</span>
+        <a class="btn btn--primary" href="shop.html">See the designs</a>
+      </p>
+
+      <p class="notice notice--off" id="offNotice" hidden>
+        Ordering is not switched on yet. You can still check your proof below, and we can
+        take the order by message in the meantime.
+      </p>
+
+      <p class="cart-error" id="fatal" hidden></p>
+
+      <div class="checkout" id="checkout" hidden>
+
+        <div class="checkout__main">
+          <section aria-labelledby="proofHead">
+            <h2 class="step" id="proofHead"><span class="step__n">1</span> Your proof</h2>
+            <ul class="proofs" id="proofs" role="list"></ul>
+
+            <label class="approve" id="approveBox">
+              <input type="checkbox" id="approve">
+              <span>
+                <strong>This is right. Print it.</strong>
+                <span class="approve__sub">We print exactly this. Colours on a screen and colours on a mug are never a perfect match.</span>
+              </span>
+            </label>
+          </section>
+
+          <section aria-labelledby="detailsHead">
+            <h2 class="step" id="detailsHead"><span class="step__n">2</span> Where it goes</h2>
+
+            <div class="field">
+              <label for="name">Your name</label>
+              <input type="text" id="name" autocomplete="name" maxlength="80" required>
+            </div>
+            <div class="field">
+              <label for="phone">Phone</label>
+              <input type="tel" id="phone" autocomplete="tel" maxlength="24" placeholder="03 123 456" required>
+              <p class="field__hint">So the driver can call when they are outside.</p>
+            </div>
+            <div class="field">
+              <label for="email">Email <span class="field__opt">optional</span></label>
+              <input type="email" id="email" autocomplete="email" maxlength="120">
+              <p class="field__hint">Where we send the confirmation and the tracking link.</p>
+            </div>
+            <div class="field">
+              <label for="zone">Area</label>
+              <span id="zoneWrap"></span>
+              <p class="field__hint" id="zoneHint"></p>
+            </div>
+            <div class="field">
+              <label for="address">Address</label>
+              <textarea id="address" rows="3" maxlength="400" autocomplete="street-address" required></textarea>
+              <p class="field__hint">Street, building, floor, and a landmark if there is one.</p>
+            </div>
+          </section>
+
+          <section aria-labelledby="payHead">
+            <h2 class="step" id="payHead"><span class="step__n">3</span> Paying</h2>
+            <div class="pays" id="pays" role="radiogroup" aria-label="How you want to pay"></div>
+
+            <div class="field" id="refField" hidden>
+              <label for="reference">Transfer reference</label>
+              <input type="text" id="reference" maxlength="60">
+              <p class="field__hint">The number the transfer gives you, so we can match it.</p>
+            </div>
+
+            <div class="field">
+              <label for="notes">Anything we should know <span class="field__opt">optional</span></label>
+              <textarea id="notes" rows="2" maxlength="600"></textarea>
+            </div>
+          </section>
+        </div>
+
+        <aside class="checkout__side" aria-label="Total">
+          <h2>The order</h2>
+          <ul class="side-items" id="sideItems" role="list"></ul>
+          <div class="totals">
+            <div><span>Things</span><span id="sumItems"></span></div>
+            <div><span>Delivery</span><span id="sumDelivery"></span></div>
+            <div class="totals__grand"><span>Total</span><span id="sumTotal"></span></div>
+          </div>
+          <p class="cart-promise" id="sumPromise"></p>
+
+          <div id="turnstile"></div>
+
+          <p class="cart-error" id="formError" hidden role="alert"></p>
+
+          <button class="btn btn--primary checkout__go" type="button" id="place" disabled>
+            Place the order
+          </button>
+          <p class="cart-note" id="goNote">Cash on delivery. No account, no card.</p>
+        </aside>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap site-footer__inner">
+    <p>Gifty. Custom gifts, made in Beirut.</p>
+    <p><span id="year">2026</span> Gifty</p>
+  </div>
+</footer>
+
+<script defer src="js/firebase-config.js?v=0.2.3"></script>
+<script defer src="js/data.js?v=0.2.3"></script>
+<script defer src="js/recipe.js?v=0.2.3"></script>
+<script defer src="js/engine/warp.js?v=0.2.3"></script>
+<script defer src="js/engine/design.js?v=0.2.3"></script>
+<script defer src="js/engine/render.js?v=0.2.3"></script>
+<script defer src="js/engine/state.js?v=0.2.3"></script>
+<script defer src="js/engine/price.js?v=0.2.3"></script>
+<script defer src="js/proof.js?v=0.2.3"></script>
+<script defer src="js/delivery.js?v=0.2.3"></script>
+<script defer src="js/cart.js?v=0.2.3"></script>
+<script defer src="js/checkout.js?v=0.2.3"></script>
+<script defer src="js/main.js?v=0.2.3"></script>
+</body>
+</html>

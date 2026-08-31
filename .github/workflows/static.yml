@@ -38,6 +38,8 @@ jobs:
           cp index.html _site/index.html
           cp 404.html _site/404.html
           cp customize.html _site/customize.html
+          cp shop.html _site/shop.html
+          cp cart.html _site/cart.html
           cp .nojekyll _site/.nojekyll
 
           # CNAME is deliberately NOT copied yet. giftylb.com has no DNS records,
@@ -49,13 +51,19 @@ jobs:
 
           cp css/tokens.css _site/css/tokens.css
           cp css/base.css _site/css/base.css
+          cp css/chrome.css _site/css/chrome.css
           cp css/home.css _site/css/home.css
+          cp css/shop.css _site/css/shop.css
           cp css/customize.css _site/css/customize.css
 
           cp js/firebase-config.js _site/js/firebase-config.js
           cp js/main.js _site/js/main.js
           cp js/recipe.js _site/js/recipe.js
           cp js/customize.js _site/js/customize.js
+          cp js/delivery.js _site/js/delivery.js
+          cp js/cart.js _site/js/cart.js
+          cp js/cart-page.js _site/js/cart-page.js
+          cp js/shop.js _site/js/shop.js
           cp js/engine/warp.js _site/js/engine/warp.js
           cp js/engine/design.js _site/js/engine/design.js
           cp js/engine/render.js _site/js/engine/render.js
@@ -63,6 +71,8 @@ jobs:
           cp js/engine/photo.js _site/js/engine/photo.js
           cp js/engine/price.js _site/js/engine/price.js
 
+          cp data/settings.json _site/data/settings.json
+          cp data/templates.json _site/data/templates.json
           cp data/products/mug.json _site/data/products/mug.json
           cp data/products/cap.json _site/data/products/cap.json
           cp data/products/bottle.json _site/data/products/bottle.json

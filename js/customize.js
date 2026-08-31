@@ -12,13 +12,15 @@
   var recipe = null, images = null, cache = null, store = null;
   var zone = null, rule = null, part0 = null;
   var frame = null, pending = 1, lastTotal = null;
+  var editingId = null;   /* set when the buyer came back from the cart to edit */
 
   var el = {};
   ['preview', 'loading', 'productName', 'undoBtn', 'restoredChip', 'startOver', 'dpiChip',
    'photoInput', 'photoBtnLabel', 'removePhoto', 'photoHint', 'photoControls',
    'zoom', 'panX', 'panY', 'recentre', 'textInput', 'charCount', 'fontChips',
    'textColours', 'textColourField', 'textSize', 'textY', 'colourParts',
-   'priceAmount', 'priceBreakdown', 'priceBreakdownBtn', 'addBtn', 'dock', 'zonePicker']
+   'priceAmount', 'priceBreakdown', 'priceBreakdownBtn', 'addBtn', 'dock', 'zonePicker',
+   'addedChip', 'addedText', 'deliverLine']
     .forEach(function (id) { el[id] = $(id); });
 
   /* ------------------------------------------------------------- rendering */
@@ -42,6 +44,9 @@
     updatePrice(state);
     updateDpi(state);
     el.undoBtn.disabled = !store.canUndo();
+    /* Once the design moves on, "in the cart" is no longer true of what is on
+       screen, so the confirmation goes rather than quietly becoming a lie. */
+    if (!el.addedChip.hidden && !(meta && meta.transient)) el.addedChip.hidden = true;
   }
 
   /* ----------------------------------------------------------------- price */
@@ -62,6 +67,64 @@
       var b = document.createElement('span'); b.textContent = G.Price.format(line.amount, p.currency);
       li.appendChild(a); li.appendChild(b);
       el.priceBreakdown.appendChild(li);
+    });
+  }
+
+  /* -------------------------------------------------------------- delivery */
+
+  function paintDeliver() {
+    if (!G.Delivery.settings() || !recipe) return;
+    el.deliverLine.textContent =
+      G.Delivery.sentence(G.Delivery.promise(recipe.leadTimeDays, G.Cart.zone()));
+  }
+
+  /* ------------------------------------------------------------------ cart
+
+     The thumbnail is a downscale of the very canvas the buyer is looking at,
+     so the picture in the cart is the design and cannot drift from it. P4
+     re-renders the same state at print resolution for the proof. */
+
+  function thumbOf() {
+    var view = recipe.views[0];
+    var c = document.createElement('canvas');
+    c.width = 420;
+    c.height = Math.round(420 * view.h / view.w);
+    c.getContext('2d').drawImage(el.preview, 0, 0, c.width, c.height);
+    try { return c.toDataURL('image/jpeg', 0.82); } catch (e) { return null; }
+  }
+
+  function say(message, bad) {
+    el.addedChip.hidden = false;
+    el.addedChip.classList.toggle('cz-chip--warn', !!bad);
+    el.addedChip.classList.toggle('cz-chip--added', !bad);
+    el.addedText.textContent = message;
+  }
+
+  function addToCart() {
+    var state = store.get();
+    var price = G.Price.compute(recipe, state);
+    var item = {
+      productId: recipe.id,
+      productName: recipe.name,
+      leadTimeDays: recipe.leadTimeDays,
+      unitPrice: price.total,
+      lines: price.lines,
+      thumb: thumbOf(),
+      snapshot: G.State.snapshot(state)
+    };
+
+    el.addBtn.disabled = true;
+    var job = editingId ? G.Cart.replace(editingId, item) : G.Cart.add(item);
+
+    job.then(function (entry) {
+      el.addBtn.disabled = false;
+      if (!entry) {
+        /* The store is full, which is ours to explain and not the buyer's
+           fault. Give them the way out rather than a storage error. */
+        say('We could not keep that one. This phone has run out of room for saved designs, so take something out of the cart and try again.', true);
+        return;
+      }
+      say(editingId ? 'Cart updated.' : 'In the cart.', false);
     });
   }
 
@@ -425,6 +488,8 @@
       el.priceBreakdownBtn.setAttribute('aria-expanded', String(open));
     });
 
+    el.addBtn.addEventListener('click', addToCart);
+
     el.startOver.addEventListener('click', function () {
       store.clearSaved();
       store.replace(G.Recipe.initialState(recipe));
@@ -461,8 +526,75 @@
     el.loading.hidden = false;
   }
 
+  /* ---------------------------------------------------------- what to open
+
+     Three ways in, and the URL decides which. A template or a cart item wins
+     over the autosave and clears it, because the link is what says which
+     design this screen is showing and a refresh has to land on the same one. */
+
+  function fromTemplate(tpl) {
+    var state = G.Recipe.initialState(recipe);
+    var src = tpl.state || {};
+
+    Object.keys(src.colors || {}).forEach(function (k) {
+      if (k in state.colors) state.colors[k] = src.colors[k];
+    });
+
+    Object.keys(src.zones || {}).forEach(function (id) {
+      if (!state.zones[id] || !src.zones[id].text) return;
+      var from = src.zones[id].text, into = state.zones[id].text;
+      ['value', 'font', 'color', 'size', 'y'].forEach(function (k) {
+        if (from[k] != null) into[k] = from[k];
+      });
+      var zrule = (recipe.textRules || []).filter(function (r) { return r.zoneId === id; })[0] || {};
+      into.value = G.Design.applyTextRules(zrule, into.value);
+    });
+
+    return state;
+  }
+
+  function openWith(params) {
+    if (params.cartId) {
+      var item = G.Cart.find(params.cartId);
+      if (item) {
+        editingId = item.id;
+        el.addBtn.textContent = 'Update the cart';
+        store.clearSaved();
+        return G.State.hydrate(item.snapshot).then(function (s) { store.replace(s); });
+      }
+    }
+
+    if (params.templateId) {
+      return G.Data.doc('templates/' + params.templateId)
+        .then(function (tpl) {
+          if (!tpl || tpl.productId !== recipe.id) return;
+          store.clearSaved();
+          store.replace(fromTemplate(tpl));
+        })
+        .catch(function () { /* a missing template opens a blank one, not an error */ });
+    }
+
+    var saved = G.State.loadSaved(recipe.id);
+    if (G.State.isMeaningful(saved)) {
+      return G.State.hydrate(saved).then(function (s) {
+        store.replace(s);
+        el.restoredChip.hidden = false;
+      });
+    }
+    return Promise.resolve();
+  }
+
   function boot() {
-    var id = new URLSearchParams(location.search).get('p') || 'mug';
+    var q = new URLSearchParams(location.search);
+    var id = q.get('p') || 'mug';
+    var params = { templateId: q.get('t'), cartId: q.get('c') };
+
+    /* The date is not on the critical path for drawing, so it loads alongside
+       and fills itself in. A slow settings fetch never holds up the preview. */
+    G.Delivery.load().then(function () {
+      paintDeliver();
+      setInterval(paintDeliver, 30000);
+    }).catch(function () { el.deliverLine.hidden = true; });
 
     G.Recipe.load(id)
       .then(function (r) {
@@ -481,19 +613,10 @@
         rule = (recipe.textRules || []).filter(function (t) { return t.zoneId === zone.id; })[0] || {};
         part0 = recipe.colorParts[0];
 
-        var saved = G.State.loadSaved(recipe.id);
-        var start = G.Recipe.initialState(recipe);
-        store = G.State.create(start, onChange);
+        store = G.State.create(G.Recipe.initialState(recipe), onChange);
         wire();
 
-        if (G.State.isMeaningful(saved)) {
-          return G.State.hydrate(saved).then(function (s) {
-            store.replace(s);
-            el.restoredChip.hidden = false;
-            syncAll();
-          });
-        }
-        syncAll();
+        return openWith(params).then(syncAll);
       })
       .then(function () {
         el.loading.hidden = true;
@@ -506,6 +629,7 @@
            every product on the site. */
         updatePrice(store.get());
         updateDpi(store.get());
+        paintDeliver();
       })
       .catch(function (err) {
         fail('We could not open the customizer just now. Please try again in a moment.');

@@ -1,0 +1,143 @@
+{
+  "_comment": "settings/global. Lead times, zones and fees are config, never code. Seeded from here with tools/seed-firestore.mjs; after that the admin edits the Firestore document and this file is only the seed.",
+  "currency": "USD",
+  "timeZone": "Asia/Beirut",
+  "cutoffHour": 15,
+  "workingDays": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "blackoutDates": [
+    "2026-11-22",
+    "2026-12-25",
+    "2027-01-01"
+  ],
+  "defaultZone": "A",
+  "zones": [
+    {
+      "id": "A",
+      "name": "Beirut area",
+      "area": "Beirut, Jnah up to Dbayeh, and out to Baabda",
+      "transitDays": 2,
+      "fee": 4
+    },
+    {
+      "id": "B",
+      "name": "Rest of Lebanon",
+      "area": "Everywhere else in Lebanon",
+      "transitDays": 3,
+      "fee": 7
+    }
+  ],
+  "occasions": [
+    {
+      "id": "birthday",
+      "name": "Birthday"
+    },
+    {
+      "id": "graduation",
+      "name": "Graduation"
+    },
+    {
+      "id": "wedding",
+      "name": "Wedding"
+    },
+    {
+      "id": "mothers-day",
+      "name": "Mother's Day"
+    },
+    {
+      "id": "eid",
+      "name": "Eid"
+    },
+    {
+      "id": "christmas",
+      "name": "Christmas"
+    },
+    {
+      "id": "new-baby",
+      "name": "New baby"
+    },
+    {
+      "id": "teacher",
+      "name": "Teacher"
+    },
+    {
+      "id": "sorry",
+      "name": "Sorry"
+    },
+    {
+      "id": "just-because",
+      "name": "Just because"
+    }
+  ],
+  "recipients": [
+    {
+      "id": "her",
+      "name": "Her"
+    },
+    {
+      "id": "him",
+      "name": "Him"
+    },
+    {
+      "id": "mum",
+      "name": "Mum"
+    },
+    {
+      "id": "dad",
+      "name": "Dad"
+    },
+    {
+      "id": "friend",
+      "name": "A friend"
+    },
+    {
+      "id": "kids",
+      "name": "Kids"
+    },
+    {
+      "id": "couple",
+      "name": "A couple"
+    },
+    {
+      "id": "teacher",
+      "name": "A teacher"
+    }
+  ],
+  "products": [
+    "mug",
+    "cap",
+    "bottle",
+    "tote",
+    "photo-block"
+  ],
+  "orderPrefix": "GFT",
+  "maxCartItems": 6,
+  "shopEmail": null,
+  "whatsappNumber": null,
+  "payments": [
+    {
+      "id": "cod",
+      "name": "Cash on delivery",
+      "blurb": "Pay the driver when it arrives. Nothing to do now.",
+      "needsReference": false
+    },
+    {
+      "id": "whish",
+      "name": "Whish Money",
+      "blurb": "Send the total, then give us the reference number.",
+      "needsReference": true
+    },
+    {
+      "id": "omt",
+      "name": "OMT",
+      "blurb": "Send the total, then give us the reference number.",
+      "needsReference": true
+    }
+  ]
+}

@@ -1,0 +1,230 @@
+{
+  "_comment": "templates/{id}. A template is a saved design: the layout, colours and words are done, and the buyer swaps in the photo and the name. Authored here in P3, authored in the admin in P4. The shape is the same either way, so the editor writes these documents and nothing downstream changes.",
+
+  "templates": [
+    {
+      "id": "birthday-photo-mug",
+      "productId": "mug",
+      "name": "Happy birthday",
+      "published": true,
+      "occasions": ["birthday"],
+      "recipients": ["friend", "her", "him"],
+      "state": {
+        "productId": "mug",
+        "colors": { "body": "#FFFFFF" },
+        "zones": {
+          "wrap": {
+            "photo": null,
+            "text": { "value": "Happy birthday Lara", "font": "display", "color": "#0F766E", "size": 0.16, "y": 0.78 }
+          }
+        }
+      }
+    },
+    {
+      "id": "for-mum-mug",
+      "productId": "mug",
+      "name": "For mum",
+      "published": true,
+      "occasions": ["mothers-day", "birthday"],
+      "recipients": ["mum"],
+      "state": {
+        "productId": "mug",
+        "colors": { "body": "#DB2777" },
+        "zones": {
+          "wrap": {
+            "photo": null,
+            "text": { "value": "Best mum in Beirut", "font": "hand", "color": "#FFFFFF", "size": 0.24, "y": 0.5 }
+          }
+        }
+      }
+    },
+    {
+      "id": "thank-you-teacher-mug",
+      "productId": "mug",
+      "name": "Thank you, miss",
+      "published": true,
+      "occasions": ["teacher", "just-because"],
+      "recipients": ["teacher"],
+      "state": {
+        "productId": "mug",
+        "colors": { "body": "#0F766E" },
+        "zones": {
+          "wrap": {
+            "photo": null,
+            "text": { "value": "Thank you, miss", "font": "display", "color": "#FFFFFF", "size": 0.2, "y": 0.56 }
+          }
+        }
+      }
+    },
+    {
+      "id": "small-sorry-mug",
+      "productId": "mug",
+      "name": "A small sorry",
+      "published": true,
+      "occasions": ["sorry"],
+      "recipients": ["friend", "her", "him"],
+      "state": {
+        "productId": "mug",
+        "colors": { "body": "#FFFFFF" },
+        "zones": {
+          "wrap": {
+            "photo": null,
+            "text": { "value": "Sorry. Coffee?", "font": "ui", "color": "#14201F", "size": 0.17, "y": 0.5 }
+          }
+        }
+      }
+    },
+    {
+      "id": "class-of-cap",
+      "productId": "cap",
+      "name": "Class of 26",
+      "published": true,
+      "occasions": ["graduation"],
+      "recipients": ["him", "her", "kids"],
+      "state": {
+        "productId": "cap",
+        "colors": { "crown": "#14201F", "panels": "#B91C1C", "brim": "#14201F", "button": "#14201F" },
+        "zones": {
+          "front-panel": {
+            "photo": null,
+            "text": { "value": "CLASS OF 26", "font": "display", "color": "#FFFFFF", "size": 0.28, "y": 0.5 }
+          }
+        }
+      }
+    },
+    {
+      "id": "habibi-cap",
+      "productId": "cap",
+      "name": "Habibi",
+      "published": true,
+      "occasions": ["birthday", "just-because", "eid"],
+      "recipients": ["friend", "him"],
+      "state": {
+        "productId": "cap",
+        "colors": { "crown": "#0F766E", "panels": "#0F766E", "brim": "#D97706", "button": "#0F766E" },
+        "zones": {
+          "front-panel": {
+            "photo": null,
+            "text": { "value": "HABIBI", "font": "display", "color": "#FFFFFF", "size": 0.34, "y": 0.5 }
+          }
+        }
+      }
+    },
+    {
+      "id": "engraved-name-bottle",
+      "productId": "bottle",
+      "name": "His name on it",
+      "published": true,
+      "occasions": ["birthday", "teacher", "christmas"],
+      "recipients": ["dad", "him"],
+      "state": {
+        "productId": "bottle",
+        "colors": { "body": "#14201F", "lid": "#D97706", "band": "#D97706" },
+        "zones": {
+          "engrave": {
+            "photo": null,
+            "text": { "value": "ELIE", "font": "display", "color": "#FFFFFF", "size": 0.28, "y": 0.48 }
+          }
+        }
+      }
+    },
+    {
+      "id": "stay-hydrated-bottle",
+      "productId": "bottle",
+      "name": "Stay hydrated",
+      "published": true,
+      "occasions": ["graduation", "just-because"],
+      "recipients": ["her", "friend"],
+      "state": {
+        "productId": "bottle",
+        "colors": { "body": "#0F766E", "lid": "#FFFFFF", "band": "#FFFFFF" },
+        "zones": {
+          "engrave": {
+            "photo": null,
+            "text": { "value": "Stay hydrated", "font": "ui", "color": "#FFFFFF", "size": 0.2, "y": 0.48 }
+          }
+        }
+      }
+    },
+    {
+      "id": "souk-day-tote",
+      "productId": "tote",
+      "name": "Souk day",
+      "published": true,
+      "occasions": ["just-because", "birthday"],
+      "recipients": ["her", "mum"],
+      "state": {
+        "productId": "tote",
+        "colors": { "cloth": "#FFFFFF" },
+        "zones": {
+          "front-print": {
+            "photo": null,
+            "text": { "value": "SOUK DAY", "font": "display", "color": "#14201F", "size": 0.16, "y": 0.46 }
+          }
+        }
+      }
+    },
+    {
+      "id": "wedding-tote",
+      "productId": "tote",
+      "name": "The two of them",
+      "published": true,
+      "occasions": ["wedding"],
+      "recipients": ["couple"],
+      "state": {
+        "productId": "tote",
+        "colors": { "cloth": "#FFFFFF" },
+        "zones": {
+          "front-print": {
+            "photo": null,
+            "text": { "value": "Nadia and Karim", "font": "hand", "color": "#14201F", "size": 0.1, "y": 0.84 }
+          }
+        }
+      }
+    },
+    {
+      "id": "us-photo-block",
+      "productId": "photo-block",
+      "name": "Us, on a block",
+      "published": true,
+      "occasions": ["wedding", "just-because"],
+      "recipients": ["couple", "her"],
+      "state": {
+        "productId": "photo-block",
+        "colors": { "base": "#D9A066" },
+        "zones": {
+          "acrylic": {
+            "photo": null,
+            "text": { "value": "", "font": "ui", "color": "#14201F", "size": 0.2, "y": 0.5 }
+          },
+          "caption": {
+            "photo": null,
+            "text": { "value": "Beirut, 2026", "font": "display", "color": "#FFFFFF", "size": 0.34, "y": 0.5 }
+          }
+        }
+      }
+    },
+    {
+      "id": "new-baby-block",
+      "productId": "photo-block",
+      "name": "Welcome to the world",
+      "published": true,
+      "occasions": ["new-baby"],
+      "recipients": ["mum", "dad", "kids"],
+      "state": {
+        "productId": "photo-block",
+        "colors": { "base": "#FFFFFF" },
+        "zones": {
+          "acrylic": {
+            "photo": null,
+            "text": { "value": "", "font": "ui", "color": "#14201F", "size": 0.2, "y": 0.5 }
+          },
+          "caption": {
+            "photo": null,
+            "text": { "value": "Welcome, ya rouh", "font": "hand", "color": "#FFFFFF", "size": 0.34, "y": 0.5 }
+          }
+        }
+      }
+    }
+  ]
+}

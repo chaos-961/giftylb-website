@@ -1,0 +1,298 @@
+/* Gifty. Proof and checkout.
+   One scrolling page, not a wizard. On a phone a wizard is three chances to
+   lose someone, and there is nothing here that needs hiding from them. */
+
+.notice {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  margin-block-end: var(--space-5);
+}
+.notice--off {
+  background: var(--teal-wash);
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+}
+
+.checkout { display: grid; gap: var(--space-6); align-items: start; }
+
+@media (min-width: 56rem) {
+  .checkout { grid-template-columns: 1fr 21rem; gap: var(--space-8); }
+  .checkout__side { position: sticky; inset-block-start: 76px; }
+}
+
+.checkout__main > section + section { margin-block-start: var(--space-8); }
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-xl);
+  margin-block-end: var(--space-4);
+}
+
+.step__n {
+  display: grid;
+  place-items: center;
+  inline-size: 1.9rem;
+  block-size: 1.9rem;
+  flex: none;
+  border-radius: var(--radius-full);
+  background: var(--teal);
+  color: var(--ink);          /* 6.72:1 */
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+/* ---------- The proof ---------- */
+
+.proofs { display: grid; gap: var(--space-4); }
+
+.proof {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+@media (min-width: 34rem) {
+  .proof { grid-template-columns: 14rem 1fr; gap: var(--space-5); align-items: center; }
+}
+
+.proof__art {
+  aspect-ratio: 9 / 7;
+  border-radius: var(--radius-sm);
+  background: var(--teal-wash);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+.proof__art canvas { inline-size: 100%; block-size: 100%; object-fit: contain; }
+
+.proof__body { display: flex; flex-direction: column; gap: var(--space-1); align-items: start; }
+.proof__name { font-family: var(--font-display); font-weight: 600; font-size: var(--text-lg); }
+.proof__words { font-size: var(--text-sm); color: var(--ink-soft); }
+
+/* ---------- Approve ---------- */
+
+.approve {
+  display: flex;
+  align-items: start;
+  gap: var(--space-3);
+  margin-block-start: var(--space-4);
+  padding: var(--space-4);
+  background: var(--paper-warm);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+.approve input {
+  inline-size: 22px;
+  block-size: 22px;
+  flex: none;
+  margin-block-start: 2px;
+  accent-color: var(--teal-deep);
+}
+.approve span { display: block; }
+/* --ink-soft, not --ink-faint: this box sits on --paper-warm. */
+.approve__sub {
+  margin-block-start: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+
+/* ---------- Fields ---------- */
+
+.field { margin-block-end: var(--space-4); }
+.field label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin-block-end: var(--space-2);
+}
+.field__opt { font-weight: 400; color: var(--ink-faint); }
+
+.field input,
+.field textarea {
+  inline-size: 100%;
+  min-block-size: 48px;
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: var(--text-base);
+}
+.field textarea { min-block-size: 5rem; resize: vertical; line-height: 1.5; }
+.field input:hover, .field textarea:hover { border-color: var(--ink-faint); }
+
+.field__hint {
+  margin-block-start: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--ink-faint);   /* 4.55:1 on --paper */
+}
+
+/* ---------- Paying ---------- */
+
+.pays { display: grid; gap: var(--space-2); margin-block-end: var(--space-5); }
+
+.pay {
+  display: flex;
+  align-items: start;
+  gap: var(--space-3);
+  min-block-size: 56px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  cursor: pointer;
+  transition: border-color var(--t-instant) var(--ease-out),
+              background-color var(--t-instant) var(--ease-out);
+}
+.pay:hover { background: var(--paper-warm); }
+.pay:has(input:checked) { border-color: var(--teal); background: var(--teal-wash); }
+
+.pay input {
+  inline-size: 20px;
+  block-size: 20px;
+  flex: none;
+  margin-block-start: 3px;
+  accent-color: var(--teal-deep);
+}
+.pay strong { display: block; font-size: var(--text-base); }
+.pay__blurb { display: block; font-size: var(--text-xs); color: var(--ink-soft); }
+
+/* ---------- The side ---------- */
+
+.checkout__side {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--paper-warm);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+.checkout__side h2 { font-size: var(--text-lg); }
+
+.side-items { display: grid; gap: var(--space-2); font-size: var(--text-sm); }
+.side-items li { display: flex; justify-content: space-between; gap: var(--space-4); }
+
+.checkout__go { inline-size: 100%; }
+.checkout__go:disabled { opacity: 0.5; cursor: default; }
+
+/* ---------- Done ---------- */
+
+.done { padding-block: var(--space-9); text-align: center; }
+.done h1 { font-size: var(--text-3xl); }
+.done .lede { margin-inline: auto; margin-block-start: var(--space-4); }
+
+.done__tick {
+  display: grid;
+  place-items: center;
+  inline-size: 72px;
+  block-size: 72px;
+  margin-inline: auto;
+  margin-block-end: var(--space-5);
+  border-radius: var(--radius-full);
+  background: var(--teal-wash);
+  color: var(--teal-deep);
+}
+.done__tick svg { inline-size: 40px; block-size: 40px; }
+
+.done__note { margin-block-start: var(--space-3); font-size: var(--text-sm); color: var(--ink-soft); }
+
+.done__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+  margin-block-start: var(--space-7);
+}
+
+/* ---------- Tracking ---------- */
+
+.track { max-inline-size: 34rem; }
+
+.track__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: var(--teal-wash);
+  color: var(--teal-deep);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.track__steps {
+  display: grid;
+  gap: 0;
+  margin-block-start: var(--space-6);
+}
+
+.track__step {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: var(--space-4);
+  padding-block-end: var(--space-5);
+}
+
+.track__dot {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 28px;
+  block-size: 28px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--line);
+  background: var(--paper);
+  color: var(--paper);
+}
+.track__step[data-done="yes"] .track__dot { background: var(--teal); border-color: var(--teal); color: var(--ink); }
+.track__dot svg { inline-size: 15px; block-size: 15px; }
+
+/* The line joining the dots is drawn on the dot, not between the rows, so it
+   cannot fall out of step with the grid. */
+.track__step:not(:last-child) .track__dot::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 100%;
+  inline-size: 2px;
+  block-size: var(--space-5);
+  background: var(--line);
+}
+.track__step[data-done="yes"]:not(:last-child) .track__dot::after { background: var(--teal); }
+
+.track__label { font-weight: 600; }
+.track__when { font-size: var(--text-xs); color: var(--ink-soft); }
+
+.track__items { display: grid; gap: var(--space-3); margin-block-start: var(--space-6); }
+.track__item {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr;
+  gap: var(--space-4);
+  align-items: center;
+}
+.track__item img {
+  inline-size: 100%;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+}
+
+.track__find { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-block-start: var(--space-5); }
+.track__find input {
+  flex: 1 1 12rem;
+  min-block-size: 48px;
+  padding-inline: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-full);
+  background: var(--paper);
+  font-size: var(--text-base);
+  text-transform: uppercase;
+}

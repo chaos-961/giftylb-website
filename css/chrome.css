@@ -1,0 +1,123 @@
+/* Gifty. The chrome every page wears: header, cart link, footer.
+   Lifted out of home.css when the shop and the cart arrived, because three
+   pages copying a header is how a header starts drifting. */
+
+/* ---------- Header ---------- */
+
+.site-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 20;
+  background: rgb(255 255 255 / 0.86);
+  backdrop-filter: blur(10px);
+  border-block-end: 1px solid var(--line);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-block-size: 60px;
+}
+
+.wordmark {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 44px;   /* thumb target, not just the text box */
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-xl);
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  text-decoration: none;
+  margin-inline-end: auto;
+}
+.wordmark span { color: var(--teal-deep); }
+
+.site-nav { display: flex; align-items: center; gap: var(--space-5); }
+.site-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 44px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition: color var(--t-instant) var(--ease-out);
+}
+.site-nav a:hover { color: var(--ink); }
+.site-nav a[aria-current="page"] { color: var(--ink); font-weight: 600; }
+
+/* Below the breakpoint only Shop stays. A phone still needs one way into the
+   catalogue from every page, and the rest of the links are homepage anchors. */
+.site-nav a:not(.site-nav__primary) { display: none; }
+
+@media (min-width: 46rem) {
+  .site-nav a:not(.site-nav__primary) { display: inline-flex; }
+}
+
+/* ---------- Cart link ---------- */
+
+.cart-link {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: var(--radius-full);
+  color: var(--ink);
+  text-decoration: none;
+  transition: background-color var(--t-instant) var(--ease-out);
+}
+.cart-link:hover { background: var(--paper-warm); }
+.cart-link svg { inline-size: 22px; block-size: 22px; }
+
+.cart-link__count {
+  position: absolute;
+  inset-block-start: 2px;
+  inset-inline-end: 2px;
+  min-inline-size: 18px;
+  block-size: 18px;
+  padding-inline: 5px;
+  border-radius: var(--radius-full);
+  background: var(--teal);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  border-block-start: 1px solid var(--line);
+  padding-block: var(--space-7);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.site-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-5);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.site-footer a { color: var(--ink-soft); }
+
+/* ---------- Shared element transition ----------
+   A template card carries the design straight into the customizer instead of
+   dropping the buyer on a new screen and making them find it again. That is
+   the "orient" job. Browsers without cross document view transitions just
+   navigate, which is the same screen one frame sooner. */
+
+@view-transition { navigation: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) { animation: none !important; }
+}

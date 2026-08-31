@@ -9,7 +9,6 @@
 
   var R = G.Recipe = {};
 
-  R.source = 'data/products/';
 
   /* Release version, read from the page. Recipes hold clean asset paths so a
      release does not mean editing every JSON file, but the assets still have to
@@ -25,16 +24,33 @@
     return url + '?v=' + R.version;
   };
 
+  /* Firestore cannot nest an array inside an array, and a quad is four pairs.
+     It is stored as four {x,y} maps and turned back into the engine's own
+     [[x,y]] here, so the wire format never reaches the renderer. */
+  R.normalize = function (recipe) {
+    (recipe.printZones || []).forEach(function (z) {
+      var q = z.warp && z.warp.quad;
+      if (q && q.length && !Array.isArray(q[0])) {
+        z.warp.quad = q.map(function (p) { return [p.x, p.y]; });
+      }
+    });
+    return recipe;
+  };
+
   R.load = function (id) {
-    return fetch(R.bust(R.source + id + '.json'), { cache: 'no-cache' })
-      .then(function (res) {
-        if (!res.ok) throw new Error('recipe ' + id + ' returned ' + res.status);
-        return res.json();
-      })
-      .then(function (recipe) {
-        R.validate(recipe);
-        return recipe;
-      });
+    return G.Data.doc('products/' + id).then(function (recipe) {
+      if (!recipe) throw new Error('there is no product ' + id);
+      R.validate(R.normalize(recipe));
+      return recipe;
+    });
+  };
+
+  /* The shop wants the whole catalogue, which is one request rather than five. */
+  R.all = function () {
+    return G.Data.collection('products').then(function (list) {
+      list.forEach(function (r) { R.validate(R.normalize(r)); });
+      return list;
+    });
   };
 
   /* Fails loudly and early. A recipe typo that reaches the renderer produces a

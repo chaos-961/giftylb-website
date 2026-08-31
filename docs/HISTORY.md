@@ -219,3 +219,133 @@ because recipes are fetched by JS. It also proves `<meta name="version">` matche
 `VERSION`, since that meta is what stamps `?v=` onto recipe assets. Page to page
 `.html` links are exempt from cache busting: a document is an entry point, and
 busting it would only break bookmarks.
+
+---
+
+## v0.2.3 . P3 shop, templates, cart
+
+2026-08-31. Browse by occasion, by who it is for, or by the thing itself. Every
+card is a live render of the real design. A cart that survives a refresh with no
+account and no backend.
+
+### The shape of it
+
+Three new data documents, all in the shape their Firestore counterparts will
+take in P4, so the admin editor writes these and nothing downstream changes:
+
+- `data/settings.json` is `settings/global`. Lead times, zones, fees, the cutoff
+  hour, blackout dates, the occasion and recipient vocabularies. Nothing about
+  delivery is hardcoded anywhere else.
+- `data/templates.json` is `templates/{id}`. A template is a saved design:
+  `productId`, `occasions[]`, `recipients[]`, and a `state` in exactly the shape
+  `State.snapshot` produces. Twelve of them across the five products.
+- Recipes are unchanged. `js/engine/*` and `js/recipe.js` are untouched.
+
+Four new runtime files, and the customizer's interface layer changed:
+
+- `js/delivery.js`. The promise. Counts working days in the shop's own timezone
+  through `Intl`, not the buyer's, because the cutoff belongs to Beirut.
+- `js/cart.js`. The store, the header badge, cross tab sync.
+- `js/shop.js`, `js/cart-page.js`, `shop.html`, `cart.html`.
+- `css/chrome.css`, lifted out of `home.css` when three pages started needing a
+  header. `css/shop.css` covers the shop and the cart.
+
+### Template cards are the product, not a picture of it
+
+Every card renders its design through the same `Render.draw` the customizer
+uses, so a card cannot drift from what the buyer gets and no product photography
+is needed to launch the catalogue. One 900x700 scratch canvas is reused for
+every card and the result is drawn down into the card's own 360px one: twelve
+cards at engine resolution would be about forty megabytes of canvas on a phone.
+Painting is one card per frame behind an `IntersectionObserver`, with a straight
+paint when there is no observer so a card can never shimmer forever.
+
+Template prices are computed as the finished thing, with a photo assumed in
+every zone that accepts one, rather than quoting a number that jumps the moment
+the buyer adds theirs.
+
+### The cart is localStorage, and that is the right answer
+
+Anonymous auth is still switched off on the project. Re-probed on the day:
+
+```
+POST identitytoolkit accounts:signUp -> {"error":{"code":400,"message":"ADMIN_ONLY_OPERATION"}}
+```
+
+It would not have been the store anyway. Anonymous auth buys continuity across
+devices; it does not buy surviving a refresh, and localStorage does that for
+free, offline, at zero Firestore reads. The write path has a shrink ladder: on
+a quota failure the cart re-encodes its photos at 1400, then 1000, then 700px
+and retries, and only then tells the buyer, blaming the phone's storage and not
+them. The resolution gate always re-reads the pixels that are really there, so
+a shrunk photo cannot be reported as print ready.
+
+### Template to design carries the design with it
+
+`@view-transition { navigation: auto }` in `chrome.css` on both ends, and the
+tapped card's canvas takes `view-transition-name: product-preview` on the way
+out, which is also the name on the customizer's `#preview`. Browsers without
+cross document view transitions just navigate. Reduced motion cancels the
+animation on the pseudo elements.
+
+The URL is what says which design a customizer screen is showing. `?t=` applies
+a template, `?c=` reopens a cart item for editing, and both clear the autosave
+first, so a refresh lands on the same design instead of restoring whatever was
+saved for that product last.
+
+### 375px, where the fold nearly ate the catalogue
+
+First measurement put the top of the grid at **769px** on a 375x812 screen: a
+buyer would have scrolled past a whole screen of chrome before seeing one
+product. Four changes brought it to **647px**, with the first row of cards
+165px above the fold:
+
+- the page eyebrow went, the lede went from three lines to two
+- the two zone chips became one native select, which is also now the single
+  zone control on both the shop and the cart, `Delivery.zoneSelect`
+- `Show everything` only appears once a filter is actually set
+- the gap between filter rows dropped one step
+
+### Release checks added
+
+`check-release.mjs` section 5c validates `settings.json` and every template
+against the recipes: unknown product, unknown zone, unknown colour part, a hex
+outside a part's palette, text over the rule's `maxChars`, a font the zone does
+not allow, a text colour outside the zone palette, size or y outside what the
+controls offer, a template shipping a photo, and a template that would draw
+nothing. Negative tested with four deliberate breakages, all four caught.
+
+`checkRef` now strips fragments, so `index.html#how` is a page link and not a
+missing file.
+
+### Gate
+
+Template tap to finished design, scripted end to end and timed over three runs:
+
+```
+tap to interactive     74 / 71 / 75 ms
+photo placed          124 / 119 / 140 ms
+name typed, priced      1 /   0 /   1 ms
+total                 199 / 190 / 216 ms
+```
+
+That is machine time only, on this desktop over localhost. It leaves about
+29.8 of the 30 second budget for the human. The thumb on a real phone over a
+real network is the outstanding half of this gate.
+
+Route JS, gzipped: homepage 4.3KB, shop 20.3KB, cart 10.8KB, customizer 26KB.
+The storefront budget is 120KB.
+
+### Bugs found by verifying
+
+- The loading word lived inside `#resultsCount`, which `renderResults` rewrites.
+  Reaching for that span afterwards threw, and the catch hid the whole grid.
+- Cart thumbnails were `loading="lazy"` data URLs. Lazy saves no network on
+  something already in memory and only delays the paint.
+- Reduced motion froze the card sheen with `animation: none`, which leaves a
+  permanent white diagonal band on the tile. It now drops the pseudo element.
+- The delivery line sat after the price bar, which is the element carrying the
+  safe area inset, so on a notched phone it would have sat under the home
+  indicator. Moved above it.
+- Two mugs in a cart looked identical. The row now leads with the design's own
+  words and falls back to the price breakdown only when there are none.

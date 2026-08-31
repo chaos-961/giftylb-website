@@ -2,52 +2,6 @@
    The hero stage is a static render. P5 replaces its contents with the live
    customizer self assembly. Its box does not change, so nothing reflows later. */
 
-/* ---------- Header ---------- */
-
-.site-header {
-  position: sticky;
-  inset-block-start: 0;
-  z-index: 20;
-  background: rgb(255 255 255 / 0.86);
-  backdrop-filter: blur(10px);
-  border-block-end: 1px solid var(--line);
-}
-
-.site-header__inner {
-  display: flex;
-  align-items: center;
-  gap: var(--space-5);
-  min-block-size: 60px;
-}
-
-.wordmark {
-  display: inline-flex;
-  align-items: center;
-  min-block-size: 44px;   /* thumb target, not just the text box */
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--text-xl);
-  letter-spacing: -0.03em;
-  color: var(--ink);
-  text-decoration: none;
-  margin-inline-end: auto;
-}
-.wordmark span { color: var(--teal-deep); }
-
-.site-nav { display: none; gap: var(--space-5); }
-.site-nav a {
-  color: var(--ink-soft);
-  text-decoration: none;
-  font-size: var(--text-sm);
-  font-weight: 500;
-  transition: color var(--t-instant) var(--ease-out);
-}
-.site-nav a:hover { color: var(--ink); }
-
-@media (min-width: 46rem) {
-  .site-nav { display: flex; }
-}
-
 /* ---------- Hero ---------- */
 
 .hero { padding-block: var(--section-y) var(--space-9); }
@@ -214,25 +168,6 @@
 
 .zone h3 { font-size: var(--text-base); margin-block: var(--space-3) var(--space-1); }
 .zone p { font-size: var(--text-sm); color: var(--ink-soft); }
-
-/* ---------- Footer ---------- */
-
-.site-footer {
-  border-block-start: 1px solid var(--line);
-  padding-block: var(--space-7);
-  font-size: var(--text-sm);
-  color: var(--ink-soft);
-}
-
-.site-footer__inner {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3) var(--space-5);
-  align-items: baseline;
-  justify-content: space-between;
-}
-
-.site-footer a { color: var(--ink-soft); }
 
 /* ---------- 404 ---------- */
 

@@ -11,12 +11,13 @@
      together with the rest of the meta and OG work, when the domain is live. -->
 <meta name="robots" content="noindex">
 
-<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.2.2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.2.2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.2.3" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.2.3" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="css/tokens.css?v=0.2.2">
-<link rel="stylesheet" href="css/base.css?v=0.2.2">
-<link rel="stylesheet" href="css/home.css?v=0.2.2">
+<link rel="stylesheet" href="css/tokens.css?v=0.2.3">
+<link rel="stylesheet" href="css/base.css?v=0.2.3">
+<link rel="stylesheet" href="css/chrome.css?v=0.2.3">
+<link rel="stylesheet" href="css/home.css?v=0.2.3">
 <script>
 /* Decide the reveal path before anything paints. Only arm the observer path,
    and only when it will really run. Nothing is hidden otherwise. */
@@ -64,12 +65,19 @@ if(!ok&&!red&&'IntersectionObserver' in w)d.documentElement.classList.add('revea
 
 <header class="site-header">
   <div class="wrap site-header__inner">
-    <a class="wordmark" href="./">Gift<span>y</span></a>
+    <a class="wordmark" href="index.html">Gift<span>y</span></a>
     <nav class="site-nav" aria-label="Main">
-      <a href="#products">What we make</a>
-      <a href="#how">How it works</a>
-      <a href="#delivery">Delivery</a>
+      <a class="site-nav__primary" href="shop.html">Shop</a>
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#delivery">Delivery</a>
     </nav>
+    <a class="cart-link" href="cart.html" aria-label="Cart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M5 8h14l1 12H4z"/>
+        <path d="M9 8V6a3 3 0 0 1 6 0v2"/>
+      </svg>
+      <span class="cart-link__count" data-cart-count hidden>0</span>
+    </a>
   </div>
 </header>
 
@@ -85,7 +93,7 @@ if(!ok&&!red&&'IntersectionObserver' in w)d.documentElement.classList.add('revea
           Then we deliver it anywhere in Lebanon.
         </p>
         <div class="hero__actions">
-          <a class="btn btn--primary" href="#products">See what we make</a>
+          <a class="btn btn--primary" href="shop.html">See the designs</a>
           <a class="btn btn--quiet" href="#how">How it works</a>
         </div>
         <p class="hero__note">Try the customizer now. Ordering opens soon.</p>
@@ -150,6 +158,11 @@ if(!ok&&!red&&'IntersectionObserver' in w)d.documentElement.classList.add('revea
           </a>
         </li>
       </ul>
+
+      <p class="reveal footnote">
+        Those five start blank. <a href="shop.html">Browse the ready made designs</a> if you would
+        rather swap a photo and a name into one that is already laid out.
+      </p>
 
       <p class="reveal footnote">
         A gift box that holds two to four of these, with a ribbon and a printed card, comes after.
@@ -218,7 +231,8 @@ if(!ok&&!red&&'IntersectionObserver' in w)d.documentElement.classList.add('revea
   </div>
 </footer>
 
-<script defer src="js/firebase-config.js?v=0.2.2"></script>
-<script defer src="js/main.js?v=0.2.2"></script>
+<script defer src="js/firebase-config.js?v=0.2.3"></script>
+<script defer src="js/cart.js?v=0.2.3"></script>
+<script defer src="js/main.js?v=0.2.3"></script>
 </body>
 </html>

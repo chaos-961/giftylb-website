@@ -7,14 +7,15 @@
 <meta name="description" content="Put your photo and your name on it, and watch it change as you go.">
 <meta name="theme-color" content="#14B8A6">
 <meta name="robots" content="noindex">
-<meta name="version" content="0.2.2">
+<meta name="version" content="0.2.3">
 
-<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.2.2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.2.2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.2.3" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.2.3" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="css/tokens.css?v=0.2.2">
-<link rel="stylesheet" href="css/base.css?v=0.2.2">
-<link rel="stylesheet" href="css/customize.css?v=0.2.2">
+<link rel="stylesheet" href="css/tokens.css?v=0.2.3">
+<link rel="stylesheet" href="css/base.css?v=0.2.3">
+<link rel="stylesheet" href="css/chrome.css?v=0.2.3">
+<link rel="stylesheet" href="css/customize.css?v=0.2.3">
 </head>
 <body class="customizer">
 
@@ -28,6 +29,10 @@
   <button class="cz-icon" id="undoBtn" type="button" disabled aria-label="Undo the last change">
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h11a5 5 0 0 1 0 10h-4"/><path d="M8 5L4 9l4 4"/></svg>
   </button>
+  <a class="cz-icon cz-cart" href="cart.html" aria-label="Cart">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l1 12H4z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+    <span class="cart-link__count" data-cart-count hidden>0</span>
+  </a>
 </header>
 
 <main class="cz-main">
@@ -45,6 +50,11 @@
     </p>
 
     <p class="cz-chip cz-chip--warn" id="dpiChip" hidden></p>
+
+    <p class="cz-chip cz-chip--added" id="addedChip" hidden role="status">
+      <span id="addedText">In the cart.</span>
+      <a class="cz-linkbtn" href="cart.html">Go to the cart</a>
+    </p>
   </section>
 
   <section class="cz-dock" id="dock" aria-label="Controls">
@@ -119,25 +129,29 @@
 
     </div>
 
+    <p class="cz-deliver" id="deliverLine"></p>
+
     <div class="cz-pricebar">
       <div class="cz-price">
         <span class="cz-price__amount" id="priceAmount">$12</span>
         <button class="cz-linkbtn" type="button" id="priceBreakdownBtn" aria-expanded="false">What is in the price</button>
       </div>
-      <button class="btn btn--primary" type="button" id="addBtn" disabled>Ordering opens soon</button>
+      <button class="btn btn--primary" type="button" id="addBtn">Add to cart</button>
     </div>
     <ul class="cz-breakdown" id="priceBreakdown" role="list" hidden></ul>
 
   </section>
 </main>
 
-<script defer src="js/recipe.js?v=0.2.2"></script>
-<script defer src="js/engine/warp.js?v=0.2.2"></script>
-<script defer src="js/engine/design.js?v=0.2.2"></script>
-<script defer src="js/engine/render.js?v=0.2.2"></script>
-<script defer src="js/engine/state.js?v=0.2.2"></script>
-<script defer src="js/engine/photo.js?v=0.2.2"></script>
-<script defer src="js/engine/price.js?v=0.2.2"></script>
-<script defer src="js/customize.js?v=0.2.2"></script>
+<script defer src="js/recipe.js?v=0.2.3"></script>
+<script defer src="js/engine/warp.js?v=0.2.3"></script>
+<script defer src="js/engine/design.js?v=0.2.3"></script>
+<script defer src="js/engine/render.js?v=0.2.3"></script>
+<script defer src="js/engine/state.js?v=0.2.3"></script>
+<script defer src="js/engine/photo.js?v=0.2.3"></script>
+<script defer src="js/engine/price.js?v=0.2.3"></script>
+<script defer src="js/delivery.js?v=0.2.3"></script>
+<script defer src="js/cart.js?v=0.2.3"></script>
+<script defer src="js/customize.js?v=0.2.3"></script>
 </body>
 </html>
