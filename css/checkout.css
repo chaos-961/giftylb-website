@@ -296,3 +296,27 @@
   font-size: var(--text-base);
   text-transform: uppercase;
 }
+
+/* ---------- The proof arrives ----------
+
+   This is the moment the whole funnel is for: the buyer finds out whether the
+   thing looks right. So it settles rather than appearing, once, slowly, the way
+   something comes out of a wrapper.
+
+   The hidden state lives in the keyframes and nowhere else. Without the class
+   the drawing code adds, the proof is simply on screen. */
+
+.proof__art.is-arriving {
+  animation: proof-arrive var(--t-reveal) var(--ease-out) both;
+  animation-delay: var(--proof-delay, 0ms);
+}
+
+@keyframes proof-arrive {
+  from { opacity: 0; transform: scale(0.94); filter: blur(7px); }
+  70%  { opacity: 1; filter: blur(0); }
+  to   { opacity: 1; transform: none; filter: blur(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proof__art.is-arriving { animation: none; }
+}

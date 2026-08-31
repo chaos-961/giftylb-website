@@ -40,6 +40,7 @@ function totalsBlock(t) {
   return `
 <table style="width:100%;border-collapse:collapse;font-size:14px;margin-top:8px">
   <tr><td style="padding:2px 0">Things</td><td style="padding:2px 0;text-align:right">$${money(t.subtotal)}</td></tr>
+  ${t.discount ? `<tr><td style="padding:2px 0;color:#0F766E">Boxed together</td><td style="padding:2px 0;text-align:right;color:#0F766E">-$${money(t.discount)}</td></tr>` : ''}
   <tr><td style="padding:2px 0">Delivery</td><td style="padding:2px 0;text-align:right">$${money(t.delivery)}</td></tr>
   <tr><td style="padding:10px 0 0;border-top:1px solid #E3EAE8;font-weight:700">Total</td>
       <td style="padding:10px 0 0;border-top:1px solid #E3EAE8;text-align:right;font-weight:700">$${money(t.total)}</td></tr>

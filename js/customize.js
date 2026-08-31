@@ -623,7 +623,13 @@
         /* Draw straight away rather than through requestAnimationFrame. rAF does
            not fire in a hidden or background tab, so a customizer opened in a
            second tab would sit blank until it was looked at. */
+        el.preview.classList.add('is-first');
         G.Render.draw(el.preview, recipe, cache, images, store.get(), 1);
+        /* Two frames, so the hidden class is really in effect before the class
+           that reveals it lands, or the transition never runs at all. */
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { el.preview.classList.add('is-ready'); });
+        });
         /* And price it. Nothing has changed yet, so no change handler has run,
            and the markup's placeholder would otherwise stand as the price of
            every product on the site. */

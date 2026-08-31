@@ -87,3 +87,65 @@ export function money(n) {
   const v = Math.round(n * 100) / 100;
   return v % 1 === 0 ? String(v) : v.toFixed(2);
 }
+
+/* ---------------------------------------------------------------- the box
+
+   The gift box is a group, not a container: two to four items the buyer
+   designed, plus one gift-box line for the ribbon and the card, all sharing a
+   boxId. Every line still prices against its own product document, which is
+   what keeps the order rule able to bound it.
+
+   This is the module form of js/bundle.js. The two are held equal by
+   tools/test-parity.mjs. Never edit one without the other.
+*/
+
+export const BUNDLE_DEFAULTS = { productId: 'gift-box', minItems: 2, maxItems: 4, discountPercent: 10 };
+
+export function bundleConfig(settings) {
+  const s = (settings && settings.giftBox) || {};
+  return {
+    productId: s.productId || BUNDLE_DEFAULTS.productId,
+    minItems: s.minItems || BUNDLE_DEFAULTS.minItems,
+    maxItems: s.maxItems || BUNDLE_DEFAULTS.maxItems,
+    discountPercent: s.discountPercent == null ? BUNDLE_DEFAULTS.discountPercent : s.discountPercent
+  };
+}
+
+export function bundleGross(lines) {
+  let sum = 0;
+  for (const l of lines) sum += l.unitPrice * (l.qty || 1);
+  return Math.round(sum * 100) / 100;
+}
+
+export function bundleSaving(percent, lines) {
+  if (!percent || !lines.length) return 0;
+  return Math.round(bundleGross(lines) * percent) / 100;
+}
+
+export function bundleGroups(items, config) {
+  const byId = {};
+  const order = [];
+  for (const item of items) {
+    if (!item.boxId) continue;
+    if (!byId[item.boxId]) { byId[item.boxId] = { id: item.boxId, box: null, items: [] }; order.push(item.boxId); }
+    if (item.productId === config.productId) byId[item.boxId].box = item;
+    else byId[item.boxId].items.push(item);
+  }
+  return order.map((id) => byId[id]);
+}
+
+export function bundleComplete(group, config) {
+  return !!group.box &&
+    group.items.length >= config.minItems &&
+    group.items.length <= config.maxItems;
+}
+
+export function bundleDiscount(items, settings) {
+  const config = bundleConfig(settings);
+  let total = 0;
+  for (const group of bundleGroups(items, config)) {
+    if (!bundleComplete(group, config)) continue;
+    total += bundleSaving(config.discountPercent, group.items);
+  }
+  return Math.round(total * 100) / 100;
+}

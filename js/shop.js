@@ -261,10 +261,11 @@
     });
 
     /* The bar quotes the fastest thing in the shop, because that is the one the
-       sentence is true about. */
-    var quickest = Math.min.apply(null, Object.keys(recipes).map(function (id) {
-      return recipes[id].leadTimeDays;
-    }));
+       sentence is true about. Only what the shop actually offers counts: the
+       gift box is a recipe like any other but it is not sold on its own, and
+       letting it in here would promise a date for something nobody can buy. */
+    var quickest = Math.min.apply(null, (order.length ? order : Object.keys(recipes))
+      .map(function (id) { return recipes[id].leadTimeDays; }));
     var p = G.Delivery.promise(quickest, zoneId);
     $('promiseLine').textContent = G.Delivery.sentence(p);
   }
@@ -275,6 +276,49 @@
     box.appendChild(G.Delivery.zoneSelect('shopZone', G.Cart.zone(), function (id) {
       G.Cart.setZone(id).then(paintDates);
     }));
+  }
+
+  /* -------------------------------------------------- what a crawler reads
+
+     Emitted here rather than written into shop.html, because the price and the
+     description live in the database and a second copy in the markup would be a
+     second answer to what a mug costs. Whatever the shop is showing a buyer is
+     exactly what this says. */
+
+  function paintStructuredData() {
+    var origin = 'https://giftylb.com';
+    var items = order.map(function (id, i) {
+      var r = recipes[id];
+      return {
+        '@type': 'ListItem',
+        position: i + 1,
+        item: {
+          '@type': 'Product',
+          name: r.name,
+          description: r.blurb || '',
+          image: origin + '/' + r.views[0].baseImage,
+          url: origin + '/customize.html?p=' + encodeURIComponent(id),
+          brand: { '@type': 'Brand', name: 'Gifty' },
+          offers: {
+            '@type': 'Offer',
+            price: String(r.basePrice),
+            priceCurrency: r.currency || 'USD',
+            availability: 'https://schema.org/InStock',
+            url: origin + '/customize.html?p=' + encodeURIComponent(id)
+          }
+        }
+      };
+    });
+
+    var node = document.createElement('script');
+    node.type = 'application/ld+json';
+    node.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: 'What Gifty makes',
+      itemListElement: items
+    });
+    document.head.appendChild(node);
   }
 
   /* ------------------------------------------------------------------- boot */
@@ -314,6 +358,7 @@
 
         buildZoneSwitch();
         buildBlankRow();
+        paintStructuredData();
 
         /* Text on a card is drawn into a canvas, and a canvas does not restyle
            itself when a webfont arrives. So wait for the faces first, by name:

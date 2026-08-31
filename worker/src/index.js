@@ -13,7 +13,7 @@
  */
 
 import { Firestore, normalize } from './firestore.js';
-import { computePrice, money } from './price.js';
+import { computePrice, money, bundleConfig, bundleGroups, bundleComplete, bundleDiscount } from './price.js';
 import { promise as deliveryPromise } from './promise.js';
 import { buyerEmail, shopEmail, send } from './email.js';
 
@@ -204,9 +204,15 @@ async function handleOrder(request, env, ctx) {
     subtotal += priced.total * qty;
     slowest = Math.max(slowest, recipe.leadTimeDays || 1);
 
+    const boxId = raw.boxId == null ? null : String(raw.boxId);
+    if (boxId !== null && !/^[a-z0-9]{4,24}$/i.test(boxId)) {
+      return json({ error: 'box', message: SORRY }, 400);
+    }
+
     items.push({
       productId: recipe.id,
       productName: recipe.name,
+      boxId,
       config: raw.config || {},
       proofUrl: String(raw.proofUrl),
       printFileUrl: /^https:\/\//.test(String(raw.printFileUrl || '')) ? String(raw.printFileUrl) : '',
@@ -218,11 +224,30 @@ async function handleOrder(request, env, ctx) {
   }
 
   subtotal = Math.round(subtotal * 100) / 100;
+
+  /* ---- the gift box
+
+     A box is a group of lines sharing a boxId, one of which is the box product
+     itself. The saving is derived here from the settings document, never taken
+     from the browser, and a group that is not a real box earns nothing rather
+     than being quietly repaired. */
+
+  const boxCfg = bundleConfig(settings);
+  for (const group of bundleGroups(items, boxCfg)) {
+    if (!bundleComplete(group, boxCfg)) {
+      return json({
+        error: 'box_incomplete',
+        message: `A gift box holds ${boxCfg.minItems} to ${boxCfg.maxItems} things. Please open the cart and put that one together again.`
+      }, 400);
+    }
+  }
+  const discount = bundleDiscount(items, settings);
+
   const totals = {
     subtotal,
     delivery: zone.fee,
-    discount: 0,
-    total: Math.round((subtotal + zone.fee) * 100) / 100
+    discount,
+    total: Math.round((subtotal + zone.fee - discount) * 100) / 100
   };
 
   if (body.totals && Math.abs(Number(body.totals.total) - totals.total) > 0.005) {

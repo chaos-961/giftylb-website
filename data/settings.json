@@ -118,6 +118,12 @@
   ],
   "orderPrefix": "GFT",
   "maxCartItems": 6,
+  "giftBox": {
+    "productId": "gift-box",
+    "minItems": 2,
+    "maxItems": 4,
+    "discountPercent": 10
+  },
   "shopEmail": null,
   "whatsappNumber": null,
   "payments": [

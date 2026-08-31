@@ -121,3 +121,25 @@
   ::view-transition-old(*),
   ::view-transition-new(*) { animation: none !important; }
 }
+
+/* The morph itself, tuned rather than left at the browser default. The card
+   the buyer tapped is the same object as the canvas they land on, so it moves
+   at the page level duration and settles with the same easing as everything
+   else that moves on this site. Everything around it cross fades. */
+
+::view-transition-group(product-preview) {
+  animation-duration: var(--t-move);
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-old(product-preview),
+::view-transition-new(product-preview) {
+  animation-duration: var(--t-move);
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--t-quick);
+  animation-timing-function: var(--ease-out);
+}

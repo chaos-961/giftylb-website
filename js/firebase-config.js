@@ -30,3 +30,10 @@ window.GIFTY_API = 'https://api.giftylb.com';
    half configured site never silently drops an order on the floor. */
 window.GIFTY_CONFIG.turnstileSiteKey = '';
 
+
+/* Cloudflare Web Analytics. Cookieless and it stores nothing on the device, so
+   there is no consent banner on this site and there is not going to be one.
+   The token is public by design like everything else in this file. While it is
+   empty nothing at all is loaded, which is why a site without analytics makes
+   no third party request rather than a failing one. */
+window.GIFTY_CONFIG.analyticsToken = '';

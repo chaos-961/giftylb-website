@@ -399,3 +399,17 @@ input[type="range"] {
   color: var(--teal-deep);
   text-align: center;
 }
+
+/* The design arrives rather than popping. The canvas is blank for as long as
+   the recipe and its art take to load, and a hard swap from white to a
+   finished mug reads as a glitch. This is the tail of the shared element
+   transition from the shop, so it uses the same easing.
+
+   The hidden state belongs to the class the drawing code sets, never to a
+   static rule: if that code never runs, the canvas is simply visible. */
+#preview.is-first { opacity: 0; transform: scale(0.985); }
+#preview.is-ready {
+  opacity: 1;
+  transform: none;
+  transition: opacity var(--t-quick) var(--ease-out), transform var(--t-quick) var(--ease-out);
+}

@@ -9,6 +9,27 @@
   var year = document.getElementById('year');
   if (year) year.textContent = String(new Date().getFullYear());
 
+  /* ------------------------------------------------------------- analytics
+
+     Loaded last, after everything the page needs, and only when a token has
+     actually been set. It is cookieless and stores nothing on the device, so
+     there is no consent banner here. A site with no token makes no third party
+     request at all rather than one that fails. */
+
+  (function () {
+    var token = window.GIFTY_CONFIG && window.GIFTY_CONFIG.analyticsToken;
+    if (!token) return;
+    function beacon() {
+      var s = document.createElement('script');
+      s.defer = true;
+      s.src = 'https://static.cloudflareinsights.com/beacon.min.js';
+      s.setAttribute('data-cf-beacon', JSON.stringify({ token: token }));
+      document.head.appendChild(s);
+    }
+    if (document.readyState === 'complete') beacon();
+    else window.addEventListener('load', beacon);
+  })();
+
   /* Scroll reveal fallback.
      The preferred path is the CSS scroll driven animation in base.css, which
      runs off the main thread and holds 60fps on a cheap Android. Firefox still

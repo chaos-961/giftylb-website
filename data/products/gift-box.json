@@ -1,0 +1,51 @@
+{
+  "id": "gift-box",
+  "name": "Gift box",
+  "blurb": "Two to four of your things, boxed with a ribbon and a card in your own words.",
+  "method": "hand packed",
+  "basePrice": 8,
+  "currency": "USD",
+  "leadTimeDays": 1,
+
+  "views": [
+    { "id": "front", "label": "Front", "w": 900, "h": 700,
+      "baseImage": "assets/products/gift-box/base.svg" }
+  ],
+
+  "colorParts": [
+    { "id": "box", "name": "Box", "viewId": "front",
+      "maskUrl": "assets/products/gift-box/mask-box.svg", "default": "#FFFFFF",
+      "palette": [
+        { "hex": "#FFFFFF", "name": "White" },
+        { "hex": "#14201F", "name": "Black" },
+        { "hex": "#0F766E", "name": "Deep teal" },
+        { "hex": "#B91C1C", "name": "Red" },
+        { "hex": "#D9A066", "name": "Kraft" }
+      ] },
+    { "id": "ribbon", "name": "Ribbon", "viewId": "front",
+      "maskUrl": "assets/products/gift-box/mask-ribbon.svg", "default": "#0F766E",
+      "palette": [
+        { "hex": "#0F766E", "name": "Deep teal" },
+        { "hex": "#B91C1C", "name": "Red" },
+        { "hex": "#D97706", "name": "Gold" },
+        { "hex": "#14201F", "name": "Black" },
+        { "hex": "#FFFFFF", "name": "Ivory" }
+      ] }
+  ],
+
+  "printZones": [
+    { "id": "card", "name": "The card", "viewId": "front",
+      "rect": { "x": 480, "y": 381, "w": 230, "h": 178 },
+      "warp": { "type": "quad", "quad": [[480, 405], [694, 381], [710, 535], [496, 559]] },
+      "widthMm": 100, "heightMm": 78, "minDpi": 300, "bleedMm": 0,
+      "accepts": ["text"], "background": null }
+  ],
+
+  "textRules": [
+    { "zoneId": "card", "maxChars": 90, "maxLines": 3,
+      "allowedFonts": ["hand"], "defaultFont": "hand",
+      "engraved": false, "colorLocked": true, "defaultColor": "#14201F" }
+  ],
+
+  "pricing": []
+}

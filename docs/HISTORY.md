@@ -567,3 +567,105 @@ ok  the server identity cannot move an order at all
 
 `tools/test-order.mjs` 41 passed, 0 failed. `tools/test-parity.mjs` 16103
 agreed, 0 disagreed. `check-release.mjs` exits 0.
+
+---
+
+# v0.2.6, P5. Gift box, signature moments, launch
+
+## The gift box is a group, not a container
+
+The obvious build is a bundle product that holds other products inside it. It
+would have broken the order rule on the first order: every line has to price
+against its own product document, and a bundle line cannot be bounded against
+four different products at once.
+
+So a box is a **group**. Two to four things the buyer already made, plus one
+`gift-box` line carrying the ribbon and the card, all sharing a `boxId`. Nothing
+about how an item is priced, edited, proofed or ordered changes because it is in
+a box. The box itself is a sixth recipe drawn by the same engine, so it needed
+no renderer change either: two colour parts and one quad zone for the card.
+
+The saving is the only new number. It lives in `js/bundle.js` and, again as a
+module, in `worker/src/price.js`, and `tools/test-parity.mjs` runs both over
+twelve cart shapes including every way a group can be malformed. A group that is
+not a real box earns nothing in both files, which is what stops the cart
+promising a saving the Worker then refuses.
+
+The builder is a picker over the cart rather than a second customizer. The
+things are already made; what is left is which of them go in, what colour the
+ribbon is, and what the card says.
+
+## The rule could only ever accept a one line order
+
+The find of the phase, and it had been shipped since P4.
+
+Firestore caps a security rule at **1000 expression evaluations per request**.
+The P4 order rule repeated `request.resource.data.items[i]` a dozen times per
+line and called `get()` on the same product document three times inside one
+function. A one item order fit. **A two item order did not**, and going over the
+cap does not look like a bug: it comes back as a plain permission denied, which
+reads exactly like a tampered price.
+
+Nothing caught it because every order the P4 suite pushed through the Worker had
+one line in it, and the seven line case was refused on size before the per item
+checks ever ran.
+
+What fixed it, in order of how much each bought:
+
+- Every function takes what it checks as a **parameter** instead of reaching
+  back into `request.resource.data`.
+- The product document is read **once** per line and handed to the price check,
+  not fetched three times.
+- `hasOnly` against a nine string list, three length checked strings and a key
+  count each cost about one line out of six. They are gone from the hot path;
+  the money checks stayed.
+- `exists()` beside the `get()` is redundant. A `get()` on a missing document
+  returns null and reading a field off null denies the write anyway.
+- `items.size()` is worked out once and passed down instead of being called a
+  dozen times.
+
+A full cart of six now evaluates with room for three more clauses.
+`tools/probe-rule-cost.mjs` measures that and exits non-zero if it drops, and
+`tools/test-order.mjs` has a six line order in it as a permanent regression.
+
+A prototype that replaced the six product reads with one derived bounds document
+bought only five more clauses, which did not pay for a second copy of the price
+bounds that the admin would have to keep in step. It was dropped.
+
+## The hero assembles itself, and fails visible
+
+A blank mug, then the picture settles onto it and wraps, then the name types on.
+It is a live render by the same engine that draws the customizer, so the
+homepage cannot promise something the customizer does not make.
+
+It costs the homepage nothing: `js/hero.js` waits for load, then pulls the engine
+in on an idle callback. The static illustration in the markup is the real hero
+until two finished canvases exist to replace it.
+
+The first version put `opacity: 0` on the top layer and added a class in a
+`requestAnimationFrame` to reveal it. **A rAF does not fire in a hidden or
+background tab**, so a homepage opened in a second tab would have sat on a blank
+mug until it was looked at. The keyframes own the hidden state now and the layer
+is only added when it is going to animate.
+
+That rule is now mechanical: `check-release.mjs` section 8b refuses any static
+rule that sets `opacity: 0` or `visibility: hidden` unless it is inside a
+keyframe, inside a `prefers-reduced-motion: no-preference` block, or on a class a
+script adds. It caught the hero on the first run.
+
+## Launch
+
+- The share card is a real engine render of a mug, drawn at 1200x630 with the
+  real fonts, not an illustration of one. `tools/make-images.html` draws it and
+  the touch icon and posts them to the dev server, which writes the files.
+- `LocalBusiness` on the homepage carries no telephone and no street address,
+  because there is not a real one to give yet and an invented local listing is
+  worse than none.
+- `Product` structured data is emitted at runtime by `js/shop.js` from the
+  recipes it already loaded. Writing it into the markup would have put a second
+  price list in the repo, which is the thing `data/` was taken out of the deploy
+  to avoid.
+- Analytics is Cloudflare Web Analytics, cookieless, so there is no consent
+  banner and there is not going to be one. While the token is empty nothing at
+  all loads, so a site without analytics makes no third party request rather
+  than a failing one.

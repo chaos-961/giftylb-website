@@ -31,8 +31,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _site/css _site/js _site/js/engine _site/fonts _site/admin
+          mkdir -p _site/assets/hero
           mkdir -p _site/assets/products/mug _site/assets/products/cap
-          mkdir -p _site/assets/products/bottle _site/assets/products/tote _site/assets/products/photo-block
+          mkdir -p _site/assets/products/bottle _site/assets/products/tote
+          mkdir -p _site/assets/products/photo-block _site/assets/products/gift-box
 
           cp index.html _site/index.html
           cp 404.html _site/404.html
@@ -41,9 +43,14 @@ jobs:
           cp cart.html _site/cart.html
           cp checkout.html _site/checkout.html
           cp track.html _site/track.html
+          cp box.html _site/box.html
           cp admin/index.html _site/admin/index.html
           cp admin/payload.js _site/admin/payload.js
           cp .nojekyll _site/.nojekyll
+          cp robots.txt _site/robots.txt
+          cp sitemap.xml _site/sitemap.xml
+          cp favicon.svg _site/favicon.svg
+          cp apple-touch-icon.png _site/apple-touch-icon.png
 
           # CNAME is deliberately NOT copied yet. giftylb.com has no DNS records,
           # and shipping the file would set a custom domain that does not resolve,
@@ -59,9 +66,13 @@ jobs:
           cp css/shop.css _site/css/shop.css
           cp css/checkout.css _site/css/checkout.css
           cp css/customize.css _site/css/customize.css
+          cp css/box.css _site/css/box.css
 
           cp js/firebase-config.js _site/js/firebase-config.js
           cp js/main.js _site/js/main.js
+          cp js/hero.js _site/js/hero.js
+          cp js/bundle.js _site/js/bundle.js
+          cp js/box.js _site/js/box.js
           cp js/data.js _site/js/data.js
           cp js/recipe.js _site/js/recipe.js
           cp js/proof.js _site/js/proof.js
@@ -104,6 +115,13 @@ jobs:
 
           cp assets/products/photo-block/base.svg _site/assets/products/photo-block/base.svg
           cp assets/products/photo-block/mask-base.svg _site/assets/products/photo-block/mask-base.svg
+
+          cp assets/products/gift-box/base.svg _site/assets/products/gift-box/base.svg
+          cp assets/products/gift-box/mask-box.svg _site/assets/products/gift-box/mask-box.svg
+          cp assets/products/gift-box/mask-ribbon.svg _site/assets/products/gift-box/mask-ribbon.svg
+
+          cp assets/hero/photo.svg _site/assets/hero/photo.svg
+          cp assets/og.jpg _site/assets/og.jpg
 
           cp fonts/bricolage-grotesque-var-latin.woff2 _site/fonts/bricolage-grotesque-var-latin.woff2
           cp fonts/inter-var-latin.woff2 _site/fonts/inter-var-latin.woff2

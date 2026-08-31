@@ -143,6 +143,7 @@
       productId: item.productId,
       productName: item.productName,
       leadTimeDays: item.leadTimeDays,
+      boxId: item.boxId || null,
       qty: 1,
       unitPrice: item.unitPrice,
       lines: item.lines || [],
@@ -185,9 +186,89 @@
     return persist().then(function (ok) { announce(); return ok; });
   };
 
-  Cart.remove = function (id) {
+  /* Resolves { ok, unwrapped }. `unwrapped` names a box that came apart, so the
+     screen can say what happened rather than silently losing a ribbon. */
+  Cart.remove = function (id, settings) {
+    var going = Cart.find(id);
+    var cfg = G.Bundle.config(settings);
     data = state();
     data.items = data.items.filter(function (i) { return i.id !== id; });
+
+    var broke = null;
+    if (going && going.boxId) {
+      var group = G.Bundle.groups(data.items, cfg).filter(function (g) {
+        return g.id === going.boxId;
+      })[0];
+      /* A box that has lost too many of its things is no longer a box. Rather
+         than leave a ribbon and a card sitting on their own, take it apart and
+         keep everything else exactly where it was. */
+      if (going.productId === cfg.productId || !group || group.items.length < cfg.minItems) {
+        broke = going.boxId;
+        unwrapIn(broke, cfg);
+      }
+    }
+    return persist().then(function (ok) { announce(); return { ok: ok, unwrapped: broke }; });
+  };
+
+  /* ---------------------------------------------------------------- the box
+
+     A box is a group, not a container. The things stay ordinary cart items and
+     pick up a boxId, and one gift-box item carrying the ribbon and the card
+     joins them under the same id. Nothing about how an item is priced, edited
+     or ordered changes because it is in a box. */
+
+  function unwrapIn(boxId, cfg) {
+    data.items = data.items.filter(function (i) {
+      return !(i.boxId === boxId && i.productId === cfg.productId);
+    });
+    data.items.forEach(function (i) { if (i.boxId === boxId) i.boxId = null; });
+  }
+
+  Cart.boxes = function (settings) {
+    return G.Bundle.groups(state().items, G.Bundle.config(settings));
+  };
+
+  Cart.loose = function (settings) {
+    var cfg = G.Bundle.config(settings);
+    var whole = {};
+    G.Bundle.groups(state().items, cfg).forEach(function (g) {
+      if (G.Bundle.complete(g, cfg)) whole[g.id] = 1;
+    });
+    return state().items.filter(function (i) { return !i.boxId || !whole[i.boxId]; });
+  };
+
+  /* Anything not already wrapped, which is what the builder offers. */
+  Cart.wrappable = function () {
+    return state().items.filter(function (i) { return !i.boxId; });
+  };
+
+  Cart.discount = function (settings) {
+    return G.Bundle.discount(state().items, settings);
+  };
+
+  /* One write, so the cart is never briefly showing a box with nothing in it. */
+  Cart.wrap = function (memberIds, boxItem) {
+    var id = 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    var chosen = state().items.filter(function (i) {
+      return memberIds.indexOf(i.id) >= 0 && !i.boxId;
+    });
+    if (!chosen.length) return Promise.resolve(null);
+    chosen.forEach(function (i) { i.boxId = id; });
+    var wants = {};
+    Object.keys(boxItem).forEach(function (k) { wants[k] = boxItem[k]; });
+    wants.boxId = id;
+    return Cart.add(wants).then(function (entry) {
+      if (!entry) {
+        chosen.forEach(function (i) { i.boxId = null; });
+        return null;
+      }
+      return id;
+    });
+  };
+
+  Cart.unwrap = function (boxId, settings) {
+    data = state();
+    unwrapIn(boxId, G.Bundle.config(settings));
     return persist().then(function (ok) { announce(); return ok; });
   };
 

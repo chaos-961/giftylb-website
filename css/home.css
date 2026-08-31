@@ -206,3 +206,40 @@
   border-radius: var(--radius-md);
 }
 .tile__link h3 { color: var(--ink); }
+
+/* ---------- The hero assembles itself ----------
+   Two canvases stacked in the stage's own box, which already has its aspect
+   ratio, so swapping the illustration for them moves nothing on the page.
+   The blank mug is underneath and it is a finished picture on its own: if the
+   script stops after inserting these and before starting, the hero still reads
+   as a hero rather than as an empty box. */
+
+.stage__art {
+  position: absolute;
+  inset-block: 0;
+  inset-inline: 0;
+}
+
+.stage__layer {
+  position: absolute;
+  inset-block: 0;
+  inset-inline: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+
+/* The keyframes own the hidden state, and nothing else does. A static
+   opacity: 0 here would outlive its own animation: the frame that reveals it
+   is a rAF, and a rAF does not fire in a background tab, so the hero would sit
+   on a blank mug for as long as the tab stayed unlooked at. This way the layer
+   is only ever added when it is going to animate, and if it animates in zero
+   time it simply arrives. */
+.stage__layer--top { animation: hero-settle 620ms var(--ease-out) both; }
+
+@keyframes hero-settle {
+  from { opacity: 0; transform: scale(1.05); }
+  to   { opacity: 1; transform: none; }
+}
+
+.stage:has(.stage__art) svg { display: none; }

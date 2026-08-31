@@ -10,20 +10,61 @@
      it at giftylb.com would name a domain that does not resolve. Restored in P5
      together with the rest of the meta and OG work, when the domain is live. -->
 <meta name="robots" content="noindex">
+<link rel="icon" href="favicon.svg?v=0.2.6" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.2.6">
 
-<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.2.5" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.2.5" as="font" type="font/woff2" crossorigin>
+<!-- Share card. The picture is a real render by the product engine, not a
+     mock up of one, so what gets shared is what gets made. Absolute URLs
+     because a scraper does not resolve relative ones reliably. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gifty">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Gifty. Custom gifts you can see before you buy.">
+<meta property="og:description" content="Put your photo, a name, or your colors on a mug, cap, bottle, tote or photo block. See it before you buy it. Delivered anywhere in Lebanon.">
+<meta property="og:url" content="https://giftylb.com/">
+<meta property="og:image" content="https://giftylb.com/assets/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A white mug with a photo printed around it and the words For Mum underneath">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Gifty. Custom gifts you can see before you buy.">
+<meta name="twitter:description" content="Put your photo, a name, or your colors on a mug, cap, bottle, tote or photo block. See it before you buy it. Delivered anywhere in Lebanon.">
+<meta name="twitter:image" content="https://giftylb.com/assets/og.jpg">
 
-<link rel="stylesheet" href="css/tokens.css?v=0.2.5">
-<link rel="stylesheet" href="css/base.css?v=0.2.5">
-<link rel="stylesheet" href="css/chrome.css?v=0.2.5">
-<link rel="stylesheet" href="css/home.css?v=0.2.5">
+<meta name="version" content="0.2.6">
+
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.2.6" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.2.6" as="font" type="font/woff2" crossorigin>
+
+<link rel="stylesheet" href="css/tokens.css?v=0.2.6">
+<link rel="stylesheet" href="css/base.css?v=0.2.6">
+<link rel="stylesheet" href="css/chrome.css?v=0.2.6">
+<link rel="stylesheet" href="css/home.css?v=0.2.6">
 <script>
 /* Decide the reveal path before anything paints. Only arm the observer path,
    and only when it will really run. Nothing is hidden otherwise. */
 (function(w,d){var ok=w.CSS&&CSS.supports&&CSS.supports('animation-timeline','view()');
 var red=w.matchMedia&&w.matchMedia('(prefers-reduced-motion: reduce)').matches;
 if(!ok&&!red&&'IntersectionObserver' in w)d.documentElement.classList.add('reveal-js');})(window,document);
+</script>
+
+<!-- Who this is, for a search engine. Nothing in here is invented: there is no
+     telephone and no street address until there is a real one to give, because
+     a made up local listing is worse than no listing. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Gifty",
+  "url": "https://giftylb.com",
+  "image": "https://giftylb.com/assets/og.jpg",
+  "logo": "https://giftylb.com/apple-touch-icon.png",
+  "description": "Custom gifts you design yourself and see before you buy. Mugs, caps, bottles, tote bags and photo blocks, printed and delivered in Lebanon.",
+  "address": { "@type": "PostalAddress", "addressLocality": "Beirut", "addressCountry": "LB" },
+  "areaServed": { "@type": "Country", "name": "Lebanon" },
+  "currenciesAccepted": "USD",
+  "paymentAccepted": "Cash on delivery, Whish Money, OMT"
+}
 </script>
 </head>
 <body>
@@ -165,7 +206,8 @@ if(!ok&&!red&&'IntersectionObserver' in w)d.documentElement.classList.add('revea
       </p>
 
       <p class="reveal footnote">
-        A gift box that holds two to four of these, with a ribbon and a printed card, comes after.
+        Made more than one? <a href="box.html">Put them in one gift box</a> with a ribbon and a
+        card in your handwriting, and pay less than you would for them separately.
       </p>
     </div>
   </section>
@@ -231,8 +273,10 @@ if(!ok&&!red&&'IntersectionObserver' in w)d.documentElement.classList.add('revea
   </div>
 </footer>
 
-<script defer src="js/firebase-config.js?v=0.2.5"></script>
-<script defer src="js/cart.js?v=0.2.5"></script>
-<script defer src="js/main.js?v=0.2.5"></script>
+<script defer src="js/firebase-config.js?v=0.2.6"></script>
+<script defer src="js/bundle.js?v=0.2.6"></script>
+<script defer src="js/cart.js?v=0.2.6"></script>
+<script defer src="js/main.js?v=0.2.6"></script>
+<script defer src="js/hero.js?v=0.2.6"></script>
 </body>
 </html>

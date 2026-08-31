@@ -50,12 +50,15 @@
     var list = $('proofs');
     list.textContent = '';
 
-    items.forEach(function (it) {
+    items.forEach(function (it, i) {
       var li = document.createElement('li');
       li.className = 'proof';
 
       var art = document.createElement('div');
-      art.className = 'proof__art';
+      art.className = 'proof__art is-arriving';
+      /* One after another rather than all at once, so a cart of three reads as
+         three things being unwrapped and not as one flicker. */
+      art.style.setProperty('--proof-delay', (i * 110) + 'ms');
       var canvas = document.createElement('canvas');
       var view = it.recipe.views[0];
       canvas.width = 720;
@@ -102,6 +105,7 @@
     var zoneId = G.Cart.zone() || settings.defaultZone;
     var zone = G.Delivery.zone(zoneId);
     var subtotal = G.Cart.subtotal();
+    var saving = G.Cart.discount(settings);
     var money = function (n) { return G.Price.format(n, settings.currency); };
 
     var list = $('sideItems');
@@ -117,11 +121,19 @@
     });
 
     $('sumItems').textContent = money(subtotal);
+    $('sumSaving').textContent = '-' + money(saving);
+    $('sumSavingRow').hidden = saving <= 0;
     $('sumDelivery').textContent = money(zone.fee);
-    $('sumTotal').textContent = money(subtotal + zone.fee);
+    $('sumTotal').textContent = money(orderTotal(zone));
     $('zoneHint').textContent = zone.area + '. Delivery ' + money(zone.fee) + '.';
     $('sumPromise').textContent =
       G.Delivery.sentence(G.Delivery.promise(G.Cart.leadTimeDays(), zoneId));
+  }
+
+  /* The one figure the whole screen agrees on, so the panel, the button and
+     the request can never quote three different numbers. */
+  function orderTotal(zone) {
+    return Math.round((G.Cart.subtotal() + zone.fee - G.Cart.discount(settings)) * 100) / 100;
   }
 
   /* ------------------------------------------------------------------ form */
@@ -232,6 +244,7 @@
             .then(function (urls) {
               return {
                 productId: it.cart.productId,
+                boxId: it.cart.boxId || null,
                 qty: it.cart.qty,
                 unitPrice: it.cart.unitPrice,
                 config: forWire(it.state, photoUrls),
@@ -256,7 +269,7 @@
             payment: { method: payment.id, reference: v.reference || null },
             notes: v.notes || null,
             items: wireItems,
-            totals: { total: Math.round((G.Cart.subtotal() + zone.fee) * 100) / 100 }
+            totals: { total: orderTotal(zone) }
           })
         });
       })

@@ -1,0 +1,13 @@
+# Gifty. The shop and the homepage are for everyone. The cart, the checkout,
+# the order tracker and the admin belong to one person each and there is
+# nothing in them worth a search result.
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /cart.html
+Disallow: /checkout.html
+Disallow: /track.html
+Disallow: /box.html
+
+Sitemap: https://giftylb.com/sitemap.xml

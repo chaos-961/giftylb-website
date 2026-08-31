@@ -7,15 +7,36 @@
 <meta name="description" content="Put your photo and your name on it, and watch it change as you go.">
 <meta name="theme-color" content="#14B8A6">
 <meta name="robots" content="noindex">
-<meta name="version" content="0.2.5">
+<link rel="icon" href="favicon.svg?v=0.2.6" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.2.6">
 
-<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.2.5" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.2.5" as="font" type="font/woff2" crossorigin>
+<!-- Share card. The picture is a real render by the product engine, not a
+     mock up of one, so what gets shared is what gets made. Absolute URLs
+     because a scraper does not resolve relative ones reliably. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gifty">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Make it yours. Gifty">
+<meta property="og:description" content="Put your photo and your name on it, and watch it change as you go.">
+<meta property="og:url" content="https://giftylb.com/customize.html">
+<meta property="og:image" content="https://giftylb.com/assets/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A white mug with a photo printed around it and the words For Mum underneath">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Make it yours. Gifty">
+<meta name="twitter:description" content="Put your photo and your name on it, and watch it change as you go.">
+<meta name="twitter:image" content="https://giftylb.com/assets/og.jpg">
 
-<link rel="stylesheet" href="css/tokens.css?v=0.2.5">
-<link rel="stylesheet" href="css/base.css?v=0.2.5">
-<link rel="stylesheet" href="css/chrome.css?v=0.2.5">
-<link rel="stylesheet" href="css/customize.css?v=0.2.5">
+<meta name="version" content="0.2.6">
+
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.2.6" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.2.6" as="font" type="font/woff2" crossorigin>
+
+<link rel="stylesheet" href="css/tokens.css?v=0.2.6">
+<link rel="stylesheet" href="css/base.css?v=0.2.6">
+<link rel="stylesheet" href="css/chrome.css?v=0.2.6">
+<link rel="stylesheet" href="css/customize.css?v=0.2.6">
 </head>
 <body class="customizer">
 
@@ -143,17 +164,18 @@
   </section>
 </main>
 
-<script defer src="js/firebase-config.js?v=0.2.5"></script>
-<script defer src="js/data.js?v=0.2.5"></script>
-<script defer src="js/recipe.js?v=0.2.5"></script>
-<script defer src="js/engine/warp.js?v=0.2.5"></script>
-<script defer src="js/engine/design.js?v=0.2.5"></script>
-<script defer src="js/engine/render.js?v=0.2.5"></script>
-<script defer src="js/engine/state.js?v=0.2.5"></script>
-<script defer src="js/engine/photo.js?v=0.2.5"></script>
-<script defer src="js/engine/price.js?v=0.2.5"></script>
-<script defer src="js/delivery.js?v=0.2.5"></script>
-<script defer src="js/cart.js?v=0.2.5"></script>
-<script defer src="js/customize.js?v=0.2.5"></script>
+<script defer src="js/firebase-config.js?v=0.2.6"></script>
+<script defer src="js/data.js?v=0.2.6"></script>
+<script defer src="js/recipe.js?v=0.2.6"></script>
+<script defer src="js/engine/warp.js?v=0.2.6"></script>
+<script defer src="js/engine/design.js?v=0.2.6"></script>
+<script defer src="js/engine/render.js?v=0.2.6"></script>
+<script defer src="js/engine/state.js?v=0.2.6"></script>
+<script defer src="js/engine/photo.js?v=0.2.6"></script>
+<script defer src="js/engine/price.js?v=0.2.6"></script>
+<script defer src="js/delivery.js?v=0.2.6"></script>
+<script defer src="js/bundle.js?v=0.2.6"></script>
+<script defer src="js/cart.js?v=0.2.6"></script>
+<script defer src="js/customize.js?v=0.2.6"></script>
 </body>
 </html>

@@ -14,7 +14,8 @@
 
   /* --------------------------------------------------------------- one item */
 
-  function itemRow(item) {
+  function itemRow(item, opts) {
+    opts = opts || {};
     var li = document.createElement('li');
     li.className = 'cart-item';
 
@@ -84,9 +85,17 @@
     remove.type = 'button';
     remove.className = 'linkbtn linkbtn--danger';
     remove.textContent = 'Remove';
-    remove.addEventListener('click', function () { G.Cart.remove(item.id).then(paint); });
+    remove.addEventListener('click', function () {
+      G.Cart.remove(item.id, settings).then(function (out) {
+        notice(out.unwrapped
+          ? 'That box needed at least ' + G.Bundle.config(settings).minItems +
+            ' things in it, so we took it apart. Everything else is still here.'
+          : '');
+        paint();
+      });
+    });
 
-    actions.appendChild(qty);
+    if (!opts.noQty) actions.appendChild(qty);
     actions.appendChild(edit);
     actions.appendChild(remove);
 
@@ -99,18 +108,84 @@
     return li;
   }
 
+  /* -------------------------------------------------------------- the box
+
+     A box is drawn as what it is: the ribbon and the card at the top, the
+     things it holds indented under it, and the saving stated in figures rather
+     than promised in words. */
+
+  function boxBlock(group) {
+    var cfg = G.Bundle.config(settings);
+    var li = document.createElement('li');
+    li.className = 'cart-box';
+
+    var head = document.createElement('div');
+    head.className = 'cart-box__head';
+    head.appendChild(itemRow(group.box, { noQty: true }));
+
+    var inner = document.createElement('ul');
+    inner.className = 'cart-box__items';
+    inner.setAttribute('role', 'list');
+    group.items.forEach(function (item) { inner.appendChild(itemRow(item)); });
+
+    var foot = document.createElement('p');
+    foot.className = 'cart-box__saving';
+    foot.textContent = 'Boxed together, you save ' +
+      money(G.Bundle.saving(cfg.discountPercent, group.items)) + '.';
+
+    var actions = document.createElement('div');
+    actions.className = 'cart-box__actions';
+    var undo = document.createElement('button');
+    undo.type = 'button';
+    undo.className = 'linkbtn';
+    undo.textContent = 'Take it out of the box';
+    undo.addEventListener('click', function () {
+      G.Cart.unwrap(group.id, settings).then(function () {
+        notice('Unwrapped. Everything is still in the cart on its own.');
+        paint();
+      });
+    });
+    actions.appendChild(undo);
+
+    li.appendChild(head);
+    li.appendChild(inner);
+    li.appendChild(foot);
+    li.appendChild(actions);
+    return li;
+  }
+
+  function notice(text) {
+    var box = $('cartNotice');
+    box.hidden = !text;
+    box.textContent = text || '';
+  }
+
+  function paintBoxCta() {
+    var cfg = G.Bundle.config(settings);
+    var free = G.Cart.wrappable().length;
+    var cta = $('cartBoxCta');
+    cta.hidden = free < cfg.minItems;
+    if (cta.hidden) return;
+    $('boxCtaSub').textContent =
+      'Wrap ' + cfg.minItems + ' to ' + cfg.maxItems + ' of them with a ribbon and a card, and take ' +
+      cfg.discountPercent + '% off what is inside.';
+  }
+
   /* ----------------------------------------------------------------- totals */
 
   function paintSide() {
     var zoneId = G.Cart.zone() || settings.defaultZone;
     var zone = G.Delivery.zone(zoneId);
     var subtotal = G.Cart.subtotal();
+    var saving = G.Cart.discount(settings);
 
     $('zoneArea').textContent = zone.area + '.';
 
     $('totalItems').textContent = money(subtotal);
+    $('totalSaving').textContent = '-' + money(saving);
+    $('totalSavingRow').hidden = saving <= 0;
     $('totalDelivery').textContent = money(zone.fee);
-    $('totalGrand').textContent = money(subtotal + zone.fee);
+    $('totalGrand').textContent = money(Math.round((subtotal + zone.fee - saving) * 100) / 100);
 
     var promise = G.Delivery.promise(G.Cart.leadTimeDays(), zoneId);
     $('cartPromise').textContent = G.Delivery.sentence(promise);
@@ -135,9 +210,24 @@
       : items.length + ' things in the cart';
     if (!items.length) return;
 
+    var cfg = G.Bundle.config(settings);
     var list = $('cartList');
     list.textContent = '';
-    items.forEach(function (item) { list.appendChild(itemRow(item)); });
+
+    var boxed = {};
+    G.Cart.boxes(settings).forEach(function (group) {
+      if (!G.Bundle.complete(group, cfg)) return;
+      list.appendChild(boxBlock(group));
+      boxed[group.box.id] = 1;
+      group.items.forEach(function (i) { boxed[i.id] = 1; });
+    });
+
+    items.forEach(function (item) {
+      if (boxed[item.id]) return;
+      list.appendChild(itemRow(item));
+    });
+
+    paintBoxCta();
     paintSide();
   }
 
