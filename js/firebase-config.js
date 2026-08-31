@@ -9,13 +9,17 @@
    homepage pays nothing for it. */
 
 window.GIFTY_CONFIG = {
-  apiKey: 'REPLACE_ME_API_KEY',
-  authDomain: 'REPLACE_ME.firebaseapp.com',
-  projectId: 'REPLACE_ME',
-  storageBucket: 'REPLACE_ME.firebasestorage.app',
-  messagingSenderId: 'REPLACE_ME_SENDER_ID',
-  appId: 'REPLACE_ME_APP_ID'
+  apiKey: 'AIzaSyDgiZPH8bepbib5k3AmfS8YX8jY_RZRTos',
+  authDomain: 'giftylb.firebaseapp.com',
+  projectId: 'giftylb',
+  storageBucket: 'giftylb.firebasestorage.app',
+  messagingSenderId: '1069350194171',
+  appId: '1:1069350194171:web:cb488db6aae5d2bc18595e'
 };
+
+/* storageBucket is present because the console hands it over, but nothing uses
+   it. Cloud Storage left the Spark plan on 2026-02-03, which is the whole
+   reason customer uploads go to an image host through a worker instead. */
 
 /* Endpoint for the one worker that handles uploads, orders and order lookup.
    Wired up in P4. */
