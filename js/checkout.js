@@ -304,10 +304,17 @@
         /* A refused write is almost always the price bound in the rules, which
            means the catalogue moved while they were designing. Everything else
            is the system's fault and says so. */
-        var denied = /PERMISSION_DENIED|permission/i.test((err && err.message) || '');
+        var msg = (err && err.message) || '';
+        /* Three different failures, three different things to say. A refused
+           write is almost always the price bound, which means the catalogue
+           moved while they were designing. A sign in that never happened is
+           ours and says so plainly rather than blaming their cart. Everything
+           else is the system's fault too. */
+        var noIdentity = /sign in/i.test(msg);
+        var denied = !noIdentity && /PERMISSION_DENIED|permission/i.test(msg);
         fail(denied
           ? 'Something on this order no longer matches our prices. Please open the cart, check it over and try again.'
-          : 'We could not save your order just now. Nothing has been charged. Please try again in a moment.');
+          : 'We could not save your order just now. Nothing has been charged and your design is still here. Please try again in a moment.');
         if (window.console) console.error(err);
       });
   }

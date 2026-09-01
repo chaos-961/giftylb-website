@@ -219,9 +219,23 @@
      works, and that asymmetry is what lets a tracking link carry no login
      without handing anyone the whole order book. A 404 here is a wrong number,
      which is a real answer and not an error. */
+  /* Reading one order takes an identity now. The tracking page still needs no
+     login and no password: js/order.js mints an anonymous account for the page
+     and this borrows it, which the buyer never sees. What it costs somebody
+     walking the number space is that they have to keep minting accounts in
+     front of Firebase Auth, rather than curling a URL in a loop.
+
+     No identity available means a local emulator, which does not check tokens
+     anyway, so the read goes ahead without one. */
   Data.orderByNumber = function (number) {
     var path = 'orders/' + encodeURIComponent(String(number).trim().toUpperCase());
-    return fetch(url(path), { cache: 'no-store' }).then(function (res) {
+    var who = (G.Auth && G.Auth.anon) ? G.Auth.anon().catch(function () { return null; })
+                                      : Promise.resolve(null);
+    return who.then(function (got) {
+      var init = { cache: 'no-store' };
+      if (got && got.token) init.headers = { Authorization: 'Bearer ' + got.token };
+      return fetch(url(path), init);
+    }).then(function (res) {
       if (res.status === 404 || res.status === 403) return null;
       if (!res.ok) throw new Error(path + ' returned ' + res.status);
       return res.json().then(Data.decodeDoc);

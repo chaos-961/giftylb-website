@@ -24,6 +24,20 @@
  * rules bound every line against the live product document, and the cart
  * priced it with the same js/price.js the customizer drew with. There is no
  * second implementation to drift from any more.
+ *
+ * EVERY WRITE CARRIES AN IDENTITY as of v0.3.4. The checkout mints an anonymous
+ * Firebase account for itself, uses it once and throws it away. The buyer never
+ * sees it, there is no password and no account to manage, and it is the whole
+ * of the bot story: a plain curl loop cannot write an order any more, every
+ * attempt goes through Firebase Auth's own abuse detection, and the rules make
+ * one identity worth exactly one order.
+ *
+ * THE ORDER IS SPLIT IN THREE, and the split is a privacy decision, not a
+ * storage one. orders/{n} is what a tracking link may show. The name, the
+ * phone, the email, the address, the note and the payment reference go into
+ * orders/{n}/private/details, which only the shop can read. The proof goes into
+ * assets, which the buyer can see; the print file and the buyer's own
+ * photograph go into print, which they cannot. Nothing reassembles the two.
  */
 (function (G) {
   'use strict';
@@ -50,6 +64,60 @@
   function commitUrl() {
     return G.Data.base.replace(/\/documents$/, '/documents:commit') +
            (key ? '?key=' + encodeURIComponent(key) : '');
+  }
+
+  /* ------------------------------------------------------------------- who
+
+     An anonymous Firebase account, minted on the spot. No password, no email,
+     no account for the buyer to manage or lose, and nothing kept after the
+     page closes.
+
+     It exists so that a write costs an identity. Every order write and every
+     order read now needs one, which is what took the site from "an
+     unauthenticated POST in a loop drains the daily quota" to "an attacker has
+     to keep minting accounts in front of Google's abuse detection".
+
+     The token is cached for the page, because a tracking page reads the order
+     and then its pictures and one identity does for both. `fresh` skips the
+     cache, and the checkout asks for a fresh one, so an order and its throttle
+     document always agree about who placed it.
+
+     GIFTY_AUTH_BASE points this at the Auth emulator when the dev server is
+     running in emulator mode, exactly the way GIFTY_FIRESTORE_BASE points the
+     reads at the Firestore one. The repo has no idea either exists. */
+
+  var Auth = G.Auth = {};
+  var pending = null;
+
+  Auth.anon = function (fresh) {
+    if (pending && !fresh) return pending;
+    var base = window.GIFTY_AUTH_BASE || 'https://identitytoolkit.googleapis.com/v1';
+    var p = fetch(base + '/accounts:signUp' +
+                  (key ? '?key=' + encodeURIComponent(key) : ''), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ returnSecureToken: true })
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (body) {
+        if (!body || !body.idToken) {
+          var m = (body && body.error && body.error.message) || 'no token';
+          throw new Error('anonymous sign in failed: ' + m);
+        }
+        return { token: body.idToken, uid: body.localId };
+      });
+    if (!pending || fresh) pending = p;
+    return p;
+  };
+
+  /* Everything that talks to the database from this file goes through here, so
+     there is one place that knows an identity is required and one place that
+     would have to be changed if that ever stopped being true. */
+  function withAuth(who, init) {
+    init = init || {};
+    init.headers = Object.assign({}, init.headers || {});
+    if (who && who.token) init.headers.Authorization = 'Bearer ' + who.token;
+    return init;
   }
 
   /* ---------------------------------------------------------------- encoding
@@ -121,17 +189,21 @@
   /* --------------------------------------------------------------- the write */
 
   function orderNumber(prefix) {
-    /* Five digits. The tracking link needs no login by design, so the number is
-       the only thing standing between a stranger and someone else's order. */
-    return prefix + '-' + (10000 + Math.floor(Math.random() * 90000));
+    /* SIX digits, not five, as of v0.3.4. The tracking link needs no login by
+       design, so the number is the only thing standing between a stranger and
+       someone else's order page. Five digits is ninety thousand, which a script
+       walks in an afternoon. Six is nine hundred thousand, it is still short
+       enough to read down a phone, and it is now guarding a document that
+       carries no name, no phone and no address. */
+    return prefix + '-' + (100000 + Math.floor(Math.random() * 900000));
   }
 
-  function commit(writes) {
-    return fetch(commitUrl(), {
+  function commit(writes, who) {
+    return fetch(commitUrl(), withAuth(who, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ writes: writes })
-    }).then(function (res) {
+    })).then(function (res) {
       return res.json().catch(function () { return {}; }).then(function (out) {
         if (!res.ok) {
           var err = new Error((out.error && out.error.message) || ('commit returned ' + res.status));
@@ -156,20 +228,101 @@
                                         request.time, which the rule insists on,
                                         because the browser cannot know the
                                         server's clock before it writes */
-  function createOrder(number, data) {
-    return commit([{
-      update: { name: docPath('orders/' + number), fields: fieldsOf(data) },
-      updateMask: { fieldPaths: Object.keys(data) },
-      updateTransforms: [{ fieldPath: 'createdAt', setToServerValue: 'REQUEST_TIME' }],
-      currentDocument: { exists: false }
-    }]);
+  /* What a tracking link may show, and what only the shop may. One object in,
+     two documents out, and this function is the only place that knows which
+     field goes where. Getting it wrong is a privacy bug, so it is written once,
+     here, rather than at the four call sites that assemble an order. */
+  function split(order) {
+    return {
+      open: {
+        orderNumber: order.orderNumber,
+        status: order.status,
+        uid: order.uid,
+        delivery: {
+          zone: order.delivery.zone,
+          zoneName: order.delivery.zoneName,
+          promisedDate: order.delivery.promisedDate,
+          fee: order.delivery.fee
+        },
+        items: order.items,
+        totals: order.totals,
+        statusHistory: order.statusHistory
+      },
+      shut: {
+        buyer: order.buyer,
+        address: order.delivery.address,
+        payment: order.payment,
+        notes: order.notes == null ? null : order.notes
+      }
+    };
   }
 
-  function writeChunks(number, assets) {
+  Order.split = split;
+
+  /* One atomic commit: the order, who and where, and the throttle document that
+     spends this identity.
+
+       currentDocument.exists = false   makes a duplicate order number a 409
+                                        instead of quietly overwriting somebody
+       updateTransforms REQUEST_TIME    is the only way createdAt can equal
+                                        request.time, which the rule insists on,
+                                        because the browser cannot know the
+                                        server's clock before it writes
+
+     All three together on purpose. An order that lands without its address is
+     an order the shop cannot deliver, and a throttle document that lands
+     without its order would lock a buyer out of the checkout they just failed
+     to complete. Either all of it or none of it. */
+  function createOrder(number, order, who) {
+    var parts = split(order);
+    var writes = [
+      {
+        update: { name: docPath('orders/' + number), fields: fieldsOf(parts.open) },
+        updateMask: { fieldPaths: Object.keys(parts.open) },
+        updateTransforms: [{ fieldPath: 'createdAt', setToServerValue: 'REQUEST_TIME' }],
+        currentDocument: { exists: false }
+      },
+      {
+        update: {
+          name: docPath('orders/' + number + '/private/details'),
+          fields: fieldsOf(parts.shut)
+        },
+        updateMask: { fieldPaths: Object.keys(parts.shut) },
+        currentDocument: { exists: false }
+      }
+    ];
+
+    /* No identity means the emulator, where there is no sign in endpoint to
+       call. Skip the throttle rather than write one keyed on nothing. */
+    if (who && who.uid) {
+      writes.push({
+        update: {
+          name: docPath('throttle/' + who.uid),
+          fields: fieldsOf({ order: number })
+        },
+        updateMask: { fieldPaths: ['order'] },
+        updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }],
+        currentDocument: { exists: false }
+      });
+    }
+
+    return commit(writes, who);
+  }
+
+  /* The proof goes where the buyer can see it and everything else goes where
+     only the shop can. The id says which: a proof is "0-proof-2", a print file
+     is "0-print-0", a photograph is "0-wrap-photo-0". The rule on the public
+     collection refuses anything that is not a proof, so a mistake here is
+     refused rather than quietly leaking somebody's photograph. */
+  function collectionFor(id) {
+    return /-proof-[0-9]+$/.test(id) ? 'assets' : 'print';
+  }
+
+  function writeChunks(number, assets, who) {
     var writes = assets.map(function (a) {
       return {
         update: {
-          name: docPath('orders/' + number + '/assets/' + a.id),
+          name: docPath('orders/' + number + '/' + collectionFor(a.id) + '/' + a.id),
           fields: fieldsOf({ i: a.i, data: a.data })
         },
         updateMask: { fieldPaths: ['i', 'data'] },
@@ -180,7 +333,7 @@
     var run = Promise.resolve();
     for (var at = 0; at < writes.length; at += CHUNKS_PER_COMMIT) {
       (function (slice) {
-        run = run.then(function () { return commit(slice); });
+        run = run.then(function () { return commit(slice, who); });
       })(writes.slice(at, at + CHUNKS_PER_COMMIT));
     }
     return run;
@@ -202,11 +355,12 @@
 
     var number = null;
     var attempt = 0;
+    var who = null;
 
     function tryOnce() {
       number = orderNumber(prefix || 'GFT');
       order.orderNumber = number;
-      return createOrder(number, order).catch(function (err) {
+      return createOrder(number, order, who).catch(function (err) {
         /* A collision on the number is the only thing worth another go. A
            refusal is a refusal and retrying it five more times helps nobody. */
         var clash = err.status === 409 || /ALREADY_EXISTS|already exists/i.test(err.message || '');
@@ -215,23 +369,42 @@
       });
     }
 
-    return tryOnce()
+    /* A fresh identity, not the page's cached one, so this order's throttle
+       document is spent on this order and nothing else.
+
+       No catch. A write with no identity is refused by the rules, and a buyer
+       told "something no longer matches our prices" when the real answer is
+       that sign in is switched off would be the v0.3.0 mistake again in a new
+       place. Let it throw, so the checkout says the system is at fault, which
+       it is. */
+    return G.Auth.anon(true)
+      .then(function (got) {
+        who = got;
+        order.uid = (got && got.uid) || null;
+        return tryOnce();
+      })
       .then(function () {
         /* The order has landed. From here the buyer is on the list even if an
            image never finishes, which is why this failure is reported rather
            than thrown. */
-        return writeChunks(number, assets)
+        return writeChunks(number, assets, who)
           .then(function () { return { orderNumber: number, assetsComplete: true }; })
           .catch(function () { return { orderNumber: number, assetsComplete: false }; });
       });
   };
 
-  /* Read an order's images back and reassemble them. Used by the tracking page
-     and by the admin, both of which want the picture, not the chunks. */
+  /* Read an order's PROOFS back and reassemble them, for the tracking page.
+     Only proofs live in this collection; the print file and the buyer's own
+     photograph are next door in print, where the rules let nobody but the shop
+     look. The admin has its own reader that fetches both. */
   Order.assets = function (number) {
     var url = G.Data.base + '/orders/' + encodeURIComponent(number) + '/assets' +
               (key ? '?key=' + encodeURIComponent(key) : '');
-    return fetch(url, { cache: 'no-store' })
+    return G.Auth.anon()
+      .catch(function () { return null; })
+      .then(function (who) {
+        return fetch(url, withAuth(who, { cache: 'no-store' }));
+      })
       .then(function (res) {
         if (!res.ok) throw new Error('assets returned ' + res.status);
         return res.json();

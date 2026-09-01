@@ -1206,3 +1206,109 @@ own work, and nothing on the site claims otherwise.
   from 188 down to 76 before the exposure pass.
 - The share card is **69856 bytes** and is a render of the real object with a
   real photograph on it.
+
+---
+
+## v0.3.4. The two launch blockers are closed
+
+They were written at the top of `firestore.rules` since v0.3.2 and they were the
+only two things standing between this and taking real money from strangers.
+
+### Bot protection: an order costs an identity
+
+There was none. Turnstile went with the Worker and an unauthenticated POST in a
+loop could drain the daily write quota, which takes ordering down and catalogue
+reads with it.
+
+Every write to an order, in every collection under it, now needs a Firebase
+identity. The checkout mints an **anonymous account** for itself at the moment
+of ordering, uses it once and throws it away: no password, no email, nothing for
+the buyer to manage or lose, and they never see it happen.
+
+That is not a wall and the rules say so out loud rather than pretending. What it
+actually buys:
+
+- a plain curl loop no longer works at all,
+- every attempt passes through Firebase Auth, so Google's own per project and
+  per address quotas and abuse detection are in front of it rather than nothing,
+- **one identity is worth exactly one order.** `throttle/{uid}` is written in
+  the same atomic commit as the order, and the order rule refuses to write when
+  it already exists. A stolen or replayed token buys one order and no more,
+- every order carries the uid that placed it, so abuse is visible in the admin.
+
+The throttle needed one thing to be true and it is worth writing down: **`exists()`
+inside a commit reads the state BEFORE the commit.** That is why the order and
+the document that spends its identity can be written together.
+
+A real buyer never meets the throttle, because the checkout mints a fresh
+identity every time. Proven in a browser: two orders placed one after another
+from one page, two different uids, one order each.
+
+### Privacy: the order document is split in three
+
+A `get` used to return the whole document, phone and address included, to
+anyone who guessed a five digit number.
+
+    orders/{n}                  what a tracking link may show. Status, dates,
+                                product names, quantities, money, the zone.
+    orders/{n}/private/details  who and where. Written once by the buyer, read
+                                only by the shop, never updatable.
+    orders/{n}/assets/{part}    the proof, and ONLY the proof. The id pattern is
+                                enforced in the rule, so nothing else can be
+                                smuggled into the collection a stranger can read.
+    orders/{n}/print/{part}     the print file and the buyer's own photograph at
+                                full size. Shop only, both ways.
+
+Reads take an identity too now, so walking the number space costs an account per
+attempt rather than a curl. `list` stays shop only. And the order number went
+from five digits to **six**, which takes the space from 90,000 to 900,000.
+
+What a guessed number still shows: that an order exists, what was on it, what it
+cost, and the proof image. That is the tracking page's whole job and it cannot
+be hidden from somebody holding the number.
+
+### What it cost elsewhere
+
+- **`js/order.js`** owns the split, in one function, because getting it wrong is
+  a privacy bug and it should be wrong in one place or none. It commits the
+  order, the private details and the throttle as ONE atomic write: an order that
+  lands without its address is an order the shop cannot deliver.
+- **The admin** joins the private documents back on with a single collection
+  group query, so three hundred orders is one extra request rather than three
+  hundred. Everything downstream still reads `order.buyer.name` the way it did.
+  Nothing writes them back: the status change is a PATCH with an explicit field
+  mask naming `status` and `statusHistory`, and that was checked rather than
+  assumed.
+- **The emulator grew an Auth emulator**, and `tools/devserver.py` injects
+  `GIFTY_AUTH_BASE` beside the Firestore override, so the whole path including
+  sign in can be exercised locally without touching the live project.
+- **A sign in that never happened no longer reads as a price problem.** The
+  checkout had one message for a refused write, and a refusal caused by auth
+  being switched off would have said "something no longer matches our prices",
+  which is the v0.3.0 mistake wearing a different hat.
+
+### Proven, with pasted output
+
+- **`test-order.mjs`: 49 passed, 0 failed**, up from 27, against the emulator
+  and the real rules. Including: an order with no identity is refused, one
+  identity is worth one order, an identity cannot spend somebody else's
+  throttle, an order cannot claim to have been placed by another identity, a
+  shopper cannot read who and where, a shopper cannot read the print file or the
+  photograph, nothing but a proof can be written into the public collection, and
+  a shopper cannot gather the private details.
+- **The expression budget still holds: the rule evaluates a full six line
+  cart.** Splitting the buyer out took `buyerOk`, `paymentOk` and the address
+  check off the order rule, and that is what paid for the throttle lookup.
+- **Two real browser orders against the emulator**, `GFT-402133` and
+  `GFT-490655`, six digits, two identities, one order each. The public documents
+  carry `createdAt, delivery, items, orderNumber, status, statusHistory, totals,
+  uid` and nothing else, and `delivery` carries `fee, promisedDate, zone,
+  zoneName` and no address.
+- **Unauthenticated, everything is 403**: the order, its proof, its private
+  details, its print file, the throttle and the orders collection.
+- **The tracking page** shows `GFT-402133` with its status timeline and its
+  proof reassembled, and a scan of the rendered page for the buyer's name, phone,
+  address and note found none of them.
+- **The admin** lists eleven orders with buyer names joined from one collection
+  group query, and opening one shows the address, the note and both images. After
+  moving that order to `confirmed` the public document still carried no PII.
