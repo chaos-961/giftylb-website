@@ -833,3 +833,27 @@ customizer keeps working, verified by calling `WEBGL_lose_context` mid session.
 - The shared element name moved from `#preview` to `.cz-canvas-wrap`. There are
   two canvases in that box now and only one is on screen at a time, and a view
   transition whose target is `display: none` does not run at all.
+
+## v0.2.9. A stale empty cache beat the bundle
+
+v0.2.8 went out and the live customizer still said "We could not open the
+customizer just now", with `Data.usingBundle` reporting true. The bundle had
+loaded and the recipe still could not be found.
+
+Builds before the fallback existed cached whatever the database returned,
+including an empty collection against an unseeded database. `Data.collection`
+then had this in its catch:
+
+    if (cached) return cached.data;
+    return bundleCollection(name)...
+
+A seven hour old `{at: ..., data: []}` is truthy, so it was served in preference
+to a bundle that was sitting right there, and `Data.doc` correctly reported that
+there is no products/mug. It would have hit every returning visitor who had
+opened any earlier version, and nobody else, which is the worst shape a bug can
+have: invisible in a fresh browser.
+
+An empty list is never an answer now, whether it arrived from the database a
+moment ago or from the cache seven hours ago. The poisoned entries age out on
+their own rather than needing a migration. Reproduced by writing exactly what
+v0.2.7 left behind into localStorage and confirming the screen recovers.

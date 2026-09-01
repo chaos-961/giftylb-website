@@ -95,6 +95,16 @@
     catch (e) { /* a full store must never stop the shop rendering */ }
   }
 
+  /* An empty list is never an answer, whether it came from the database a
+     moment ago or from this cache seven hours ago. Builds before the fallback
+     existed happily cached an empty collection against an unseeded database,
+     and honouring those is how a returning visitor got a blank shop out of a
+     bundle that was sitting right there. Ignoring them lets the poisoned entry
+     age out on its own rather than needing a migration. */
+  function usable(cached) {
+    return !!(cached && Array.isArray(cached.data) && cached.data.length);
+  }
+
   Data.clearCache = function () {
     memory = {};
     try {
@@ -204,7 +214,7 @@
      products is one round trip, not five. */
   Data.collection = function (name) {
     var cached = readCache(name);
-    if (cached && Date.now() - cached.at < TTL) return Promise.resolve(cached.data);
+    if (usable(cached) && Date.now() - cached.at < TTL) return Promise.resolve(cached.data);
 
     return get(name)
       .then(function (body) {
@@ -218,7 +228,7 @@
       .catch(function (err) {
         /* Serving the last known catalogue beats serving nothing. The buyer is
            never charged from it: the order is priced again server side. */
-        if (cached) return cached.data;
+        if (usable(cached)) return cached.data;
         return bundleCollection(name).then(function (docs) {
           if (docs && docs.length) return docs;
           throw err;
@@ -253,7 +263,7 @@
 
     var name = path.replace(/\//g, '.');
     var cached = readCache(name);
-    if (cached && Date.now() - cached.at < TTL) return Promise.resolve(cached.data);
+    if (cached && cached.data && Date.now() - cached.at < TTL) return Promise.resolve(cached.data);
 
     return get(path)
       .then(function (body) {
@@ -262,7 +272,7 @@
         return doc;
       })
       .catch(function (err) {
-        if (cached) return cached.data;
+        if (cached && cached.data) return cached.data;
         return bundleDoc(path).then(function (doc) {
           if (doc) return doc;
           throw err;
