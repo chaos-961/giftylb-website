@@ -80,6 +80,16 @@
     var future = [];
     var saveTimer = null;
 
+    /* The design as of the last finished action, which is NOT the same thing as
+       the design right now. A drag or a keystroke goes through `touch`, which
+       mutates `current` and draws without touching the undo stack; the commit
+       that follows then has to push the state from BEFORE all of that. Taking a
+       fresh snapshot inside commit pushes the state the buyer is already
+       looking at, and undo becomes a button that does nothing, which is what it
+       did for typing, every slider and every photo drag. Only discrete changes
+       like a colour swatch ever worked. */
+    var baseline = State.snapshot(initial);
+
     function persist() {
       clearTimeout(saveTimer);
       saveTimer = setTimeout(function () {
@@ -101,13 +111,15 @@
         onChange(current, { transient: true });
       },
 
-      /* A finished action. Goes on the undo stack and gets saved. */
+      /* A finished action. Goes on the undo stack and gets saved. What goes on
+         the stack is the baseline, so one gesture is one undo entry however
+         many transient frames it took to make. */
       commit: function (mutate) {
-        var before = State.snapshot(current);
         mutate(current);
-        past.push(before);
+        past.push(baseline);
         if (past.length > LIMIT) past.shift();
         future.length = 0;
+        baseline = State.snapshot(current);
         onChange(current, { transient: false });
         persist();
       },
@@ -118,9 +130,10 @@
       undo: function () {
         if (!past.length) return Promise.resolve(false);
         var snap = past.pop();
-        future.push(State.snapshot(current));
+        future.push(baseline);
         return State.hydrate(snap).then(function (s) {
           current = s;
+          baseline = State.snapshot(s);
           onChange(current, { transient: false });
           persist();
           return true;
@@ -130,9 +143,10 @@
       redo: function () {
         if (!future.length) return Promise.resolve(false);
         var snap = future.pop();
-        past.push(State.snapshot(current));
+        past.push(baseline);
         return State.hydrate(snap).then(function (s) {
           current = s;
+          baseline = State.snapshot(s);
           onChange(current, { transient: false });
           persist();
           return true;
@@ -141,6 +155,7 @@
 
       replace: function (state) {
         current = state;
+        baseline = State.snapshot(state);
         past.length = 0;
         future.length = 0;
         onChange(current, { transient: false });

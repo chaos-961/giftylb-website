@@ -7,8 +7,8 @@
 <meta name="description" content="Put your photo and your name on it, and watch it change as you go.">
 <meta name="theme-color" content="#14B8A6">
 <meta name="robots" content="noindex">
-<link rel="icon" href="favicon.svg?v=0.2.7" type="image/svg+xml">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.2.7">
+<link rel="icon" href="favicon.svg?v=0.2.8" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.2.8">
 
 <!-- Share card. The picture is a real render by the product engine, not a
      mock up of one, so what gets shared is what gets made. Absolute URLs
@@ -28,15 +28,15 @@
 <meta name="twitter:description" content="Put your photo and your name on it, and watch it change as you go.">
 <meta name="twitter:image" content="https://giftylb.com/assets/og.jpg">
 
-<meta name="version" content="0.2.7">
+<meta name="version" content="0.2.8">
 
-<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.2.7" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.2.7" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.2.8" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.2.8" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="css/tokens.css?v=0.2.7">
-<link rel="stylesheet" href="css/base.css?v=0.2.7">
-<link rel="stylesheet" href="css/chrome.css?v=0.2.7">
-<link rel="stylesheet" href="css/customize.css?v=0.2.7">
+<link rel="stylesheet" href="css/tokens.css?v=0.2.8">
+<link rel="stylesheet" href="css/base.css?v=0.2.8">
+<link rel="stylesheet" href="css/chrome.css?v=0.2.8">
+<link rel="stylesheet" href="css/customize.css?v=0.2.8">
 </head>
 <body class="customizer">
 
@@ -60,9 +60,20 @@
 
   <section class="cz-stage" aria-label="Preview">
     <div class="cz-canvas-wrap">
+      <!-- Two previews, one design. The 3D one is the real object and is what
+           opens; the flat one is the same render the proof and the print file
+           come from, and it is where a photo is dragged into place. Neither is
+           a picture of the other: both are drawn from the same state. -->
+      <canvas id="preview3d" class="cz-3d" tabindex="0" role="img" hidden
+              aria-label="Your design on the real shape. Drag it, or use the arrow keys, to turn it."></canvas>
       <canvas id="preview" width="900" height="700" role="img"
               aria-label="Live preview of your design"></canvas>
       <p class="cz-loading" id="loading">Getting the mug ready</p>
+
+      <div class="cz-view" id="viewToggle" role="group" aria-label="How to see it" hidden>
+        <button type="button" class="cz-viewbtn" id="viewTurn" aria-pressed="true">Turn it</button>
+        <button type="button" class="cz-viewbtn" id="viewFlat" aria-pressed="false">Flat</button>
+      </div>
     </div>
 
     <p class="cz-chip cz-chip--restored" id="restoredChip" hidden>
@@ -164,18 +175,20 @@
   </section>
 </main>
 
-<script defer src="js/firebase-config.js?v=0.2.7"></script>
-<script defer src="js/data.js?v=0.2.7"></script>
-<script defer src="js/recipe.js?v=0.2.7"></script>
-<script defer src="js/engine/warp.js?v=0.2.7"></script>
-<script defer src="js/engine/design.js?v=0.2.7"></script>
-<script defer src="js/engine/render.js?v=0.2.7"></script>
-<script defer src="js/engine/state.js?v=0.2.7"></script>
-<script defer src="js/engine/photo.js?v=0.2.7"></script>
-<script defer src="js/engine/price.js?v=0.2.7"></script>
-<script defer src="js/delivery.js?v=0.2.7"></script>
-<script defer src="js/bundle.js?v=0.2.7"></script>
-<script defer src="js/cart.js?v=0.2.7"></script>
-<script defer src="js/customize.js?v=0.2.7"></script>
+<script defer src="js/firebase-config.js?v=0.2.8"></script>
+<script defer src="js/data.js?v=0.2.8"></script>
+<script defer src="js/recipe.js?v=0.2.8"></script>
+<script defer src="js/engine/warp.js?v=0.2.8"></script>
+<script defer src="js/engine/mesh.js?v=0.2.8"></script>
+<script defer src="js/engine/design.js?v=0.2.8"></script>
+<script defer src="js/engine/render.js?v=0.2.8"></script>
+<script defer src="js/engine/scene.js?v=0.2.8"></script>
+<script defer src="js/engine/state.js?v=0.2.8"></script>
+<script defer src="js/engine/photo.js?v=0.2.8"></script>
+<script defer src="js/engine/price.js?v=0.2.8"></script>
+<script defer src="js/delivery.js?v=0.2.8"></script>
+<script defer src="js/bundle.js?v=0.2.8"></script>
+<script defer src="js/cart.js?v=0.2.8"></script>
+<script defer src="js/customize.js?v=0.2.8"></script>
 </body>
 </html>

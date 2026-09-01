@@ -15,6 +15,11 @@
 
   var settings = null, cfg = null;
   var recipe = null, images = null, cache = null;
+
+  /* The box is drawn in three dimensions where the device can, and flat where
+     it cannot. Same engine and same recipe as the customizer, so the box the
+     buyer turns here is the box that arrives. */
+  var scene = null;
   var state = null;
   var rule = null, zone = null;
   var candidates = [];
@@ -30,11 +35,28 @@
 
   /* ------------------------------------------------------------- rendering */
 
+  function paint() {
+    if (scene && !scene.lost()) {
+      try { scene.update(state); return; }
+      catch (e) { dropScene(e); }
+    }
+    G.Render.draw($('boxPreview'), recipe, cache, images, state, 1);
+  }
+
+  /* A driver that gives up mid session falls back to the flat preview rather
+     than leaving the buyer looking at nothing. */
+  function dropScene(err) {
+    if (window.console && err) console.warn('3D box preview stopped:', err.message || err);
+    scene = null;
+    $('boxPreview').hidden = false;
+    $('boxPreview3d').hidden = true;
+  }
+
   function schedule() {
     if (frame) return;
     frame = requestAnimationFrame(function () {
       frame = null;
-      G.Render.draw($('boxPreview'), recipe, cache, images, state, 1);
+      paint();
     });
   }
 
@@ -214,7 +236,20 @@
     var c = document.createElement('canvas');
     c.width = 420;
     c.height = Math.round(420 * view.h / view.w);
-    c.getContext('2d').drawImage($('boxPreview'), 0, 0, c.width, c.height);
+    var ctx = c.getContext('2d');
+    /* JPEG carries no alpha, so without a ground the thumbnail comes back on
+       black. */
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, c.width, c.height);
+
+    var src = (scene && !scene.lost()) ? $('boxPreview3d') : $('boxPreview');
+    if (src === $('boxPreview')) {
+      ctx.drawImage(src, 0, 0, c.width, c.height);
+    } else if (src.width && src.height) {
+      var k = Math.min(c.width / src.width, c.height / src.height);
+      var w = src.width * k, h = src.height * k;
+      ctx.drawImage(src, (c.width - w) / 2, (c.height - h) / 2, w, h);
+    }
     try { return c.toDataURL('image/jpeg', 0.82); } catch (e) { return null; }
   }
 
@@ -297,10 +332,33 @@
             $('boxAdd').addEventListener('click', addBox);
             $('boxLayout').hidden = false;
 
+            if (recipe.model && G.Scene && G.Scene.supported()) {
+              try { scene = G.Scene.create($('boxPreview3d'), recipe); }
+              catch (e) {
+                scene = null;
+                if (window.console) console.warn('3D box preview unavailable:', e.message);
+              }
+            }
+            $('boxPreview3d').hidden = !scene;
+            $('boxPreview').hidden = !!scene;
+            if (scene) {
+              scene.onLost = function () { dropScene(); };
+              if (window.ResizeObserver) {
+                new ResizeObserver(function () {
+                  if (scene && !scene.lost()) {
+                    try { scene.resize(); } catch (e) { dropScene(e); }
+                  }
+                }).observe($('boxStage'));
+              }
+            }
+
             /* Straight away rather than through requestAnimationFrame, which
                does not fire in a background tab and would leave the box blank
                until the tab was looked at. */
-            G.Render.draw($('boxPreview'), recipe, cache, images, state, 1);
+            paint();
+            if (scene) {
+              try { scene.reveal(); } catch (e) { dropScene(e); }
+            }
           });
       })
       .catch(function (err) {

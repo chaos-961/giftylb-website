@@ -1,0 +1,2530 @@
+{
+  "products": [
+    {
+      "id": "bottle",
+      "name": "Bottle",
+      "blurb": "Body, lid and band in the colors you pick. Name laser engraved into the coat.",
+      "method": "powder coat and laser engrave",
+      "basePrice": 22,
+      "currency": "USD",
+      "leadTimeDays": 3,
+      "views": [
+        {
+          "id": "front",
+          "label": "Front",
+          "w": 900,
+          "h": 700,
+          "baseImage": "assets/products/bottle/base.svg"
+        }
+      ],
+      "colorParts": [
+        {
+          "id": "body",
+          "name": "Body",
+          "viewId": "front",
+          "maskUrl": "assets/products/bottle/mask-body.svg",
+          "default": "#14201F",
+          "palette": [
+            {
+              "hex": "#14201F",
+              "name": "Black"
+            },
+            {
+              "hex": "#FFFFFF",
+              "name": "White"
+            },
+            {
+              "hex": "#0F766E",
+              "name": "Deep teal"
+            },
+            {
+              "hex": "#1E3A8A",
+              "name": "Navy"
+            },
+            {
+              "hex": "#B91C1C",
+              "name": "Red"
+            },
+            {
+              "hex": "#DB2777",
+              "name": "Pink"
+            },
+            {
+              "hex": "#D97706",
+              "name": "Amber"
+            }
+          ]
+        },
+        {
+          "id": "lid",
+          "name": "Lid",
+          "viewId": "front",
+          "maskUrl": "assets/products/bottle/mask-lid.svg",
+          "default": "#14201F",
+          "palette": [
+            {
+              "hex": "#14201F",
+              "name": "Black"
+            },
+            {
+              "hex": "#FFFFFF",
+              "name": "White"
+            },
+            {
+              "hex": "#0F766E",
+              "name": "Deep teal"
+            },
+            {
+              "hex": "#D97706",
+              "name": "Amber"
+            }
+          ]
+        },
+        {
+          "id": "band",
+          "name": "Band",
+          "viewId": "front",
+          "maskUrl": "assets/products/bottle/mask-band.svg",
+          "default": "#14201F",
+          "palette": [
+            {
+              "hex": "#14201F",
+              "name": "Black"
+            },
+            {
+              "hex": "#FFFFFF",
+              "name": "White"
+            },
+            {
+              "hex": "#0F766E",
+              "name": "Deep teal"
+            },
+            {
+              "hex": "#B91C1C",
+              "name": "Red"
+            },
+            {
+              "hex": "#D97706",
+              "name": "Amber"
+            }
+          ]
+        }
+      ],
+      "printZones": [
+        {
+          "id": "engrave",
+          "name": "Engraving",
+          "viewId": "front",
+          "rect": {
+            "x": 360,
+            "y": 250,
+            "w": 182,
+            "h": 150
+          },
+          "warp": {
+            "type": "cylinder",
+            "wrapDeg": 210,
+            "bowPx": 0
+          },
+          "widthMm": 70,
+          "heightMm": 58,
+          "minDpi": 300,
+          "bleedMm": 0,
+          "accepts": [
+            "text"
+          ],
+          "background": null
+        }
+      ],
+      "textRules": [
+        {
+          "zoneId": "engrave",
+          "maxChars": 16,
+          "maxLines": 2,
+          "allowedFonts": [
+            "display",
+            "ui",
+            "hand"
+          ],
+          "defaultFont": "ui",
+          "engraved": true,
+          "colorLocked": true,
+          "defaultColor": "#FFFFFF"
+        }
+      ],
+      "pricing": [
+        {
+          "id": "textline",
+          "label": "Engraved line",
+          "amount": 3,
+          "when": {
+            "perTextLine": "engrave"
+          }
+        },
+        {
+          "id": "lid",
+          "label": "Contrast lid",
+          "amount": 2,
+          "when": {
+            "partNotDefault": "lid"
+          }
+        },
+        {
+          "id": "band",
+          "label": "Contrast band",
+          "amount": 2,
+          "when": {
+            "partNotDefault": "band"
+          }
+        }
+      ],
+      "model": {
+        "camera": {
+          "fov": 28,
+          "yawDeg": -20,
+          "pitchDeg": 8,
+          "dist": 1
+        },
+        "shadow": 0.24,
+        "parts": [
+          {
+            "kind": "lathe",
+            "colorPart": "body",
+            "gloss": 0.46,
+            "shine": 58,
+            "metal": 0.55,
+            "segments": 112,
+            "printSpan": [
+              3,
+              4
+            ],
+            "prints": [
+              {
+                "zoneId": "engrave",
+                "rect": [
+                  0.3403,
+                  0.14,
+                  0.3194,
+                  0.34
+                ]
+              }
+            ],
+            "profile": [
+              [
+                0,
+                -1
+              ],
+              [
+                0.2,
+                -1
+              ],
+              [
+                0.252,
+                -0.986
+              ],
+              [
+                0.27,
+                -0.96
+              ],
+              [
+                0.27,
+                0.36
+              ],
+              [
+                0.268,
+                0.5
+              ],
+              [
+                0.245,
+                0.62
+              ],
+              [
+                0.205,
+                0.72
+              ],
+              [
+                0.172,
+                0.79
+              ],
+              [
+                0.168,
+                0.83
+              ]
+            ]
+          },
+          {
+            "kind": "lathe",
+            "colorPart": "lid",
+            "gloss": 0.34,
+            "shine": 34,
+            "segments": 72,
+            "profile": [
+              [
+                0.166,
+                0.8
+              ],
+              [
+                0.198,
+                0.836
+              ],
+              [
+                0.198,
+                0.968
+              ],
+              [
+                0.178,
+                0.998
+              ],
+              [
+                0.1,
+                1.008
+              ],
+              [
+                0,
+                1.01
+              ]
+            ]
+          },
+          {
+            "kind": "lathe",
+            "colorPart": "band",
+            "gloss": 0.12,
+            "shine": 14,
+            "segments": 72,
+            "profile": [
+              [
+                0.268,
+                -0.646
+              ],
+              [
+                0.284,
+                -0.64
+              ],
+              [
+                0.292,
+                -0.62
+              ],
+              [
+                0.292,
+                -0.376
+              ],
+              [
+                0.284,
+                -0.356
+              ],
+              [
+                0.268,
+                -0.35
+              ],
+              [
+                0.268,
+                -0.646
+              ]
+            ]
+          }
+        ]
+      },
+      "maxExtras": 10
+    },
+    {
+      "id": "cap",
+      "name": "Cap",
+      "blurb": "Choose the color of every panel, then a name embroidered on the front.",
+      "method": "embroidery",
+      "basePrice": 16,
+      "currency": "USD",
+      "leadTimeDays": 3,
+      "views": [
+        {
+          "id": "front",
+          "label": "Front",
+          "w": 900,
+          "h": 700,
+          "baseImage": "assets/products/cap/base.svg"
+        }
+      ],
+      "colorParts": [
+        {
+          "id": "crown",
+          "name": "Crown",
+          "viewId": "front",
+          "maskUrl": "assets/products/cap/mask-crown.svg",
+          "default": "#14201F",
+          "palette": [
+            {
+              "hex": "#14201F",
+              "name": "Black"
+            },
+            {
+              "hex": "#FFFFFF",
+              "name": "White"
+            },
+            {
+              "hex": "#0F766E",
+              "name": "Deep teal"
+            },
+            {
+              "hex": "#1E3A8A",
+              "name": "Navy"
+            },
+            {
+              "hex": "#B91C1C",
+              "name": "Red"
+            },
+            {
+              "hex": "#D97706",
+              "name": "Amber"
+            }
+          ]
+        },
+        {
+          "id": "panels",
+          "name": "Front panels",
+          "viewId": "front",
+          "maskUrl": "assets/products/cap/mask-panels.svg",
+          "default": "#14201F",
+          "palette": [
+            {
+              "hex": "#14201F",
+              "name": "Black"
+            },
+            {
+              "hex": "#FFFFFF",
+              "name": "White"
+            },
+            {
+              "hex": "#0F766E",
+              "name": "Deep teal"
+            },
+            {
+              "hex": "#1E3A8A",
+              "name": "Navy"
+            },
+            {
+              "hex": "#B91C1C",
+              "name": "Red"
+            }
+          ]
+        },
+        {
+          "id": "brim",
+          "name": "Brim",
+          "viewId": "front",
+          "maskUrl": "assets/products/cap/mask-brim.svg",
+          "default": "#14201F",
+          "palette": [
+            {
+              "hex": "#14201F",
+              "name": "Black"
+            },
+            {
+              "hex": "#FFFFFF",
+              "name": "White"
+            },
+            {
+              "hex": "#0F766E",
+              "name": "Deep teal"
+            },
+            {
+              "hex": "#1E3A8A",
+              "name": "Navy"
+            },
+            {
+              "hex": "#B91C1C",
+              "name": "Red"
+            },
+            {
+              "hex": "#D97706",
+              "name": "Amber"
+            }
+          ]
+        },
+        {
+          "id": "button",
+          "name": "Top button",
+          "viewId": "front",
+          "maskUrl": "assets/products/cap/mask-button.svg",
+          "default": "#14201F",
+          "palette": [
+            {
+              "hex": "#14201F",
+              "name": "Black"
+            },
+            {
+              "hex": "#FFFFFF",
+              "name": "White"
+            },
+            {
+              "hex": "#0F766E",
+              "name": "Deep teal"
+            },
+            {
+              "hex": "#B91C1C",
+              "name": "Red"
+            }
+          ]
+        }
+      ],
+      "printZones": [
+        {
+          "id": "front-panel",
+          "name": "Front panel",
+          "viewId": "front",
+          "rect": {
+            "x": 366,
+            "y": 268,
+            "w": 190,
+            "h": 150
+          },
+          "warp": {
+            "type": "quad",
+            "quad": [
+              [
+                372,
+                286
+              ],
+              [
+                552,
+                286
+              ],
+              [
+                548,
+                424
+              ],
+              [
+                376,
+                424
+              ]
+            ]
+          },
+          "widthMm": 90,
+          "heightMm": 55,
+          "minDpi": 200,
+          "bleedMm": 0,
+          "accepts": [
+            "text"
+          ],
+          "background": null
+        }
+      ],
+      "textRules": [
+        {
+          "zoneId": "front-panel",
+          "maxChars": 12,
+          "maxLines": 1,
+          "allowedFonts": [
+            "display",
+            "ui"
+          ],
+          "defaultFont": "display",
+          "engraved": false,
+          "colorLocked": false,
+          "defaultColor": "#FFFFFF",
+          "palette": [
+            {
+              "hex": "#FFFFFF",
+              "name": "White"
+            },
+            {
+              "hex": "#14201F",
+              "name": "Black"
+            },
+            {
+              "hex": "#D97706",
+              "name": "Gold"
+            },
+            {
+              "hex": "#0F766E",
+              "name": "Deep teal"
+            },
+            {
+              "hex": "#B91C1C",
+              "name": "Red"
+            }
+          ]
+        }
+      ],
+      "pricing": [
+        {
+          "id": "textline",
+          "label": "Embroidered line",
+          "amount": 4,
+          "when": {
+            "perTextLine": "front-panel"
+          }
+        },
+        {
+          "id": "crown",
+          "label": "Crown colour",
+          "amount": 0,
+          "when": {
+            "partNotDefault": "crown"
+          }
+        },
+        {
+          "id": "panels",
+          "label": "Contrast panels",
+          "amount": 2,
+          "when": {
+            "partNotDefault": "panels"
+          }
+        },
+        {
+          "id": "brim",
+          "label": "Contrast brim",
+          "amount": 2,
+          "when": {
+            "partNotDefault": "brim"
+          }
+        }
+      ],
+      "model": {
+        "camera": {
+          "fov": 30,
+          "yawDeg": -32,
+          "pitchDeg": 13,
+          "dist": 1,
+          "lift": 0
+        },
+        "shadow": 0.26,
+        "parts": [
+          {
+            "kind": "lathe",
+            "colorPart": "crown",
+            "gloss": 0.16,
+            "shine": 18,
+            "segments": 112,
+            "printSpan": [
+              2,
+              6
+            ],
+            "prints": [
+              {
+                "zoneId": "front-panel",
+                "rect": [
+                  0.4236,
+                  0.1,
+                  0.1528,
+                  0.82
+                ]
+              }
+            ],
+            "profile": [
+              [
+                0,
+                -0.07
+              ],
+              [
+                0.99,
+                -0.07
+              ],
+              [
+                1.008,
+                -0.02
+              ],
+              [
+                1.01,
+                0.15
+              ],
+              [
+                1.002,
+                0.36
+              ],
+              [
+                0.98,
+                0.56
+              ],
+              [
+                0.944,
+                0.74
+              ],
+              [
+                0.888,
+                0.91
+              ],
+              [
+                0.808,
+                1.062
+              ],
+              [
+                0.7,
+                1.192
+              ],
+              [
+                0.565,
+                1.296
+              ],
+              [
+                0.404,
+                1.37
+              ],
+              [
+                0.222,
+                1.412
+              ],
+              [
+                0,
+                1.424
+              ]
+            ]
+          },
+          {
+            "kind": "lathe",
+            "colorPart": "panels",
+            "gloss": 0.14,
+            "shine": 16,
+            "segments": 112,
+            "profile": [
+              [
+                0.996,
+                -0.064
+              ],
+              [
+                1.012,
+                -0.058
+              ],
+              [
+                1.02,
+                -0.038
+              ],
+              [
+                1.02,
+                0.046
+              ],
+              [
+                1.012,
+                0.066
+              ],
+              [
+                0.996,
+                0.072
+              ],
+              [
+                0.996,
+                -0.064
+              ]
+            ]
+          },
+          {
+            "kind": "lathe",
+            "colorPart": "brim",
+            "gloss": 0.22,
+            "shine": 26,
+            "segments": 96,
+            "arcDeg": 152,
+            "arcMidDeg": 0,
+            "profile": [
+              [
+                0.905,
+                -0.118
+              ],
+              [
+                1.13,
+                -0.176
+              ],
+              [
+                1.345,
+                -0.262
+              ],
+              [
+                1.528,
+                -0.372
+              ],
+              [
+                1.628,
+                -0.47
+              ],
+              [
+                1.64,
+                -0.416
+              ],
+              [
+                1.552,
+                -0.312
+              ],
+              [
+                1.378,
+                -0.208
+              ],
+              [
+                1.15,
+                -0.124
+              ],
+              [
+                0.918,
+                -0.068
+              ]
+            ]
+          },
+          {
+            "kind": "lathe",
+            "colorPart": "button",
+            "gloss": 0.3,
+            "shine": 40,
+            "segments": 40,
+            "at": [
+              0,
+              1.418,
+              0
+            ],
+            "profile": [
+              [
+                0,
+                -0.04
+              ],
+              [
+                0.048,
+                -0.036
+              ],
+              [
+                0.072,
+                -0.01
+              ],
+              [
+                0.068,
+                0.028
+              ],
+              [
+                0.04,
+                0.05
+              ],
+              [
+                0,
+                0.054
+              ]
+            ]
+          }
+        ]
+      },
+      "maxExtras": 8
+    },
+    {
+      "id": "gift-box",
+      "name": "Gift box",
+      "blurb": "Two to four of your things, boxed with a ribbon and a card in your own words.",
+      "method": "hand packed",
+      "basePrice": 8,
+      "currency": "USD",
+      "leadTimeDays": 1,
+      "views": [
+        {
+          "id": "front",
+          "label": "Front",
+          "w": 900,
+          "h": 700,
+          "baseImage": "assets/products/gift-box/base.svg"
+        }
+      ],
+      "colorParts": [
+        {
+          "id": "box",
+          "name": "Box",
+          "viewId": "front",
+          "maskUrl": "assets/products/gift-box/mask-box.svg",
+          "default": "#FFFFFF",
+          "palette": [
+            {
+              "hex": "#FFFFFF",
+              "name": "White"
+            },
+            {
+              "hex": "#14201F",
+              "name": "Black"
+            },
+            {
+              "hex": "#0F766E",
+              "name": "Deep teal"
+            },
+            {
+              "hex": "#B91C1C",
+              "name": "Red"
+            },
+            {
+              "hex": "#D9A066",
+              "name": "Kraft"
+            }
+          ]
+        },
+        {
+          "id": "ribbon",
+          "name": "Ribbon",
+          "viewId": "front",
+          "maskUrl": "assets/products/gift-box/mask-ribbon.svg",
+          "default": "#0F766E",
+          "palette": [
+            {
+              "hex": "#0F766E",
+              "name": "Deep teal"
+            },
+            {
+              "hex": "#B91C1C",
+              "name": "Red"
+            },
+            {
+              "hex": "#D97706",
+              "name": "Gold"
+            },
+            {
+              "hex": "#14201F",
+              "name": "Black"
+            },
+            {
+              "hex": "#FFFFFF",
+              "name": "Ivory"
+            }
+          ]
+        }
+      ],
+      "printZones": [
+        {
+          "id": "card",
+          "name": "The card",
+          "viewId": "front",
+          "rect": {
+            "x": 480,
+            "y": 381,
+            "w": 230,
+            "h": 178
+          },
+          "warp": {
+            "type": "quad",
+            "quad": [
+              [
+                480,
+                405
+              ],
+              [
+                694,
+                381
+              ],
+              [
+                710,
+                535
+              ],
+              [
+                496,
+                559
+              ]
+            ]
+          },
+          "widthMm": 100,
+          "heightMm": 78,
+          "minDpi": 300,
+          "bleedMm": 0,
+          "accepts": [
+            "text"
+          ],
+          "background": null
+        }
+      ],
+      "textRules": [
+        {
+          "zoneId": "card",
+          "maxChars": 90,
+          "maxLines": 3,
+          "allowedFonts": [
+            "hand"
+          ],
+          "defaultFont": "hand",
+          "engraved": false,
+          "colorLocked": true,
+          "defaultColor": "#14201F"
+        }
+      ],
+      "pricing": [],
+      "model": {
+        "camera": {
+          "fov": 30,
+          "yawDeg": -28,
+          "pitchDeg": 19,
+          "dist": 1
+        },
+        "shadow": 0.28,
+        "parts": [
+          {
+            "kind": "box",
+            "colorPart": "box",
+            "gloss": 0.18,
+            "shine": 24,
+            "size": [
+              1.7,
+              0.9,
+              1.2
+            ],
+            "bevel": 0.035,
+            "arcSteps": 3,
+            "flatSteps": 4,
+            "printFace": "none",
+            "at": [
+              0,
+              -0.35,
+              0
+            ]
+          },
+          {
+            "kind": "box",
+            "colorPart": "box",
+            "gloss": 0.22,
+            "shine": 28,
+            "size": [
+              1.78,
+              0.32,
+              1.28
+            ],
+            "bevel": 0.035,
+            "arcSteps": 3,
+            "flatSteps": 4,
+            "printFace": "none",
+            "at": [
+              0,
+              0.26,
+              0
+            ]
+          },
+          {
+            "kind": "box",
+            "colorPart": "ribbon",
+            "gloss": 0.42,
+            "shine": 52,
+            "size": [
+              0.22,
+              1.24,
+              1.33
+            ],
+            "bevel": 0.02,
+            "arcSteps": 3,
+            "flatSteps": 3,
+            "printFace": "none",
+            "at": [
+              0,
+              -0.18,
+              0
+            ]
+          },
+          {
+            "kind": "box",
+            "colorPart": "ribbon",
+            "gloss": 0.42,
+            "shine": 52,
+            "size": [
+              1.83,
+              1.24,
+              0.22
+            ],
+            "bevel": 0.02,
+            "arcSteps": 3,
+            "flatSteps": 3,
+            "printFace": "none",
+            "at": [
+              0,
+              -0.18,
+              0
+            ]
+          },
+          {
+            "kind": "tube",
+            "colorPart": "ribbon",
+            "gloss": 0.44,
+            "shine": 56,
+            "radius": 0.055,
+            "ring": 14,
+            "flatten": 0.4,
+            "path": [
+              [
+                0,
+                0.43
+              ],
+              [
+                -0.15,
+                0.56
+              ],
+              [
+                -0.33,
+                0.64
+              ],
+              [
+                -0.43,
+                0.56
+              ],
+              [
+                -0.36,
+                0.45
+              ],
+              [
+                -0.15,
+                0.41
+              ],
+              [
+                0,
+                0.42
+              ]
+            ]
+          },
+          {
+            "kind": "tube",
+            "colorPart": "ribbon",
+            "gloss": 0.44,
+            "shine": 56,
+            "radius": 0.055,
+            "ring": 14,
+            "flatten": 0.4,
+            "path": [
+              [
+                0,
+                0.43
+              ],
+              [
+                0.15,
+                0.56
+              ],
+              [
+                0.33,
+                0.64
+              ],
+              [
+                0.43,
+                0.56
+              ],
+              [
+                0.36,
+                0.45
+              ],
+              [
+                0.15,
+                0.41
+              ],
+              [
+                0,
+                0.42
+              ]
+            ]
+          },
+          {
+            "kind": "box",
+            "color": "#FCFBF7",
+            "gloss": 0.1,
+            "shine": 14,
+            "size": [
+              0.84,
+              0.66,
+              0.03
+            ],
+            "bevel": 0.008,
+            "arcSteps": 2,
+            "flatSteps": 4,
+            "printFace": "+z",
+            "at": [
+              0.76,
+              -0.47,
+              0.79
+            ],
+            "prints": [
+              {
+                "zoneId": "card",
+                "rect": [
+                  0.07,
+                  0.09,
+                  0.86,
+                  0.82
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "maxExtras": 0
+    },
+    {
+      "id": "mug",
+      "name": "Mug",
+      "blurb": "Your photo wrapped right around it. Sublimation print, dishwasher safe.",
+      "method": "sublimation",
+      "basePrice": 12,
+      "currency": "USD",
+      "leadTimeDays": 2,
+      "views": [
+        {
+          "id": "front",
+          "label": "Front",
+          "w": 900,
+          "h": 700,
+          "baseImage": "assets/products/mug/base.svg",
+          "glossImage": "assets/products/mug/gloss.svg",
+          "glossBlend": "screen"
+        }
+      ],
+      "colorParts": [
+        {
+          "id": "body",
+          "name": "Mug colour",
+          "viewId": "front",
+          "maskUrl": "assets/products/mug/mask-body.svg",
+          "default": "#FFFFFF",
+          "palette": [
+            {
+              "hex": "#FFFFFF",
+              "name": "White"
+            },
+            {
+              "hex": "#14201F",
+              "name": "Black"
+            },
+            {
+              "hex": "#0F766E",
+              "name": "Deep teal"
+            },
+            {
+              "hex": "#1E3A8A",
+              "name": "Navy"
+            },
+            {
+              "hex": "#B91C1C",
+              "name": "Red"
+            },
+            {
+              "hex": "#DB2777",
+              "name": "Pink"
+            },
+            {
+              "hex": "#D97706",
+              "name": "Amber"
+            }
+          ]
+        }
+      ],
+      "printZones": [
+        {
+          "id": "wrap",
+          "name": "The wrap",
+          "viewId": "front",
+          "rect": {
+            "x": 200,
+            "y": 212,
+            "w": 440,
+            "h": 286
+          },
+          "warp": {
+            "type": "cylinder",
+            "wrapDeg": 200,
+            "bowPx": 34
+          },
+          "widthMm": 200,
+          "heightMm": 95,
+          "minDpi": 150,
+          "bleedMm": 2,
+          "accepts": [
+            "photo",
+            "text"
+          ],
+          "background": null
+        }
+      ],
+      "textRules": [
+        {
+          "zoneId": "wrap",
+          "maxChars": 22,
+          "maxLines": 2,
+          "allowedFonts": [
+            "display",
+            "ui",
+            "hand"
+          ],
+          "defaultFont": "display",
+          "engraved": false,
+          "colorLocked": false,
+          "defaultColor": "#14201F",
+          "palette": [
+            {
+              "hex": "#14201F",
+              "name": "Ink"
+            },
+            {
+              "hex": "#FFFFFF",
+              "name": "White"
+            },
+            {
+              "hex": "#0F766E",
+              "name": "Deep teal"
+            },
+            {
+              "hex": "#B91C1C",
+              "name": "Red"
+            },
+            {
+              "hex": "#D97706",
+              "name": "Amber"
+            }
+          ]
+        }
+      ],
+      "pricing": [
+        {
+          "id": "photo",
+          "label": "Photo print",
+          "amount": 3,
+          "when": {
+            "zoneHasPhoto": "wrap"
+          }
+        },
+        {
+          "id": "textline",
+          "label": "Text line",
+          "amount": 1.5,
+          "when": {
+            "perTextLine": "wrap"
+          }
+        },
+        {
+          "id": "colour",
+          "label": "Coloured mug",
+          "amount": 2,
+          "when": {
+            "partNotDefault": "body"
+          }
+        }
+      ],
+      "model": {
+        "camera": {
+          "fov": 30,
+          "yawDeg": -24,
+          "pitchDeg": 14,
+          "dist": 1
+        },
+        "shadow": 0.28,
+        "parts": [
+          {
+            "kind": "lathe",
+            "colorPart": "body",
+            "gloss": 0.62,
+            "shine": 76,
+            "segments": 128,
+            "printSpan": [
+              3,
+              6
+            ],
+            "prints": [
+              {
+                "zoneId": "wrap",
+                "rect": [
+                  0.2222,
+                  0.06,
+                  0.5556,
+                  0.88
+                ]
+              }
+            ],
+            "profile": [
+              [
+                0,
+                -1
+              ],
+              [
+                0.72,
+                -1
+              ],
+              [
+                0.82,
+                -0.955
+              ],
+              [
+                0.855,
+                -0.9
+              ],
+              [
+                0.862,
+                -0.02
+              ],
+              [
+                0.872,
+                0.86
+              ],
+              [
+                0.878,
+                0.955
+              ],
+              [
+                0.862,
+                1
+              ],
+              [
+                0.812,
+                0.985
+              ],
+              [
+                0.802,
+                0.9
+              ],
+              [
+                0.792,
+                -0.85
+              ],
+              [
+                0.7,
+                -0.89
+              ],
+              [
+                0,
+                -0.89
+              ]
+            ]
+          },
+          {
+            "kind": "tube",
+            "colorPart": "body",
+            "gloss": 0.55,
+            "shine": 54,
+            "radius": 0.108,
+            "ring": 20,
+            "flatten": 0.62,
+            "path": [
+              [
+                0.79,
+                0.62
+              ],
+              [
+                1.05,
+                0.6
+              ],
+              [
+                1.25,
+                0.46
+              ],
+              [
+                1.35,
+                0.22
+              ],
+              [
+                1.35,
+                -0.08
+              ],
+              [
+                1.23,
+                -0.34
+              ],
+              [
+                1.03,
+                -0.48
+              ],
+              [
+                0.79,
+                -0.52
+              ]
+            ]
+          }
+        ]
+      },
+      "maxExtras": 8
+    },
+    {
+      "id": "photo-block",
+      "name": "Photo block",
+      "blurb": "Printed straight onto acrylic, with a short caption engraved on the base.",
+      "method": "UV print on acrylic",
+      "basePrice": 26,
+      "currency": "USD",
+      "leadTimeDays": 4,
+      "views": [
+        {
+          "id": "front",
+          "label": "Front",
+          "w": 900,
+          "h": 700,
+          "baseImage": "assets/products/photo-block/base.svg"
+        }
+      ],
+      "colorParts": [
+        {
+          "id": "base",
+          "name": "Base",
+          "viewId": "front",
+          "maskUrl": "assets/products/photo-block/mask-base.svg",
+          "default": "#D9A066",
+          "palette": [
+            {
+              "hex": "#D9A066",
+              "name": "Oak"
+            },
+            {
+              "hex": "#8B5E34",
+              "name": "Walnut"
+            },
+            {
+              "hex": "#14201F",
+              "name": "Black"
+            },
+            {
+              "hex": "#FFFFFF",
+              "name": "White"
+            }
+          ]
+        }
+      ],
+      "printZones": [
+        {
+          "id": "acrylic",
+          "name": "The photo",
+          "viewId": "front",
+          "rect": {
+            "x": 268,
+            "y": 120,
+            "w": 364,
+            "h": 356
+          },
+          "warp": {
+            "type": "quad",
+            "quad": [
+              [
+                268,
+                120
+              ],
+              [
+                632,
+                120
+              ],
+              [
+                632,
+                476
+              ],
+              [
+                268,
+                476
+              ]
+            ]
+          },
+          "widthMm": 150,
+          "heightMm": 147,
+          "minDpi": 200,
+          "bleedMm": 0,
+          "accepts": [
+            "photo"
+          ],
+          "background": null
+        },
+        {
+          "id": "caption",
+          "name": "Engraved caption",
+          "viewId": "front",
+          "rect": {
+            "x": 238,
+            "y": 486,
+            "w": 424,
+            "h": 50
+          },
+          "warp": {
+            "type": "quad",
+            "quad": [
+              [
+                248,
+                490
+              ],
+              [
+                652,
+                490
+              ],
+              [
+                652,
+                534
+              ],
+              [
+                248,
+                534
+              ]
+            ]
+          },
+          "widthMm": 170,
+          "heightMm": 20,
+          "minDpi": 300,
+          "bleedMm": 0,
+          "accepts": [
+            "text"
+          ],
+          "background": null
+        }
+      ],
+      "textRules": [
+        {
+          "zoneId": "acrylic",
+          "maxChars": 0,
+          "maxLines": 0,
+          "allowedFonts": [],
+          "defaultFont": "ui",
+          "engraved": false,
+          "colorLocked": true,
+          "defaultColor": "#14201F"
+        },
+        {
+          "zoneId": "caption",
+          "maxChars": 30,
+          "maxLines": 1,
+          "allowedFonts": [
+            "ui",
+            "display",
+            "hand"
+          ],
+          "defaultFont": "ui",
+          "engraved": true,
+          "colorLocked": true,
+          "defaultColor": "#FFFFFF"
+        }
+      ],
+      "pricing": [
+        {
+          "id": "photo",
+          "label": "Photo print",
+          "amount": 0,
+          "when": {
+            "zoneHasPhoto": "acrylic"
+          }
+        },
+        {
+          "id": "caption",
+          "label": "Engraved caption",
+          "amount": 3,
+          "when": {
+            "perTextLine": "caption"
+          }
+        },
+        {
+          "id": "base",
+          "label": "Base finish",
+          "amount": 2,
+          "when": {
+            "partNotDefault": "base"
+          }
+        }
+      ],
+      "model": {
+        "camera": {
+          "fov": 30,
+          "yawDeg": -21,
+          "pitchDeg": 10,
+          "dist": 1
+        },
+        "shadow": 0.3,
+        "parts": [
+          {
+            "kind": "box",
+            "color": "#EEF4F4",
+            "gloss": 0.92,
+            "shine": 130,
+            "size": [
+              1.62,
+              1.58,
+              0.14
+            ],
+            "bevel": 0.028,
+            "arcSteps": 4,
+            "flatSteps": 5,
+            "printFace": "+z",
+            "at": [
+              0,
+              0.07,
+              0
+            ],
+            "prints": [
+              {
+                "zoneId": "acrylic",
+                "rect": [
+                  0.03,
+                  0.03,
+                  0.94,
+                  0.94
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "box",
+            "colorPart": "base",
+            "gloss": 0.2,
+            "shine": 22,
+            "size": [
+              1.95,
+              0.3,
+              0.62
+            ],
+            "bevel": 0.035,
+            "arcSteps": 4,
+            "flatSteps": 5,
+            "printFace": "+z",
+            "at": [
+              0,
+              -0.87,
+              0
+            ],
+            "prints": [
+              {
+                "zoneId": "caption",
+                "rect": [
+                  0.04,
+                  0.16,
+                  0.92,
+                  0.68
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "maxExtras": 5
+    },
+    {
+      "id": "tote",
+      "name": "Tote bag",
+      "blurb": "A big flat print area. Lead with a photo or lead with the type.",
+      "method": "DTF print",
+      "basePrice": 14,
+      "currency": "USD",
+      "leadTimeDays": 2,
+      "views": [
+        {
+          "id": "front",
+          "label": "Front",
+          "w": 900,
+          "h": 700,
+          "baseImage": "assets/products/tote/base.svg"
+        }
+      ],
+      "colorParts": [
+        {
+          "id": "cloth",
+          "name": "Bag colour",
+          "viewId": "front",
+          "maskUrl": "assets/products/tote/mask-body.svg",
+          "default": "#FFFFFF",
+          "palette": [
+            {
+              "hex": "#FFFFFF",
+              "name": "Natural"
+            },
+            {
+              "hex": "#14201F",
+              "name": "Black"
+            },
+            {
+              "hex": "#0F766E",
+              "name": "Deep teal"
+            },
+            {
+              "hex": "#1E3A8A",
+              "name": "Navy"
+            },
+            {
+              "hex": "#B91C1C",
+              "name": "Red"
+            },
+            {
+              "hex": "#D97706",
+              "name": "Amber"
+            }
+          ]
+        }
+      ],
+      "printZones": [
+        {
+          "id": "front-print",
+          "name": "Print area",
+          "viewId": "front",
+          "rect": {
+            "x": 300,
+            "y": 240,
+            "w": 300,
+            "h": 290
+          },
+          "warp": {
+            "type": "quad",
+            "quad": [
+              [
+                306,
+                246
+              ],
+              [
+                598,
+                242
+              ],
+              [
+                606,
+                528
+              ],
+              [
+                312,
+                524
+              ]
+            ]
+          },
+          "widthMm": 240,
+          "heightMm": 230,
+          "minDpi": 150,
+          "bleedMm": 3,
+          "accepts": [
+            "photo",
+            "text"
+          ],
+          "background": null
+        }
+      ],
+      "textRules": [
+        {
+          "zoneId": "front-print",
+          "maxChars": 28,
+          "maxLines": 3,
+          "allowedFonts": [
+            "display",
+            "ui",
+            "hand"
+          ],
+          "defaultFont": "display",
+          "engraved": false,
+          "colorLocked": false,
+          "defaultColor": "#14201F",
+          "palette": [
+            {
+              "hex": "#14201F",
+              "name": "Ink"
+            },
+            {
+              "hex": "#FFFFFF",
+              "name": "White"
+            },
+            {
+              "hex": "#0F766E",
+              "name": "Deep teal"
+            },
+            {
+              "hex": "#B91C1C",
+              "name": "Red"
+            },
+            {
+              "hex": "#D97706",
+              "name": "Amber"
+            }
+          ]
+        }
+      ],
+      "pricing": [
+        {
+          "id": "photo",
+          "label": "Photo print",
+          "amount": 4,
+          "when": {
+            "zoneHasPhoto": "front-print"
+          }
+        },
+        {
+          "id": "textline",
+          "label": "Text line",
+          "amount": 1.5,
+          "when": {
+            "perTextLine": "front-print"
+          }
+        },
+        {
+          "id": "cloth",
+          "label": "Coloured bag",
+          "amount": 2,
+          "when": {
+            "partNotDefault": "cloth"
+          }
+        }
+      ],
+      "model": {
+        "camera": {
+          "fov": 30,
+          "yawDeg": -19,
+          "pitchDeg": 8,
+          "dist": 1,
+          "lift": -0.02
+        },
+        "shadow": 0.22,
+        "parts": [
+          {
+            "kind": "box",
+            "colorPart": "cloth",
+            "gloss": 0.07,
+            "shine": 10,
+            "size": [
+              1.81,
+              2,
+              0.4
+            ],
+            "bevel": 0.21,
+            "arcSteps": 5,
+            "flatSteps": 6,
+            "printFace": "+z",
+            "prints": [
+              {
+                "zoneId": "front-print",
+                "rect": [
+                  0.184,
+                  0.2,
+                  0.632,
+                  0.548
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "tube",
+            "colorPart": "cloth",
+            "gloss": 0.09,
+            "shine": 12,
+            "radius": 0.062,
+            "ring": 14,
+            "flatten": 0.42,
+            "at": [
+              0,
+              0,
+              0.15
+            ],
+            "path": [
+              [
+                -0.52,
+                0.9
+              ],
+              [
+                -0.56,
+                1.19
+              ],
+              [
+                -0.43,
+                1.43
+              ],
+              [
+                -0.16,
+                1.54
+              ],
+              [
+                0.16,
+                1.54
+              ],
+              [
+                0.43,
+                1.43
+              ],
+              [
+                0.56,
+                1.19
+              ],
+              [
+                0.52,
+                0.9
+              ]
+            ]
+          },
+          {
+            "kind": "tube",
+            "colorPart": "cloth",
+            "gloss": 0.09,
+            "shine": 12,
+            "radius": 0.062,
+            "ring": 14,
+            "flatten": 0.42,
+            "at": [
+              0,
+              0,
+              -0.15
+            ],
+            "path": [
+              [
+                -0.52,
+                0.9
+              ],
+              [
+                -0.56,
+                1.19
+              ],
+              [
+                -0.43,
+                1.43
+              ],
+              [
+                -0.16,
+                1.54
+              ],
+              [
+                0.16,
+                1.54
+              ],
+              [
+                0.43,
+                1.43
+              ],
+              [
+                0.56,
+                1.19
+              ],
+              [
+                0.52,
+                0.9
+              ]
+            ]
+          }
+        ]
+      },
+      "maxExtras": 10.5
+    }
+  ],
+  "templates": [
+    {
+      "id": "birthday-photo-mug",
+      "productId": "mug",
+      "name": "Happy birthday",
+      "published": true,
+      "occasions": [
+        "birthday"
+      ],
+      "recipients": [
+        "friend",
+        "her",
+        "him"
+      ],
+      "state": {
+        "productId": "mug",
+        "colors": {
+          "body": "#FFFFFF"
+        },
+        "zones": {
+          "wrap": {
+            "photo": null,
+            "text": {
+              "value": "Happy birthday Lara",
+              "font": "display",
+              "color": "#0F766E",
+              "size": 0.16,
+              "y": 0.78
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "for-mum-mug",
+      "productId": "mug",
+      "name": "For mum",
+      "published": true,
+      "occasions": [
+        "mothers-day",
+        "birthday"
+      ],
+      "recipients": [
+        "mum"
+      ],
+      "state": {
+        "productId": "mug",
+        "colors": {
+          "body": "#DB2777"
+        },
+        "zones": {
+          "wrap": {
+            "photo": null,
+            "text": {
+              "value": "Best mum in Beirut",
+              "font": "hand",
+              "color": "#FFFFFF",
+              "size": 0.24,
+              "y": 0.5
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "thank-you-teacher-mug",
+      "productId": "mug",
+      "name": "Thank you, miss",
+      "published": true,
+      "occasions": [
+        "teacher",
+        "just-because"
+      ],
+      "recipients": [
+        "teacher"
+      ],
+      "state": {
+        "productId": "mug",
+        "colors": {
+          "body": "#0F766E"
+        },
+        "zones": {
+          "wrap": {
+            "photo": null,
+            "text": {
+              "value": "Thank you, miss",
+              "font": "display",
+              "color": "#FFFFFF",
+              "size": 0.2,
+              "y": 0.56
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "small-sorry-mug",
+      "productId": "mug",
+      "name": "A small sorry",
+      "published": true,
+      "occasions": [
+        "sorry"
+      ],
+      "recipients": [
+        "friend",
+        "her",
+        "him"
+      ],
+      "state": {
+        "productId": "mug",
+        "colors": {
+          "body": "#FFFFFF"
+        },
+        "zones": {
+          "wrap": {
+            "photo": null,
+            "text": {
+              "value": "Sorry. Coffee?",
+              "font": "ui",
+              "color": "#14201F",
+              "size": 0.17,
+              "y": 0.5
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "class-of-cap",
+      "productId": "cap",
+      "name": "Class of 26",
+      "published": true,
+      "occasions": [
+        "graduation"
+      ],
+      "recipients": [
+        "him",
+        "her",
+        "kids"
+      ],
+      "state": {
+        "productId": "cap",
+        "colors": {
+          "crown": "#14201F",
+          "panels": "#B91C1C",
+          "brim": "#14201F",
+          "button": "#14201F"
+        },
+        "zones": {
+          "front-panel": {
+            "photo": null,
+            "text": {
+              "value": "CLASS OF 26",
+              "font": "display",
+              "color": "#FFFFFF",
+              "size": 0.28,
+              "y": 0.5
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "habibi-cap",
+      "productId": "cap",
+      "name": "Habibi",
+      "published": true,
+      "occasions": [
+        "birthday",
+        "just-because",
+        "eid"
+      ],
+      "recipients": [
+        "friend",
+        "him"
+      ],
+      "state": {
+        "productId": "cap",
+        "colors": {
+          "crown": "#0F766E",
+          "panels": "#0F766E",
+          "brim": "#D97706",
+          "button": "#0F766E"
+        },
+        "zones": {
+          "front-panel": {
+            "photo": null,
+            "text": {
+              "value": "HABIBI",
+              "font": "display",
+              "color": "#FFFFFF",
+              "size": 0.34,
+              "y": 0.5
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "engraved-name-bottle",
+      "productId": "bottle",
+      "name": "His name on it",
+      "published": true,
+      "occasions": [
+        "birthday",
+        "teacher",
+        "christmas"
+      ],
+      "recipients": [
+        "dad",
+        "him"
+      ],
+      "state": {
+        "productId": "bottle",
+        "colors": {
+          "body": "#14201F",
+          "lid": "#D97706",
+          "band": "#D97706"
+        },
+        "zones": {
+          "engrave": {
+            "photo": null,
+            "text": {
+              "value": "ELIE",
+              "font": "display",
+              "color": "#FFFFFF",
+              "size": 0.28,
+              "y": 0.48
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "stay-hydrated-bottle",
+      "productId": "bottle",
+      "name": "Stay hydrated",
+      "published": true,
+      "occasions": [
+        "graduation",
+        "just-because"
+      ],
+      "recipients": [
+        "her",
+        "friend"
+      ],
+      "state": {
+        "productId": "bottle",
+        "colors": {
+          "body": "#0F766E",
+          "lid": "#FFFFFF",
+          "band": "#FFFFFF"
+        },
+        "zones": {
+          "engrave": {
+            "photo": null,
+            "text": {
+              "value": "Stay hydrated",
+              "font": "ui",
+              "color": "#FFFFFF",
+              "size": 0.2,
+              "y": 0.48
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "souk-day-tote",
+      "productId": "tote",
+      "name": "Souk day",
+      "published": true,
+      "occasions": [
+        "just-because",
+        "birthday"
+      ],
+      "recipients": [
+        "her",
+        "mum"
+      ],
+      "state": {
+        "productId": "tote",
+        "colors": {
+          "cloth": "#FFFFFF"
+        },
+        "zones": {
+          "front-print": {
+            "photo": null,
+            "text": {
+              "value": "SOUK DAY",
+              "font": "display",
+              "color": "#14201F",
+              "size": 0.16,
+              "y": 0.46
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "wedding-tote",
+      "productId": "tote",
+      "name": "The two of them",
+      "published": true,
+      "occasions": [
+        "wedding"
+      ],
+      "recipients": [
+        "couple"
+      ],
+      "state": {
+        "productId": "tote",
+        "colors": {
+          "cloth": "#FFFFFF"
+        },
+        "zones": {
+          "front-print": {
+            "photo": null,
+            "text": {
+              "value": "Nadia and Karim",
+              "font": "hand",
+              "color": "#14201F",
+              "size": 0.1,
+              "y": 0.84
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "us-photo-block",
+      "productId": "photo-block",
+      "name": "Us, on a block",
+      "published": true,
+      "occasions": [
+        "wedding",
+        "just-because"
+      ],
+      "recipients": [
+        "couple",
+        "her"
+      ],
+      "state": {
+        "productId": "photo-block",
+        "colors": {
+          "base": "#D9A066"
+        },
+        "zones": {
+          "acrylic": {
+            "photo": null,
+            "text": {
+              "value": "",
+              "font": "ui",
+              "color": "#14201F",
+              "size": 0.2,
+              "y": 0.5
+            }
+          },
+          "caption": {
+            "photo": null,
+            "text": {
+              "value": "Beirut, 2026",
+              "font": "display",
+              "color": "#FFFFFF",
+              "size": 0.34,
+              "y": 0.5
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "new-baby-block",
+      "productId": "photo-block",
+      "name": "Welcome to the world",
+      "published": true,
+      "occasions": [
+        "new-baby"
+      ],
+      "recipients": [
+        "mum",
+        "dad",
+        "kids"
+      ],
+      "state": {
+        "productId": "photo-block",
+        "colors": {
+          "base": "#FFFFFF"
+        },
+        "zones": {
+          "acrylic": {
+            "photo": null,
+            "text": {
+              "value": "",
+              "font": "ui",
+              "color": "#14201F",
+              "size": 0.2,
+              "y": 0.5
+            }
+          },
+          "caption": {
+            "photo": null,
+            "text": {
+              "value": "Welcome, ya rouh",
+              "font": "hand",
+              "color": "#FFFFFF",
+              "size": 0.34,
+              "y": 0.5
+            }
+          }
+        }
+      }
+    }
+  ],
+  "settings": {
+    "_comment": "settings/global. Lead times, zones and fees are config, never code. Seeded from here with tools/seed-firestore.mjs; after that the admin edits the Firestore document and this file is only the seed.",
+    "currency": "USD",
+    "timeZone": "Asia/Beirut",
+    "cutoffHour": 15,
+    "workingDays": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "blackoutDates": [
+      "2026-11-22",
+      "2026-12-25",
+      "2027-01-01"
+    ],
+    "defaultZone": "A",
+    "zones": [
+      {
+        "id": "A",
+        "name": "Beirut area",
+        "area": "Beirut, Jnah up to Dbayeh, and out to Baabda",
+        "transitDays": 2,
+        "fee": 4
+      },
+      {
+        "id": "B",
+        "name": "Rest of Lebanon",
+        "area": "Everywhere else in Lebanon",
+        "transitDays": 3,
+        "fee": 7
+      }
+    ],
+    "occasions": [
+      {
+        "id": "birthday",
+        "name": "Birthday"
+      },
+      {
+        "id": "graduation",
+        "name": "Graduation"
+      },
+      {
+        "id": "wedding",
+        "name": "Wedding"
+      },
+      {
+        "id": "mothers-day",
+        "name": "Mother's Day"
+      },
+      {
+        "id": "eid",
+        "name": "Eid"
+      },
+      {
+        "id": "christmas",
+        "name": "Christmas"
+      },
+      {
+        "id": "new-baby",
+        "name": "New baby"
+      },
+      {
+        "id": "teacher",
+        "name": "Teacher"
+      },
+      {
+        "id": "sorry",
+        "name": "Sorry"
+      },
+      {
+        "id": "just-because",
+        "name": "Just because"
+      }
+    ],
+    "recipients": [
+      {
+        "id": "her",
+        "name": "Her"
+      },
+      {
+        "id": "him",
+        "name": "Him"
+      },
+      {
+        "id": "mum",
+        "name": "Mum"
+      },
+      {
+        "id": "dad",
+        "name": "Dad"
+      },
+      {
+        "id": "friend",
+        "name": "A friend"
+      },
+      {
+        "id": "kids",
+        "name": "Kids"
+      },
+      {
+        "id": "couple",
+        "name": "A couple"
+      },
+      {
+        "id": "teacher",
+        "name": "A teacher"
+      }
+    ],
+    "products": [
+      "mug",
+      "cap",
+      "bottle",
+      "tote",
+      "photo-block"
+    ],
+    "orderPrefix": "GFT",
+    "maxCartItems": 6,
+    "giftBox": {
+      "productId": "gift-box",
+      "minItems": 2,
+      "maxItems": 4,
+      "discountPercent": 10
+    },
+    "shopEmail": null,
+    "whatsappNumber": null,
+    "payments": [
+      {
+        "id": "cod",
+        "name": "Cash on delivery",
+        "blurb": "Pay the driver when it arrives. Nothing to do now.",
+        "needsReference": false
+      },
+      {
+        "id": "whish",
+        "name": "Whish Money",
+        "blurb": "Send the total, then give us the reference number.",
+        "needsReference": true
+      },
+      {
+        "id": "omt",
+        "name": "OMT",
+        "blurb": "Send the total, then give us the reference number.",
+        "needsReference": true
+      }
+    ]
+  }
+}

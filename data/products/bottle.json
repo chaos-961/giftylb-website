@@ -6,50 +6,168 @@
   "basePrice": 22,
   "currency": "USD",
   "leadTimeDays": 3,
-
   "views": [
-    { "id": "front", "label": "Front", "w": 900, "h": 700,
-      "baseImage": "assets/products/bottle/base.svg" }
+    {
+      "id": "front",
+      "label": "Front",
+      "w": 900,
+      "h": 700,
+      "baseImage": "assets/products/bottle/base.svg"
+    }
   ],
-
   "colorParts": [
-    { "id": "body", "name": "Body", "viewId": "front",
-      "maskUrl": "assets/products/bottle/mask-body.svg", "default": "#14201F",
+    {
+      "id": "body",
+      "name": "Body",
+      "viewId": "front",
+      "maskUrl": "assets/products/bottle/mask-body.svg",
+      "default": "#14201F",
       "palette": [
-        { "hex": "#14201F", "name": "Black" }, { "hex": "#FFFFFF", "name": "White" },
-        { "hex": "#0F766E", "name": "Deep teal" }, { "hex": "#1E3A8A", "name": "Navy" },
-        { "hex": "#B91C1C", "name": "Red" }, { "hex": "#DB2777", "name": "Pink" },
-        { "hex": "#D97706", "name": "Amber" } ] },
-    { "id": "lid", "name": "Lid", "viewId": "front",
-      "maskUrl": "assets/products/bottle/mask-lid.svg", "default": "#14201F",
+        { "hex": "#14201F", "name": "Black" },
+        { "hex": "#FFFFFF", "name": "White" },
+        { "hex": "#0F766E", "name": "Deep teal" },
+        { "hex": "#1E3A8A", "name": "Navy" },
+        { "hex": "#B91C1C", "name": "Red" },
+        { "hex": "#DB2777", "name": "Pink" },
+        { "hex": "#D97706", "name": "Amber" }
+      ]
+    },
+    {
+      "id": "lid",
+      "name": "Lid",
+      "viewId": "front",
+      "maskUrl": "assets/products/bottle/mask-lid.svg",
+      "default": "#14201F",
       "palette": [
-        { "hex": "#14201F", "name": "Black" }, { "hex": "#FFFFFF", "name": "White" },
-        { "hex": "#0F766E", "name": "Deep teal" }, { "hex": "#D97706", "name": "Amber" } ] },
-    { "id": "band", "name": "Band", "viewId": "front",
-      "maskUrl": "assets/products/bottle/mask-band.svg", "default": "#14201F",
+        { "hex": "#14201F", "name": "Black" },
+        { "hex": "#FFFFFF", "name": "White" },
+        { "hex": "#0F766E", "name": "Deep teal" },
+        { "hex": "#D97706", "name": "Amber" }
+      ]
+    },
+    {
+      "id": "band",
+      "name": "Band",
+      "viewId": "front",
+      "maskUrl": "assets/products/bottle/mask-band.svg",
+      "default": "#14201F",
       "palette": [
-        { "hex": "#14201F", "name": "Black" }, { "hex": "#FFFFFF", "name": "White" },
-        { "hex": "#0F766E", "name": "Deep teal" }, { "hex": "#B91C1C", "name": "Red" },
-        { "hex": "#D97706", "name": "Amber" } ] }
+        { "hex": "#14201F", "name": "Black" },
+        { "hex": "#FFFFFF", "name": "White" },
+        { "hex": "#0F766E", "name": "Deep teal" },
+        { "hex": "#B91C1C", "name": "Red" },
+        { "hex": "#D97706", "name": "Amber" }
+      ]
+    }
   ],
-
   "printZones": [
-    { "id": "engrave", "name": "Engraving", "viewId": "front",
+    {
+      "id": "engrave",
+      "name": "Engraving",
+      "viewId": "front",
       "rect": { "x": 360, "y": 250, "w": 182, "h": 150 },
       "warp": { "type": "cylinder", "wrapDeg": 210, "bowPx": 0 },
-      "widthMm": 70, "heightMm": 58, "minDpi": 300, "bleedMm": 0,
-      "accepts": ["text"], "background": null }
+      "widthMm": 70,
+      "heightMm": 58,
+      "minDpi": 300,
+      "bleedMm": 0,
+      "accepts": [
+        "text"
+      ],
+      "background": null
+    }
   ],
-
   "textRules": [
-    { "zoneId": "engrave", "maxChars": 16, "maxLines": 2,
-      "allowedFonts": ["display", "ui", "hand"], "defaultFont": "ui",
-      "engraved": true, "colorLocked": true, "defaultColor": "#FFFFFF" }
+    {
+      "zoneId": "engrave",
+      "maxChars": 16,
+      "maxLines": 2,
+      "allowedFonts": [
+        "display",
+        "ui",
+        "hand"
+      ],
+      "defaultFont": "ui",
+      "engraved": true,
+      "colorLocked": true,
+      "defaultColor": "#FFFFFF"
+    }
   ],
-
   "pricing": [
-    { "id": "textline", "label": "Engraved line", "amount": 3, "when": { "perTextLine": "engrave" } },
-    { "id": "lid", "label": "Contrast lid", "amount": 2, "when": { "partNotDefault": "lid" } },
-    { "id": "band", "label": "Contrast band", "amount": 2, "when": { "partNotDefault": "band" } }
-  ]
+    {
+      "id": "textline",
+      "label": "Engraved line",
+      "amount": 3,
+      "when": { "perTextLine": "engrave" }
+    },
+    {
+      "id": "lid",
+      "label": "Contrast lid",
+      "amount": 2,
+      "when": { "partNotDefault": "lid" }
+    },
+    {
+      "id": "band",
+      "label": "Contrast band",
+      "amount": 2,
+      "when": { "partNotDefault": "band" }
+    }
+  ],
+  "model": {
+    "camera": { "fov": 28, "yawDeg": -20, "pitchDeg": 8, "dist": 1.0 },
+    "shadow": 0.24,
+    "parts": [
+      {
+        "kind": "lathe",
+        "colorPart": "body",
+        "gloss": 0.46,
+        "shine": 58,
+        "metal": 0.55,
+        "segments": 112,
+        "printSpan": [3, 4],
+        "prints": [
+          {
+            "zoneId": "engrave",
+            "rect": [0.3403, 0.14, 0.3194, 0.34]
+          }
+        ],
+        "profile": [
+          [0.0, -1.0],
+          [0.2, -1.0],
+          [0.252, -0.986],
+          [0.27, -0.96],
+          [0.27, 0.36],
+          [0.268, 0.5],
+          [0.245, 0.62],
+          [0.205, 0.72],
+          [0.172, 0.79],
+          [0.168, 0.83]
+        ]
+      },
+      {
+        "kind": "lathe",
+        "colorPart": "lid",
+        "gloss": 0.34,
+        "shine": 34,
+        "segments": 72,
+        "profile": [[0.166, 0.8], [0.198, 0.836], [0.198, 0.968], [0.178, 0.998], [0.1, 1.008], [0.0, 1.01]]
+      },
+      {
+        "kind": "lathe",
+        "colorPart": "band",
+        "gloss": 0.12,
+        "shine": 14,
+        "segments": 72,
+        "profile": [
+          [0.268, -0.646],
+          [0.284, -0.64],
+          [0.292, -0.62],
+          [0.292, -0.376],
+          [0.284, -0.356],
+          [0.268, -0.35],
+          [0.268, -0.646]
+        ]
+      }
+    ]
+  }
 }

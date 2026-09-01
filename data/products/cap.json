@@ -6,7 +6,6 @@
   "basePrice": 16,
   "currency": "USD",
   "leadTimeDays": 3,
-
   "views": [
     {
       "id": "front",
@@ -16,7 +15,6 @@
       "baseImage": "assets/products/cap/base.svg"
     }
   ],
-
   "colorParts": [
     {
       "id": "crown",
@@ -76,7 +74,6 @@
       ]
     }
   ],
-
   "printZones": [
     {
       "id": "front-panel",
@@ -91,17 +88,21 @@
       "heightMm": 55,
       "minDpi": 200,
       "bleedMm": 0,
-      "accepts": ["text"],
+      "accepts": [
+        "text"
+      ],
       "background": null
     }
   ],
-
   "textRules": [
     {
       "zoneId": "front-panel",
       "maxChars": 12,
       "maxLines": 1,
-      "allowedFonts": ["display", "ui"],
+      "allowedFonts": [
+        "display",
+        "ui"
+      ],
       "defaultFont": "display",
       "engraved": false,
       "colorLocked": false,
@@ -115,11 +116,112 @@
       ]
     }
   ],
-
   "pricing": [
-    { "id": "textline", "label": "Embroidered line", "amount": 4, "when": { "perTextLine": "front-panel" } },
-    { "id": "crown", "label": "Crown colour", "amount": 0, "when": { "partNotDefault": "crown" } },
-    { "id": "panels", "label": "Contrast panels", "amount": 2, "when": { "partNotDefault": "panels" } },
-    { "id": "brim", "label": "Contrast brim", "amount": 2, "when": { "partNotDefault": "brim" } }
-  ]
+    {
+      "id": "textline",
+      "label": "Embroidered line",
+      "amount": 4,
+      "when": { "perTextLine": "front-panel" }
+    },
+    {
+      "id": "crown",
+      "label": "Crown colour",
+      "amount": 0,
+      "when": { "partNotDefault": "crown" }
+    },
+    {
+      "id": "panels",
+      "label": "Contrast panels",
+      "amount": 2,
+      "when": { "partNotDefault": "panels" }
+    },
+    {
+      "id": "brim",
+      "label": "Contrast brim",
+      "amount": 2,
+      "when": { "partNotDefault": "brim" }
+    }
+  ],
+  "model": {
+    "camera": { "fov": 30, "yawDeg": -32, "pitchDeg": 13, "dist": 1.0, "lift": 0.0 },
+    "shadow": 0.26,
+    "parts": [
+      {
+        "kind": "lathe",
+        "colorPart": "crown",
+        "gloss": 0.16,
+        "shine": 18,
+        "segments": 112,
+        "printSpan": [2, 6],
+        "prints": [
+          {
+            "zoneId": "front-panel",
+            "rect": [0.4236, 0.1, 0.1528, 0.82]
+          }
+        ],
+        "profile": [
+          [0.0, -0.07],
+          [0.99, -0.07],
+          [1.008, -0.02],
+          [1.01, 0.15],
+          [1.002, 0.36],
+          [0.98, 0.56],
+          [0.944, 0.74],
+          [0.888, 0.91],
+          [0.808, 1.062],
+          [0.7, 1.192],
+          [0.565, 1.296],
+          [0.404, 1.37],
+          [0.222, 1.412],
+          [0.0, 1.424]
+        ]
+      },
+      {
+        "kind": "lathe",
+        "colorPart": "panels",
+        "gloss": 0.14,
+        "shine": 16,
+        "segments": 112,
+        "profile": [
+          [0.996, -0.064],
+          [1.012, -0.058],
+          [1.02, -0.038],
+          [1.02, 0.046],
+          [1.012, 0.066],
+          [0.996, 0.072],
+          [0.996, -0.064]
+        ]
+      },
+      {
+        "kind": "lathe",
+        "colorPart": "brim",
+        "gloss": 0.22,
+        "shine": 26,
+        "segments": 96,
+        "arcDeg": 152,
+        "arcMidDeg": 0,
+        "profile": [
+          [0.905, -0.118],
+          [1.13, -0.176],
+          [1.345, -0.262],
+          [1.528, -0.372],
+          [1.628, -0.47],
+          [1.64, -0.416],
+          [1.552, -0.312],
+          [1.378, -0.208],
+          [1.15, -0.124],
+          [0.918, -0.068]
+        ]
+      },
+      {
+        "kind": "lathe",
+        "colorPart": "button",
+        "gloss": 0.3,
+        "shine": 40,
+        "segments": 40,
+        "at": [0, 1.418, 0],
+        "profile": [[0.0, -0.04], [0.048, -0.036], [0.072, -0.01], [0.068, 0.028], [0.04, 0.05], [0.0, 0.054]]
+      }
+    ]
+  }
 }

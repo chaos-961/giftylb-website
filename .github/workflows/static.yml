@@ -30,7 +30,7 @@ jobs:
       - name: Assemble the site
         run: |
           set -euo pipefail
-          mkdir -p _site/css _site/js _site/js/engine _site/fonts _site/admin
+          mkdir -p _site/css _site/js _site/js/engine _site/fonts _site/admin _site/data
           mkdir -p _site/assets/hero
           mkdir -p _site/assets/products/mug _site/assets/products/cap
           mkdir -p _site/assets/products/bottle _site/assets/products/tote
@@ -84,16 +84,23 @@ jobs:
           cp js/checkout.js _site/js/checkout.js
           cp js/track.js _site/js/track.js
           cp js/engine/warp.js _site/js/engine/warp.js
+          cp js/engine/mesh.js _site/js/engine/mesh.js
+          cp js/engine/scene.js _site/js/engine/scene.js
           cp js/engine/design.js _site/js/engine/design.js
           cp js/engine/render.js _site/js/engine/render.js
           cp js/engine/state.js _site/js/engine/state.js
           cp js/engine/photo.js _site/js/engine/photo.js
           cp js/engine/price.js _site/js/engine/price.js
 
-          # data/ is NOT copied. Since P4 the catalogue lives in the database and
-          # the shop reads it from there, so these files are the seed that
-          # tools/seed-firestore.mjs pushes once. Shipping them would publish a
-          # second, slowly rotting answer to what a mug costs.
+          # The seed files under data/ are still NOT copied. One built file is:
+          # data/catalogue.json is the fallback the storefront serves when a live
+          # read fails or the collection is empty, which is the difference
+          # between a shop that is briefly out of date and a blank page. The
+          # database wins whenever it has anything to say, and no buyer is ever
+          # charged from the bundle: the Worker re-derives every price from the
+          # live documents. tools/build-catalogue.mjs builds it from the same
+          # seed files the seeder pushes and check-release.mjs fails a stale one.
+          cp data/catalogue.json _site/data/catalogue.json
 
           cp assets/products/mug/base.svg _site/assets/products/mug/base.svg
           cp assets/products/mug/mask-body.svg _site/assets/products/mug/mask-body.svg

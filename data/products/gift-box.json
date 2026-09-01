@@ -6,46 +6,178 @@
   "basePrice": 8,
   "currency": "USD",
   "leadTimeDays": 1,
-
   "views": [
-    { "id": "front", "label": "Front", "w": 900, "h": 700,
-      "baseImage": "assets/products/gift-box/base.svg" }
+    {
+      "id": "front",
+      "label": "Front",
+      "w": 900,
+      "h": 700,
+      "baseImage": "assets/products/gift-box/base.svg"
+    }
   ],
-
   "colorParts": [
-    { "id": "box", "name": "Box", "viewId": "front",
-      "maskUrl": "assets/products/gift-box/mask-box.svg", "default": "#FFFFFF",
+    {
+      "id": "box",
+      "name": "Box",
+      "viewId": "front",
+      "maskUrl": "assets/products/gift-box/mask-box.svg",
+      "default": "#FFFFFF",
       "palette": [
         { "hex": "#FFFFFF", "name": "White" },
         { "hex": "#14201F", "name": "Black" },
         { "hex": "#0F766E", "name": "Deep teal" },
         { "hex": "#B91C1C", "name": "Red" },
         { "hex": "#D9A066", "name": "Kraft" }
-      ] },
-    { "id": "ribbon", "name": "Ribbon", "viewId": "front",
-      "maskUrl": "assets/products/gift-box/mask-ribbon.svg", "default": "#0F766E",
+      ]
+    },
+    {
+      "id": "ribbon",
+      "name": "Ribbon",
+      "viewId": "front",
+      "maskUrl": "assets/products/gift-box/mask-ribbon.svg",
+      "default": "#0F766E",
       "palette": [
         { "hex": "#0F766E", "name": "Deep teal" },
         { "hex": "#B91C1C", "name": "Red" },
         { "hex": "#D97706", "name": "Gold" },
         { "hex": "#14201F", "name": "Black" },
         { "hex": "#FFFFFF", "name": "Ivory" }
-      ] }
+      ]
+    }
   ],
-
   "printZones": [
-    { "id": "card", "name": "The card", "viewId": "front",
+    {
+      "id": "card",
+      "name": "The card",
+      "viewId": "front",
       "rect": { "x": 480, "y": 381, "w": 230, "h": 178 },
-      "warp": { "type": "quad", "quad": [[480, 405], [694, 381], [710, 535], [496, 559]] },
-      "widthMm": 100, "heightMm": 78, "minDpi": 300, "bleedMm": 0,
-      "accepts": ["text"], "background": null }
+      "warp": {
+        "type": "quad",
+        "quad": [[480, 405], [694, 381], [710, 535], [496, 559]]
+      },
+      "widthMm": 100,
+      "heightMm": 78,
+      "minDpi": 300,
+      "bleedMm": 0,
+      "accepts": [
+        "text"
+      ],
+      "background": null
+    }
   ],
-
   "textRules": [
-    { "zoneId": "card", "maxChars": 90, "maxLines": 3,
-      "allowedFonts": ["hand"], "defaultFont": "hand",
-      "engraved": false, "colorLocked": true, "defaultColor": "#14201F" }
+    {
+      "zoneId": "card",
+      "maxChars": 90,
+      "maxLines": 3,
+      "allowedFonts": [
+        "hand"
+      ],
+      "defaultFont": "hand",
+      "engraved": false,
+      "colorLocked": true,
+      "defaultColor": "#14201F"
+    }
   ],
-
-  "pricing": []
+  "pricing": [],
+  "model": {
+    "camera": { "fov": 30, "yawDeg": -28, "pitchDeg": 19, "dist": 1.0 },
+    "shadow": 0.28,
+    "parts": [
+      {
+        "kind": "box",
+        "colorPart": "box",
+        "gloss": 0.18,
+        "shine": 24,
+        "size": [1.7, 0.9, 1.2],
+        "bevel": 0.035,
+        "arcSteps": 3,
+        "flatSteps": 4,
+        "printFace": "none",
+        "at": [0, -0.35, 0]
+      },
+      {
+        "kind": "box",
+        "colorPart": "box",
+        "gloss": 0.22,
+        "shine": 28,
+        "size": [1.78, 0.32, 1.28],
+        "bevel": 0.035,
+        "arcSteps": 3,
+        "flatSteps": 4,
+        "printFace": "none",
+        "at": [0, 0.26, 0]
+      },
+      {
+        "kind": "box",
+        "colorPart": "ribbon",
+        "gloss": 0.42,
+        "shine": 52,
+        "size": [0.22, 1.24, 1.33],
+        "bevel": 0.02,
+        "arcSteps": 3,
+        "flatSteps": 3,
+        "printFace": "none",
+        "at": [0, -0.18, 0]
+      },
+      {
+        "kind": "box",
+        "colorPart": "ribbon",
+        "gloss": 0.42,
+        "shine": 52,
+        "size": [1.83, 1.24, 0.22],
+        "bevel": 0.02,
+        "arcSteps": 3,
+        "flatSteps": 3,
+        "printFace": "none",
+        "at": [0, -0.18, 0]
+      },
+      {
+        "kind": "tube",
+        "colorPart": "ribbon",
+        "gloss": 0.44,
+        "shine": 56,
+        "radius": 0.055,
+        "ring": 14,
+        "flatten": 0.4,
+        "path": [
+          [0.0, 0.43],
+          [-0.15, 0.56],
+          [-0.33, 0.64],
+          [-0.43, 0.56],
+          [-0.36, 0.45],
+          [-0.15, 0.41],
+          [0.0, 0.42]
+        ]
+      },
+      {
+        "kind": "tube",
+        "colorPart": "ribbon",
+        "gloss": 0.44,
+        "shine": 56,
+        "radius": 0.055,
+        "ring": 14,
+        "flatten": 0.4,
+        "path": [[0.0, 0.43], [0.15, 0.56], [0.33, 0.64], [0.43, 0.56], [0.36, 0.45], [0.15, 0.41], [0.0, 0.42]]
+      },
+      {
+        "kind": "box",
+        "color": "#FCFBF7",
+        "gloss": 0.1,
+        "shine": 14,
+        "size": [0.84, 0.66, 0.03],
+        "bevel": 0.008,
+        "arcSteps": 2,
+        "flatSteps": 4,
+        "printFace": "+z",
+        "at": [0.76, -0.47, 0.79],
+        "prints": [
+          {
+            "zoneId": "card",
+            "rect": [0.07, 0.09, 0.86, 0.82]
+          }
+        ]
+      }
+    ]
+  }
 }

@@ -39,6 +39,19 @@
   transform-origin: 50% 62%;
 }
 
+/* The 3D canvas has no intrinsic ratio to fall back on: its width and height
+   attributes are set by the renderer from the box it is given, so leaving the
+   block size to auto is a loop where each measurement feeds the next. Pinned to
+   the same 900 by 700 the flat render uses, so switching between them moves
+   nothing on the page. */
+.gb-3d {
+  aspect-ratio: 9 / 7;
+  display: block;
+  touch-action: none;
+  cursor: grab;
+}
+.gb-3d.is-turning { cursor: grabbing; }
+
 /* The lid coming down. It only ever runs once, on the way to the cart, so the
    hidden state belongs to the animation and never to a static rule. */
 .gb-preview::after {

@@ -6,45 +6,154 @@
   "basePrice": 26,
   "currency": "USD",
   "leadTimeDays": 4,
-
   "views": [
-    { "id": "front", "label": "Front", "w": 900, "h": 700,
-      "baseImage": "assets/products/photo-block/base.svg" }
+    {
+      "id": "front",
+      "label": "Front",
+      "w": 900,
+      "h": 700,
+      "baseImage": "assets/products/photo-block/base.svg"
+    }
   ],
-
   "colorParts": [
-    { "id": "base", "name": "Base", "viewId": "front",
-      "maskUrl": "assets/products/photo-block/mask-base.svg", "default": "#D9A066",
+    {
+      "id": "base",
+      "name": "Base",
+      "viewId": "front",
+      "maskUrl": "assets/products/photo-block/mask-base.svg",
+      "default": "#D9A066",
       "palette": [
-        { "hex": "#D9A066", "name": "Oak" }, { "hex": "#8B5E34", "name": "Walnut" },
-        { "hex": "#14201F", "name": "Black" }, { "hex": "#FFFFFF", "name": "White" } ] }
+        { "hex": "#D9A066", "name": "Oak" },
+        { "hex": "#8B5E34", "name": "Walnut" },
+        { "hex": "#14201F", "name": "Black" },
+        { "hex": "#FFFFFF", "name": "White" }
+      ]
+    }
   ],
-
   "printZones": [
-    { "id": "acrylic", "name": "The photo", "viewId": "front",
+    {
+      "id": "acrylic",
+      "name": "The photo",
+      "viewId": "front",
       "rect": { "x": 268, "y": 120, "w": 364, "h": 356 },
-      "warp": { "type": "quad", "quad": [[268, 120], [632, 120], [632, 476], [268, 476]] },
-      "widthMm": 150, "heightMm": 147, "minDpi": 200, "bleedMm": 0,
-      "accepts": ["photo"], "background": null },
-    { "id": "caption", "name": "Engraved caption", "viewId": "front",
+      "warp": {
+        "type": "quad",
+        "quad": [[268, 120], [632, 120], [632, 476], [268, 476]]
+      },
+      "widthMm": 150,
+      "heightMm": 147,
+      "minDpi": 200,
+      "bleedMm": 0,
+      "accepts": [
+        "photo"
+      ],
+      "background": null
+    },
+    {
+      "id": "caption",
+      "name": "Engraved caption",
+      "viewId": "front",
       "rect": { "x": 238, "y": 486, "w": 424, "h": 50 },
-      "warp": { "type": "quad", "quad": [[248, 490], [652, 490], [652, 534], [248, 534]] },
-      "widthMm": 170, "heightMm": 20, "minDpi": 300, "bleedMm": 0,
-      "accepts": ["text"], "background": null }
+      "warp": {
+        "type": "quad",
+        "quad": [[248, 490], [652, 490], [652, 534], [248, 534]]
+      },
+      "widthMm": 170,
+      "heightMm": 20,
+      "minDpi": 300,
+      "bleedMm": 0,
+      "accepts": [
+        "text"
+      ],
+      "background": null
+    }
   ],
-
   "textRules": [
-    { "zoneId": "acrylic", "maxChars": 0, "maxLines": 0,
-      "allowedFonts": [], "defaultFont": "ui", "engraved": false,
-      "colorLocked": true, "defaultColor": "#14201F" },
-    { "zoneId": "caption", "maxChars": 30, "maxLines": 1,
-      "allowedFonts": ["ui", "display", "hand"], "defaultFont": "ui",
-      "engraved": true, "colorLocked": true, "defaultColor": "#FFFFFF" }
+    {
+      "zoneId": "acrylic",
+      "maxChars": 0,
+      "maxLines": 0,
+      "allowedFonts": [],
+      "defaultFont": "ui",
+      "engraved": false,
+      "colorLocked": true,
+      "defaultColor": "#14201F"
+    },
+    {
+      "zoneId": "caption",
+      "maxChars": 30,
+      "maxLines": 1,
+      "allowedFonts": [
+        "ui",
+        "display",
+        "hand"
+      ],
+      "defaultFont": "ui",
+      "engraved": true,
+      "colorLocked": true,
+      "defaultColor": "#FFFFFF"
+    }
   ],
-
   "pricing": [
-    { "id": "photo", "label": "Photo print", "amount": 0, "when": { "zoneHasPhoto": "acrylic" } },
-    { "id": "caption", "label": "Engraved caption", "amount": 3, "when": { "perTextLine": "caption" } },
-    { "id": "base", "label": "Base finish", "amount": 2, "when": { "partNotDefault": "base" } }
-  ]
+    {
+      "id": "photo",
+      "label": "Photo print",
+      "amount": 0,
+      "when": { "zoneHasPhoto": "acrylic" }
+    },
+    {
+      "id": "caption",
+      "label": "Engraved caption",
+      "amount": 3,
+      "when": { "perTextLine": "caption" }
+    },
+    {
+      "id": "base",
+      "label": "Base finish",
+      "amount": 2,
+      "when": { "partNotDefault": "base" }
+    }
+  ],
+  "model": {
+    "camera": { "fov": 30, "yawDeg": -21, "pitchDeg": 10, "dist": 1.0 },
+    "shadow": 0.3,
+    "parts": [
+      {
+        "kind": "box",
+        "color": "#EEF4F4",
+        "gloss": 0.92,
+        "shine": 130,
+        "size": [1.62, 1.58, 0.14],
+        "bevel": 0.028,
+        "arcSteps": 4,
+        "flatSteps": 5,
+        "printFace": "+z",
+        "at": [0, 0.07, 0],
+        "prints": [
+          {
+            "zoneId": "acrylic",
+            "rect": [0.03, 0.03, 0.94, 0.94]
+          }
+        ]
+      },
+      {
+        "kind": "box",
+        "colorPart": "base",
+        "gloss": 0.2,
+        "shine": 22,
+        "size": [1.95, 0.3, 0.62],
+        "bevel": 0.035,
+        "arcSteps": 4,
+        "flatSteps": 5,
+        "printFace": "+z",
+        "at": [0, -0.87, 0],
+        "prints": [
+          {
+            "zoneId": "caption",
+            "rect": [0.04, 0.16, 0.92, 0.68]
+          }
+        ]
+      }
+    ]
+  }
 }

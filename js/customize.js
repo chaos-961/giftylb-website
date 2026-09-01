@@ -14,8 +14,18 @@
   var frame = null, pending = 1, lastTotal = null;
   var editingId = null;   /* set when the buyer came back from the cart to edit */
 
+  /* Two previews of one design. 3D is the real object and is what opens; flat
+     is the same drawing the proof and the print file come from, and it is where
+     a photo is dragged into place, because in 3D a drag turns the object. Both
+     are redrawn on every finished change so neither can go stale behind the
+     other, and only the visible one is redrawn during a drag. */
+  var scene = null;
+  var mode = '3d';
+  var VIEW_KEY = 'gifty.view';
+
   var el = {};
-  ['preview', 'loading', 'productName', 'undoBtn', 'restoredChip', 'startOver', 'dpiChip',
+  ['preview', 'preview3d', 'viewToggle', 'viewTurn', 'viewFlat',
+   'loading', 'productName', 'undoBtn', 'restoredChip', 'startOver', 'dpiChip',
    'photoInput', 'photoBtnLabel', 'removePhoto', 'photoHint', 'photoControls',
    'zoom', 'panX', 'panY', 'recentre', 'textInput', 'charCount', 'fontChips',
    'textColours', 'textColourField', 'textSize', 'textY', 'colourParts',
@@ -39,8 +49,60 @@
     });
   }
 
+  /* `quick` skips rebuilding the artwork texture, which is what a colour change
+     wants: the photo and the words have not moved, only the glaze under them. */
+  function draw3d(quick) {
+    if (!scene || scene.lost()) return;
+    try { scene.update(store.get(), quick); }
+    catch (e) { dropScene(e); }
+  }
+
+  /* A driver that dies mid session must not take the screen with it. The flat
+     preview is always drawable, so falling back to it is a complete customizer
+     rather than a broken one. */
+  function dropScene(err) {
+    if (window.console && err) console.warn('3D preview stopped:', err.message || err);
+    scene = null;
+    el.viewToggle.hidden = true;
+    setMode('flat');
+  }
+
+  /* Which preview is on screen. Only one is, ever: two canvases stacked in the
+     same box with the other display:none, so nothing is being drawn behind. */
+  function setMode(next, opts) {
+    if (next === '3d' && (!scene || scene.lost())) next = 'flat';
+    mode = next;
+    el.preview3d.hidden = (mode !== '3d');
+    el.preview.hidden = (mode === '3d');
+    el.viewTurn.setAttribute('aria-pressed', String(mode === '3d'));
+    el.viewFlat.setAttribute('aria-pressed', String(mode === 'flat'));
+    /* Only a choice is remembered. A device that cannot draw the object is
+       pushed to flat every time, and writing that down would mean a phone that
+       failed once opens flat forever after it stops failing. */
+    if (opts && opts.remember) {
+      try { localStorage.setItem(VIEW_KEY, mode); } catch (e) { /* private mode */ }
+    }
+
+    if (mode === '3d') {
+      /* The canvas had no size while it was hidden, so the renderer has to be
+         told to measure itself again before it draws anything. */
+      draw3d(false);
+      if (opts && opts.reveal && scene) scene.reveal();
+    } else {
+      G.Render.draw(el.preview, recipe, cache, images, store.get(), 1);
+    }
+    if (store) syncPhotoControls();
+  }
+
   function onChange(state, meta) {
-    schedule(meta && meta.transient ? 2 : 1);
+    var transient = !!(meta && meta.transient);
+    if (transient) {
+      if (mode === '3d') draw3d(false);
+      else schedule(2);
+    } else {
+      schedule(1);
+      draw3d(false);
+    }
     updatePrice(state);
     updateDpi(state);
     el.undoBtn.disabled = !store.canUndo();
@@ -89,7 +151,23 @@
     var c = document.createElement('canvas');
     c.width = 420;
     c.height = Math.round(420 * view.h / view.w);
-    c.getContext('2d').drawImage(el.preview, 0, 0, c.width, c.height);
+    var ctx = c.getContext('2d');
+
+    /* JPEG has no alpha and both previews are drawn on nothing, so without a
+       ground every thumbnail in the cart comes back on black. */
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, c.width, c.height);
+
+    var src = (mode === '3d' && scene && !scene.lost()) ? el.preview3d : el.preview;
+    if (src === el.preview) {
+      ctx.drawImage(src, 0, 0, c.width, c.height);
+    } else if (src.width && src.height) {
+      /* The 3D canvas is whatever shape the stage is, so it is fitted into the
+         card's ratio rather than squashed to it. */
+      var k = Math.min(c.width / src.width, c.height / src.height);
+      var w = src.width * k, h = src.height * k;
+      ctx.drawImage(src, (c.width - w) / 2, (c.height - h) / 2, w, h);
+    }
     try { return c.toDataURL('image/jpeg', 0.82); } catch (e) { return null; }
   }
 
@@ -186,9 +264,14 @@
     el.photoControls.hidden = !has;
     el.removePhoto.hidden = !has;
     el.photoBtnLabel.textContent = has ? 'Use a different photo' : 'Add a photo';
+    /* In 3D a drag turns the object, so promising that it moves the photo
+       would be a lie. The sliders do the same job in both views. */
+    var flat = (mode === 'flat');
     el.photoHint.textContent = has
-      ? 'Drag it on the preview to move it, or use the sliders.'
-      : 'Pick a photo from your phone. Drag it on the preview to move it.';
+      ? (flat ? 'Drag it on the preview to move it, or use the sliders.'
+              : 'Use the sliders to move it, or switch to Flat and drag it.')
+      : (flat ? 'Pick a photo from your phone. Drag it on the preview to move it.'
+              : 'Pick a photo from your phone, then turn it to see it wrap.');
     if (!has) return;
 
     var size = G.Design.sizeFor(zone);
@@ -361,6 +444,7 @@
     var dragging = false, lastX = 0, lastY = 0, pointer = null;
 
     el.preview.addEventListener('pointerdown', function (e) {
+      if (mode !== 'flat') return;
       var photo = store.get().zones[zone.id].photo;
       if (!photo || !photo.image) return;
       dragging = true; pointer = e.pointerId;
@@ -489,6 +573,28 @@
     });
 
     el.addBtn.addEventListener('click', addToCart);
+
+    el.viewTurn.addEventListener('click', function () {
+      setMode('3d', { reveal: true, remember: true });
+    });
+    el.viewFlat.addEventListener('click', function () {
+      setMode('flat', { remember: true });
+    });
+
+    /* The stage changes shape when the dock grows, when the phone turns, and
+       when the keyboard opens. The 3D canvas has no intrinsic ratio to fall
+       back on, so it has to be told. */
+    if (window.ResizeObserver) {
+      new ResizeObserver(function () {
+        if (mode === '3d' && scene && !scene.lost()) {
+          try { scene.resize(); } catch (e) { dropScene(e); }
+        }
+      }).observe(el.preview3d.parentNode);
+    } else {
+      window.addEventListener('resize', function () {
+        if (mode === '3d' && scene && !scene.lost()) scene.resize();
+      });
+    }
 
     el.startOver.addEventListener('click', function () {
       store.clearSaved();
@@ -620,15 +726,45 @@
       })
       .then(function () {
         el.loading.hidden = true;
+
+        /* The real object, if this recipe describes one and this device can
+           draw one. Everything below still works when it cannot: the flat
+           preview is the whole customizer on its own and always has been. */
+        if (recipe.model && G.Scene && G.Scene.supported()) {
+          try {
+            scene = G.Scene.create(el.preview3d, recipe);
+          } catch (e) {
+            scene = null;
+            if (window.console) console.warn('3D preview unavailable:', e.message);
+          }
+        }
+        el.viewToggle.hidden = !scene;
+        if (scene) scene.onLost = function () { dropScene(); };
+
+        var saved = null;
+        try { saved = localStorage.getItem(VIEW_KEY); } catch (e) {}
+        var opening = (saved === 'flat' || !scene) ? 'flat' : '3d';
+
         /* Draw straight away rather than through requestAnimationFrame. rAF does
            not fire in a hidden or background tab, so a customizer opened in a
            second tab would sit blank until it was looked at. */
         el.preview.classList.add('is-first');
+        el.preview3d.classList.add('is-first');
         G.Render.draw(el.preview, recipe, cache, images, store.get(), 1);
+        setMode(opening);
         /* Two frames, so the hidden class is really in effect before the class
            that reveals it lands, or the transition never runs at all. */
         requestAnimationFrame(function () {
-          requestAnimationFrame(function () { el.preview.classList.add('is-ready'); });
+          requestAnimationFrame(function () {
+            el.preview.classList.add('is-ready');
+            el.preview3d.classList.add('is-ready');
+            /* One turn, once, and only when the object is what is on screen.
+               It says "this can be turned" in a second and a half, which no
+               label on a button manages. */
+            if (opening === '3d' && scene) {
+              try { scene.reveal(); } catch (e) { dropScene(e); }
+            }
+          });
         });
         /* And price it. Nothing has changed yet, so no change handler has run,
            and the markup's placeholder would otherwise stand as the price of

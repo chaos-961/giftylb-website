@@ -669,3 +669,167 @@ script adds. It caught the hero on the first run.
   banner and there is not going to be one. While the token is empty nothing at
   all loads, so a site without analytics makes no third party request rather
   than a failing one.
+
+---
+
+# v0.2.8. Real 3D products, and the shop stops depending on a seeded database
+
+Authorised in session on 2026-09-01: polish the front end, make every control
+work, and put actual three dimensional models in the customizer.
+
+## The reported bug was one line deep and three layers down
+
+The console showed `products/mug returned 404` and the shop, the cart and the
+customizer all said "We could not load the shop just now". The database is
+empty, which was known and expected. What was not acceptable is that an empty
+database is a blank shop.
+
+Three separate things came out of that.
+
+**The rules were never deployed with a real uid.** `firestore.rules` still said
+`REPLACE_ME_ADMIN_UID`, so `tools/seed-firestore.mjs` signed in fine as the shop
+account, uid `kLRVYNHHfjTznqB1gUq3yWbXbG82`, and was then refused by the rule on
+its first write. The uid is filled in now. Deploying it needs `firebase login`,
+which is an interactive browser flow, so that step is still the user's.
+
+**The storefront now has a bundled fallback.** `tools/build-catalogue.mjs`
+builds `data/catalogue.json` from the same seed files the seeder pushes, and it
+is the one file under `data/` that ships. `js/data.js` serves it when a live
+read fails or a collection comes back empty. The database still wins whenever it
+has anything to say, and nobody is ever charged from the bundle: the Worker
+re-derives every price from the live documents and the order rule bounds it from
+the same place. `check-release.mjs` refuses a release where the bundle has
+drifted from `data/`.
+
+This is a deliberate softening of the "one answer to what a mug costs" rule from
+P4. That rule was written against a second *editable* copy. A generated artefact
+byte-checked against the seed on every release is not that, and a shop that is
+briefly out of date beats a shop that is a blank page.
+
+**The 404s themselves could not be fixed from JavaScript.** A 404 on `fetch` is
+printed to the console by the browser and no `catch` silences it. Listing a
+collection returns 200 with an empty body in exactly the situation a document
+read 404s, so `Data.doc` for `products`, `templates` and `settings` now resolves
+through `Data.collection`. Same answer, no red console, and fewer requests: the
+shop, a design and the cart share one cached list instead of reading a document
+each.
+
+The fallback exposed one more thing on the way. `Data.bundleUrl` started as a
+plain relative path, which resolves against the *document*, so it meant
+`/admin/data/catalogue.json` inside the dashboard and broke under a project
+pages subpath. It is worked out from `document.currentScript.src` now.
+
+## The 3D engine
+
+Two new files. No library, no build step, no vendored runtime.
+
+`js/engine/mesh.js` builds geometry from three primitives and nothing else:
+
+- **lathe**, a 2D profile revolved around Y, optionally through part of a turn.
+  Mug body, bottle, cap crown, cap peak, lids, rings.
+- **box**, a rounded box. Take a point on a sharp cube, clamp it into the box
+  shrunk by the corner radius, push it back out by that radius along the
+  direction between the two. A face centre does not move, an edge sweeps a
+  quarter round, a corner sweeps an eighth of a sphere, and the direction that
+  pushed it out is the surface normal. One formula, no special cases.
+- **tube**, a circle swept along a 2D path. Mug handle, tote straps, ribbon.
+
+`js/engine/scene.js` is the renderer: one WebGL program of about forty lines,
+three lights, lit in linear space, a Blinn-Phong specular with a fresnel rim,
+and a soft radial contact shadow on the floor.
+
+The whole trick is the uv convention, and it is one sentence: **uv runs 0 to 1
+across the part of a surface that can be printed and out of range everywhere
+else.** For each printing part the renderer composites that part's zones into a
+single canvas laid out in the part's own uv space and uploads it as one texture,
+sized so the artwork lands at its own resolution rather than being squeezed into
+a square. So the fragment shader does not sample a rectangle inside a rectangle.
+It samples `vUv`, and the geometry has already decided where on a handle or a
+lid that is. Which is nowhere.
+
+A product's shape is a `model` block in its recipe, so all six were added the
+same way the flat renderer's five were: as data.
+
+## Four bugs the eye would have missed, and the two tools that caught them
+
+**The box double-applied its axis signs.** `uu = us[c] * uSign` and then
+`px = f.u[0] * uu` cancels the sign, so three of the six faces came out wound
+inside out. With culling on they were simply absent, and the tote, the photo
+block and the gift box rendered as flat sheets. The face table now satisfies
+`u cross v = n` on every row, which makes all six faces counterclockwise seen
+from outside at once and needs no per face flip.
+
+**A closed solid was being drawn two sided.** The mug's underside fought its own
+silhouette for the same pixels and drew a dotted line along the bottom edge.
+Every part in this engine is a closed solid, so back faces are culled now. The
+inside wall of a mug survives that: it is a front face, because the profile
+turns over the rim and comes back down. That made winding load bearing, so the
+cap peak had to be traced the other way round and the crown and both rings had
+to be closed.
+
+**The contact shadow was culled for every camera above the floor.** The quad
+lies flat and its triangles face down. It survived the very first frame only
+because WebGL starts with culling disabled, and vanished from every frame after.
+Found by trying to measure the pitch direction and getting an answer that made
+no sense.
+
+**Undo did nothing for typing, sliders or photo drags.** `commit` took its undo
+snapshot *after* the transient `touch` calls had already mutated the state, so
+what went on the stack was the state the buyer was already looking at. Only
+discrete changes like a colour swatch ever worked. `State.create` keeps a
+`baseline` now, the design as of the last finished action, and that is what a
+commit pushes. This one predates the 3D work and shipped in P2.
+
+The two tools:
+
+- **`tools/test-mesh.mjs`**, wired into `check-release.mjs` as section 5d. It
+  checks every triangle's geometric normal against the vertex normals it was
+  built from, and that every designable zone has a model surface to print on. A
+  part wound the wrong way is not drawn wrong, it is not drawn, and nothing says
+  so.
+- **`tools/probe-3d.html`**, local only. Draws all six products side by side with
+  a checkerboard and a word on them and reports how much of the frame each
+  covers. Every geometry bug above was visible in one screenshot of it.
+
+## Framing, and controls that follow the finger
+
+The camera frames against the **upright cylinder** around the model, which is
+exactly the bound a Y axis orbit cannot change, so turning a mug can never clip
+its handle. Tilting does change the vertical extent, and the second term of the
+distance is that projection, so a hard tilt eases the object away instead of
+cropping it. Framing against the largest dimension instead made a cap, which is
+twice as wide as it is tall, render at a third of its proper size.
+
+The finger holds the object, not the camera, so both axes subtract. Both were
+checked by measurement rather than by reasoning:
+
+- dragging right 72px moved the printed text right by 110px;
+- dragging down raised the camera, measured as the floor shadow's area going
+  29218, then 43548, then 45372 across three drags.
+
+The keyboard goes through the same `turn()` as the pointer, so the two cannot
+drift apart. Under `prefers-reduced-motion` the opening turn is not there at
+all, verified as zero `requestAnimationFrame` calls with the object drawn
+finished in one frame. A lost GPU context falls back to the flat preview and the
+customizer keeps working, verified by calling `WEBGL_lose_context` mid session.
+
+## The rest of the pass
+
+- The gift box builder uses the same engine, so the box the buyer turns is the
+  box that arrives.
+- The proof and the print file stay on the flat renderer, deliberately. What
+  gets printed is flat, and a photograph of a mug is not a thing a press can
+  output.
+- The shop's twelve card thumbnails stay on the flat renderer too. Twelve WebGL
+  contexts on one page is near the browser's limit and would cost more than it
+  buys.
+- Cart thumbnails come from whichever preview the buyer was actually looking at,
+  and both now get a white ground first: JPEG carries no alpha and every
+  thumbnail was being written onto black.
+- `.cz-linkbtn` gets a 44px hit box out of padding, with the space given straight
+  back as negative margin so nothing on screen moves. The two remaining small
+  targets are links inside a sentence on the homepage, which the target size rule
+  exempts and which would overlap their own neighbouring lines if padded.
+- The shared element name moved from `#preview` to `.cz-canvas-wrap`. There are
+  two canvases in that box now and only one is on screen at a time, and a view
+  transition whose target is `display: none` does not run at all.
