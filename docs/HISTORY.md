@@ -1312,3 +1312,38 @@ be hidden from somebody holding the number.
 - **The admin** lists eleven orders with buyer names joined from one collection
   group query, and opening one shows the address, the note and both images. After
   moving that order to `confirmed` the public document still carried no PII.
+
+### The setting that was not the setting
+
+Turning the Anonymous provider on changed nothing. `accounts:signUp` kept
+answering `ADMIN_ONLY_OPERATION` while the config read back
+`anonymous: {enabled: true}`, through two minutes of retries.
+
+The cause was `client.permissions.disabledUserSignup`, the project level
+"prevent users from signing up" switch, which was on. **While it is set, sign up
+is refused for every provider, and the provider's own flag says nothing about
+it.** Worth knowing before spending an afternoon on the wrong one.
+
+Turning it off also allows email and password account creation. Under these
+rules that buys nothing: `isShop()` names one uid and every other rule that cares
+about identity cares only that there IS one, so a new account can place one order
+and do nothing else. The trade was worth taking, and the useful half of it was
+`quota.signUpQuotaConfig`, a ceiling of 500 anonymous sign ups an hour applied by
+Google before a request ever reaches the rules. That is a real rate limit on
+precisely the thing blocker 1 is about.
+
+### Proven on production
+
+Fifteen checks over the wire against the live project, placing a real order
+exactly the way `js/order.js` places one, then reading it back as a second
+anonymous identity: the order opens and the proof reads, and who and where, the
+print file, the orders list and the throttle collection are all refused.
+Unauthenticated, every order path is 403 and `products/mug` is still 200.
+
+Then the real thing: `GFT-231009`, placed from a browser on
+`chaos-961.github.io`, followed on the tracking page with its status, its date
+and its proof, and a scan of the rendered page for the buyer's name, phone and
+address found none of them.
+
+Both test orders were deleted, document, subcollections and throttle document,
+and `orders` and `throttle` were both confirmed empty afterwards.
