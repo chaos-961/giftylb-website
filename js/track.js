@@ -39,11 +39,16 @@
 
     $('status').textContent = cancelled ? 'Cancelled' : current.label;
     $('orderNumber').textContent = order.orderNumber;
+    /* Read off the order document itself now, not off a response some server
+       reshaped on the way out. The date and the zone live under delivery, and
+       reading them from the top level is how this page said "Arriving undefined
+       in undefined" the first time it was pointed at the real document. */
+    var going = order.delivery || {};
     $('promised').textContent = cancelled
       ? 'This order was cancelled. If that is a surprise, message us and we will look into it.'
       : (order.status === 'delivered'
-        ? 'Delivered to ' + order.zoneName + '.'
-        : 'Arriving ' + order.promisedDate + ' in ' + order.zoneName + '.');
+        ? 'Delivered to ' + going.zoneName + '.'
+        : 'Arriving ' + going.promisedDate + ' in ' + going.zoneName + '.');
 
     /* The history carries the times the shop actually moved it, so a step that
        has happened says when, and one that has not says nothing rather than
@@ -84,13 +89,15 @@
 
     var items = $('items');
     items.textContent = '';
-    (order.items || []).forEach(function (i) {
+    (order.items || []).forEach(function (i, n) {
       var row = document.createElement('div');
       row.className = 'track__item';
 
       var img = document.createElement('img');
-      img.src = i.proofUrl;
+      /* The proof is stored beside the order in chunks, so it arrives after the
+         rest of the page. Left empty until then rather than broken. */
       img.alt = 'Your ' + i.productName.toLowerCase();
+      img.dataset.asset = n + '-proof';
 
       var text = document.createElement('div');
       var name = document.createElement('p');
@@ -109,22 +116,32 @@
   }
 
   function look(number) {
-    if (!window.GIFTY_API) {
-      say('Order tracking is not switched on yet.');
-      return;
-    }
     $('error').hidden = true;
-    fetch(window.GIFTY_API + '/api/order/' + encodeURIComponent(number))
-      .then(function (res) {
-        return res.json().then(function (body) { return { ok: res.ok, body: body }; });
-      })
-      .then(function (r) {
-        if (!r.ok) { say(r.body.message || 'We cannot find that order number.'); return; }
-        paint(r.body);
+
+    /* Read by document id, never by listing. The rules allow a get on one order
+       and refuse a list, which is what makes a tracking link work with no login
+       without letting anybody walk the whole collection. */
+    G.Data.orderByNumber(number)
+      .then(function (order) {
+        if (!order) { say('We cannot find that order number.'); return; }
+        paint(order);
+        return fillProofs(number);
       })
       .catch(function () {
-        say('We could not reach the order desk just now. Please try again in a moment.');
+        say('We could not look that up just now. Please try again in a moment.');
       });
+  }
+
+  /* The pictures follow the order, because they are stored in pieces beside it.
+     A missing one leaves the row without an image rather than with a broken
+     one: half an order page still tells the buyer where their order is. */
+  function fillProofs(number) {
+    return G.Order.assets(number).then(function (assets) {
+      document.querySelectorAll('#items img[data-asset]').forEach(function (img) {
+        var src = assets[img.dataset.asset];
+        if (src) img.src = src;
+      });
+    }).catch(function () {});
   }
 
   function fromHash() {

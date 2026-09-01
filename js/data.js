@@ -212,6 +212,22 @@
 
   /* A whole collection in one request, which is what the shop wants: five
      products is one round trip, not five. */
+  /* One order, by its number, with no cache and no fallback.
+
+     A get, deliberately, not a query. The rules allow reading a single order
+     document and refuse to list the collection, so this is the only shape that
+     works, and that asymmetry is what lets a tracking link carry no login
+     without handing anyone the whole order book. A 404 here is a wrong number,
+     which is a real answer and not an error. */
+  Data.orderByNumber = function (number) {
+    var path = 'orders/' + encodeURIComponent(String(number).trim().toUpperCase());
+    return fetch(url(path), { cache: 'no-store' }).then(function (res) {
+      if (res.status === 404 || res.status === 403) return null;
+      if (!res.ok) throw new Error(path + ' returned ' + res.status);
+      return res.json().then(Data.decodeDoc);
+    });
+  };
+
   Data.collection = function (name) {
     var cached = readCache(name);
     if (usable(cached) && Date.now() - cached.at < TTL) return Promise.resolve(cached.data);

@@ -944,3 +944,111 @@ The rest is honesty about the address:
 375px on eight routes: no horizontal scroll, no console errors. Checkout with
 every field filled and the proof approved still refuses to arm the button, with
 zero requests leaving the page. `check-release.mjs` exits 0.
+
+## v0.3.2. There is no server
+
+Asked for Firebase and nothing else, so the Cloudflare Worker, Turnstile, Resend
+and ImgBB are deleted rather than parked. The browser writes the order itself and
+`firestore.rules` is now the only thing between a buyer and the database.
+
+The Worker held three things a browser cannot be trusted with: the exact price,
+an image host key, and the one identity allowed to write an order. Two of those
+went away with the vendors. The third did not, and the honest accounting is
+written at the top of the rules file rather than discovered later:
+
+- Rules cannot loop, so they cannot evaluate a product's pricing clauses against
+  a configuration. They **bound** each line between `basePrice` and
+  `basePrice + maxExtras`, read live from `products/{id}`. Nobody pays a cent for
+  a mug. A buyer can underpay for extras, and on cash on delivery, where no card
+  is charged and the shop confirms every order by hand, that is a discrepancy
+  somebody reads rather than money taken.
+- There is no bot protection at all now. A script can create orders until the
+  daily write quota is gone, and when it is, catalogue reads start failing too.
+- A `get` on an order returns the whole document, phone and address included, to
+  anyone who guesses a five digit number.
+
+The last two are fine for testing and are not fine at launch. `orders` allows
+`get` and refuses `list`, so guessing one order is at least a different thing
+from downloading all of them.
+
+### The images ride inside the database
+
+Cloud Storage is not on this plan, so the proof, the print file and the buyer's
+own photo are base64 and split across an `assets` subcollection under the order,
+620,000 characters a chunk, which sits under the 1,048,576 byte document ceiling
+once the envelope is counted. This is exactly the pattern the agency site's
+careers form has been running on for its CVs, copied deliberately rather than
+reinvented, including the two things that pattern already knew:
+
+- **The order goes first and the chunks after.** A failure part way through then
+  leaves an order the admin can see, with the buyer's name and number intact and
+  an image it reports as incomplete. Written the other way round it would leave
+  chunks under an order that does not exist, which nothing can list, show or
+  delete, sitting in the quota forever.
+- **A subcollection does not inherit its parent's rules in `rules_version = 2`.**
+  Without its own `match` block every chunk is denied and the order lands with no
+  pictures.
+
+Five chunks a commit keeps every request under the 10 MiB cap on a write
+*request*, which is a different ceiling from the one on a document and the one
+people forget.
+
+Nothing stores a bitmap that can be drawn again: the admin re-renders from the
+saved design. Only the buyer's photograph is irreplaceable, so only it is kept
+at print size.
+
+### A shipped bug: the catalogue could never be seeded
+
+Seeding the emulator to test any of this threw immediately:
+
+    FAILED: $.model.parts[0].profile[0] is an array inside an array
+
+Firestore cannot nest an array in an array. The repo already knew that, for
+quads, and handled it in two places that have to agree: `flattenQuads` in the
+seeder going out, `Recipe.normalize` coming back. v0.2.8 then added `model`
+blocks whose lathe `profile` and tube `path` are both lists of points, and told
+neither function. `tools/seed-firestore.mjs` has thrown on the first product it
+reached ever since, which means the live catalogue could not be written at all,
+and nobody saw it because seeding had not been run since.
+
+Both halves handle all three shapes now. More usefully, `check-release.mjs`
+section 5e walks every recipe and fails on any nested array nobody has handled,
+naming its path, so the next one is caught at release rather than at a seed.
+Negative tested: adding `printZones[].fakeOutline` fails the release with that
+exact path and removing it passes again.
+
+### Fixed on the way
+
+The tracking page read `order.promisedDate` and `order.zoneName` off the top
+level, because that is the shape the Worker used to hand back. The real document
+keeps them under `delivery`, so the first live order tracked as "Arriving
+undefined in undefined".
+
+### Proven
+
+`tools/test-order.mjs` is rewritten with no Worker and no `worker/src` import,
+going over the wire exactly as `js/order.js` does, unauthenticated:
+
+    27 passed, 0 failed
+
+covering the happy path, chunk acceptance and exact reassembly, an oversized
+chunk, an unexpected field, an overwrite attempt, seven money tampering attempts,
+eight shape refusals, get allowed and list refused for a shopper, list allowed
+for the shop, and a full six line cart inside the 1000 expression budget.
+`test-parity.mjs`, `dev-worker.mjs` and `probe-rule-cost.mjs` are deleted: the
+first because there is no second price implementation left to drift from, the
+last because its measurement moved into `test-order.mjs`.
+
+Two real browser orders at 375px against the emulator. `GFT-12912`, text only:
+`createdAt` a real server timestamp, proof 61,163 characters in one chunk, print
+file 68,438 in one. `GFT-99504`, with a photo: the photo needed **3 chunks**,
+1,380,859 characters of base64, and came back complete with no holes. Tracking
+shows "Arriving Sat 5 Sept in Beirut area." with the proof reassembled at
+1200x933, and neither the address nor the phone appears on the page.
+
+The recipe round trip out of the seeded database restores `profile[0]` to
+`[0,-1]` and `path[0]` to `[0.79,0.62]`, with `Data.usingBundle` false, so the
+database really is being read and the geometry really is being rebuilt.
+
+`check-release.mjs` exits 0. `test-mesh.mjs`: every part wound outward. Eight
+routes at 375px: no horizontal scroll, no console errors.

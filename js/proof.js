@@ -4,15 +4,19 @@
  * drew, by the same engine:
  *
  *   the proof       what the buyer approves. The product, photographed. This
- *                   exact image goes on the order, into the confirmation email
- *                   and into the admin, so all three sides of any argument
- *                   later are looking at one picture.
+ *                   exact image is stored on the order and shown in the admin
+ *                   and on the tracking page, so every side of any argument
+ *                   later is looking at one picture.
  *   the print file  what the workshop prints. The flat artwork only, at the
  *                   zone's own minimum DPI, in real millimetres, with the size
  *                   written on it so nobody guesses at the press.
  *
  * No new drawing code. Render.draw and Design.render already do this; here they
  * are just asked for a bigger canvas.
+ *
+ * Neither is uploaded anywhere. Both are data URLs, and js/order.js splits them
+ * across the order's own assets subcollection, because there is no image host
+ * and no file bucket on this plan.
  */
 (function (G) {
   'use strict';
@@ -106,25 +110,6 @@
     });
 
     return out.toDataURL('image/png');
-  };
-
-  /* ----------------------------------------------------------------- upload
-
-     The photo the buyer chose was already uploaded when they picked it. These
-     two are uploaded here, at proof time, because until the buyer approves
-     there is nothing worth keeping. */
-
-  Proof.upload = function (dataUrl, name, token) {
-    return fetch(window.GIFTY_API + '/api/upload', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: token, image: dataUrl, name: name })
-    })
-      .then(function (res) { return res.json().then(function (b) { return { ok: res.ok, body: b }; }); })
-      .then(function (r) {
-        if (!r.ok || !r.body.url) throw new Error(r.body.message || 'upload failed');
-        return r.body.url;
-      });
   };
 
 })(window.Gifty = window.Gifty || {});

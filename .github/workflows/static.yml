@@ -76,6 +76,7 @@ jobs:
           cp js/data.js _site/js/data.js
           cp js/recipe.js _site/js/recipe.js
           cp js/proof.js _site/js/proof.js
+          cp js/order.js _site/js/order.js
           cp js/customize.js _site/js/customize.js
           cp js/delivery.js _site/js/delivery.js
           cp js/cart.js _site/js/cart.js

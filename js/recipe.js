@@ -24,15 +24,29 @@
     return url + '?v=' + R.version;
   };
 
-  /* Firestore cannot nest an array inside an array, and a quad is four pairs.
-     It is stored as four {x,y} maps and turned back into the engine's own
-     [[x,y]] here, so the wire format never reaches the renderer. */
+  /* Firestore cannot nest an array inside an array, and this format is full of
+     lists of points: a quad is four pairs, a lathe profile is a traced outline,
+     a tube path is a swept line. Every one of them is stored as {x,y} maps and
+     turned back into the engine's own [[x,y]] here, so the wire format never
+     reaches the renderer and a recipe read from the database is identical to
+     one read from the bundle.
+
+     The model blocks were missed when the 3D engine landed, which is why
+     seeding failed on the first product it reached. Anything added to a recipe
+     that is a list of points belongs in this list too. */
+  function points(list) {
+    return (list && list.length && !Array.isArray(list[0]))
+      ? list.map(function (p) { return [p.x, p.y]; })
+      : list;
+  }
+
   R.normalize = function (recipe) {
     (recipe.printZones || []).forEach(function (z) {
-      var q = z.warp && z.warp.quad;
-      if (q && q.length && !Array.isArray(q[0])) {
-        z.warp.quad = q.map(function (p) { return [p.x, p.y]; });
-      }
+      if (z.warp && z.warp.quad) z.warp.quad = points(z.warp.quad);
+    });
+    ((recipe.model && recipe.model.parts) || []).forEach(function (part) {
+      if (part.profile) part.profile = points(part.profile);
+      if (part.path) part.path = points(part.path);
     });
     return recipe;
   };

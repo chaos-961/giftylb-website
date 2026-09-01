@@ -16,13 +16,11 @@
   var settings = null;
   var items = [];              /* cart items, with recipe, images, cache, state */
   var payment = null;
-  var turnstileToken = null;
   var busy = false;
 
-  /* Ordering needs a bot check and somewhere to send the order. Until both are
-     configured the screen still renders the proof, because seeing the proof is
-     useful on its own, and says plainly that ordering is not on yet. */
-  var READY = !!(window.GIFTY_API && window.GIFTY_CONFIG && window.GIFTY_CONFIG.turnstileSiteKey);
+  /* The order goes straight to the database, so all ordering needs is a
+     configured project. There is nothing left to switch on separately. */
+  var READY = !!(window.GIFTY_CONFIG && window.GIFTY_CONFIG.projectId);
 
   /* ------------------------------------------------------------------ proof */
 
@@ -202,11 +200,11 @@
       && v.address.length >= 5
       && !!payment
       && (!payment.needsReference || v.reference.length >= 3)
-      /* Not "!READY ||". With ordering switched off there is nowhere to send
-         this, and letting the button go live sends the buyer's proof at a
-         worker that does not exist yet and answers them with a network error
-         after they have typed out their address. */
-      && READY && !!turnstileToken;
+      /* Not "!READY ||". A flag that says a thing is not configured has to gate
+         with &&: written "!READY || ..." it reads as "only required when on"
+         and means "never required", which is how a buyer once got all the way
+         to a network error after typing out their address. */
+      && READY;
     $('place').disabled = !ok;
     return ok;
   }
@@ -229,97 +227,102 @@
     $('place').textContent = 'Making your proof';
 
     var v = values();
+    var zone = G.Delivery.zone(G.Cart.zone() || settings.defaultZone);
+    var when = G.Delivery.promise(G.Cart.leadTimeDays(), zone.id);
 
-    /* The proof and the print file are only worth keeping once the buyer has
-       said the design is right, so they are built and uploaded here and not a
-       moment earlier. */
-    var uploads = items.map(function (it) {
-      return G.Design.ready()
-        .then(function () { return uploadPhotos(it); })
-        .then(function (photoUrls) {
-          var proof = G.Proof.proof(it.recipe, it.cache, it.images, it.state);
+    /* Every image the order carries, built here and not a moment earlier,
+       because until the buyer has said the design is right none of it is worth
+       keeping. They are stored beside the order rather than at an image host:
+       see js/order.js for why the database is the right place for them. */
+    var images = [];
+    var lines = [];
+
+    G.Design.ready()
+      .then(function () {
+        items.forEach(function (it, i) {
+          images.push({ id: i + '-proof', dataUrl: G.Proof.proof(it.recipe, it.cache, it.images, it.state) });
+
           var print = G.Proof.printFile(it.recipe, it.state);
-          return G.Proof.upload(proof, it.recipe.id + '-proof', turnstileToken)
-            .then(function (proofUrl) {
-              if (!print) return { proofUrl: proofUrl, printFileUrl: '' };
-              return G.Proof.upload(print, it.recipe.id + '-print', turnstileToken)
-                .then(function (printUrl) { return { proofUrl: proofUrl, printFileUrl: printUrl }; });
-            })
-            .then(function (urls) {
-              return {
-                productId: it.cart.productId,
-                boxId: it.cart.boxId || null,
-                qty: it.cart.qty,
-                unitPrice: it.cart.unitPrice,
-                config: forWire(it.state, photoUrls),
-                proofUrl: urls.proofUrl,
-                printFileUrl: urls.printFileUrl
-              };
-            });
-        });
-    });
+          if (print) images.push({ id: i + '-print', dataUrl: print });
 
-    Promise.all(uploads)
-      .then(function (wireItems) {
-        $('place').textContent = 'Placing the order';
-        var zone = G.Delivery.zone(G.Cart.zone() || settings.defaultZone);
-        return fetch(window.GIFTY_API + '/api/order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            token: turnstileToken,
-            buyer: { name: v.name, phone: v.phone, email: v.email || null },
-            delivery: { zone: zone.id, address: v.address },
-            payment: { method: payment.id, reference: v.reference || null },
-            notes: v.notes || null,
-            items: wireItems,
-            totals: { total: orderTotal(zone) }
-          })
+          /* The buyer's own photo is the one thing here that cannot be drawn
+             again from the saved design, so it is kept at print size. */
+          Object.keys(it.state.zones || {}).forEach(function (zid) {
+            var photo = it.state.zones[zid].photo;
+            if (photo && photo.image) {
+              images.push({ id: i + '-' + zid + '-photo', dataUrl: G.Order.shrink(photo.image) });
+            }
+          });
+
+          lines.push({
+            productId: it.cart.productId,
+            productName: it.recipe.name,
+            boxId: it.cart.boxId || null,
+            qty: it.cart.qty,
+            unitPrice: it.cart.unitPrice,
+            leadTimeDays: it.recipe.leadTimeDays || 1,
+            config: forWire(it.state),
+            summary: said(it.state)
+          });
         });
+
+        $('place').textContent = 'Placing the order';
+
+        var subtotal = Math.round(G.Cart.subtotal() * 100) / 100;
+        var discount = Math.round(G.Cart.discount(settings) * 100) / 100;
+
+        var order = {
+          orderNumber: '',
+          status: 'new',
+          buyer: { name: v.name, phone: v.phone, email: v.email || null },
+          delivery: {
+            zone: zone.id,
+            zoneName: zone.name,
+            address: v.address,
+            fee: zone.fee,
+            promisedDate: when.label
+          },
+          items: lines,
+          totals: {
+            subtotal: subtotal,
+            delivery: zone.fee,
+            discount: discount,
+            total: orderTotal(zone)
+          },
+          payment: { method: payment.id, reference: v.reference || null },
+          notes: v.notes || null,
+          statusHistory: [{ status: 'new', at: new Date().toISOString(), by: 'buyer' }]
+        };
+
+        return G.Order.create(order, images, settings.orderPrefix || 'GFT')
+          .then(function (r) { return { order: order, result: r, when: when }; });
       })
-      .then(function (res) {
-        return res.json().then(function (body) { return { status: res.status, body: body }; });
+      .then(function (done) {
+        succeed(done);
       })
-      .then(function (r) {
-        if (r.status === 409) {
-          /* The catalogue moved while they were designing. Show the new figure
-             rather than refusing and leaving them to guess. */
-          reprice(r.body);
-          return;
-        }
-        if (r.status !== 200) {
-          fail(r.body.message || 'We could not place that just now. Please try again in a moment.');
-          return;
-        }
-        succeed(r.body);
-      })
-      .catch(function () {
-        fail('We could not reach the order desk just now. Nothing has been charged. Please try again, or send us a message and we will place it for you.');
+      .catch(function (err) {
+        /* A refused write is almost always the price bound in the rules, which
+           means the catalogue moved while they were designing. Everything else
+           is the system's fault and says so. */
+        var denied = /PERMISSION_DENIED|permission/i.test((err && err.message) || '');
+        fail(denied
+          ? 'Something on this order no longer matches our prices. Please open the cart, check it over and try again.'
+          : 'We could not save your order just now. Nothing has been charged. Please try again in a moment.');
+        if (window.console) console.error(err);
       });
   }
 
-  /* The buyer's own photo goes up alongside the proof and the print file. The
-     print file is what the press needs, but without the original the shop can
-     never re-crop or reprint at another size without asking the buyer for the
-     picture again. One upload per photo, once, at order time. */
-  function uploadPhotos(it) {
-    var jobs = [];
-    var urls = {};
-    Object.keys(it.state.zones || {}).forEach(function (id) {
-      var photo = it.state.zones[id].photo;
-      if (!photo || !photo.saveSrc) return;
-      jobs.push(
-        G.Proof.upload(photo.saveSrc, it.recipe.id + '-' + id + '-photo', turnstileToken)
-          .then(function (url) { urls[id] = url; })
-      );
-    });
-    return Promise.all(jobs).then(function () { return urls; });
+  function said(state) {
+    var words = Object.keys(state.zones || {})
+      .map(function (id) { return ((state.zones[id].text || {}).value || '').trim(); })
+      .filter(Boolean);
+    return words.length ? words.join(' / ') : 'No text';
   }
 
-  /* The database keeps no bitmaps. The design travels as the photo's URL plus
-     its crop, which is everything the print file was built from and everything
-     the shop needs to rebuild it. */
-  function forWire(state, photoUrls) {
+  /* The design travels as its numbers, never as a bitmap. The photo itself is
+     an asset beside the order, found by name, so this carries the crop that
+     rebuilt it and nothing heavier. */
+  function forWire(state) {
     var out = { productId: state.productId, colors: {}, zones: {} };
     Object.keys(state.colors || {}).forEach(function (k) { out.colors[k] = state.colors[k]; });
     Object.keys(state.zones || {}).forEach(function (id) {
@@ -330,7 +333,6 @@
           size: z.text.size, y: z.text.y
         } : null,
         photo: z.photo ? {
-          url: (photoUrls && photoUrls[id]) || z.photo.url || '',
           natW: z.photo.natW, natH: z.photo.natH,
           k: z.photo.k, ox: z.photo.ox, oy: z.photo.oy
         } : null
@@ -339,57 +341,31 @@
     return out;
   }
 
-  function reprice(body) {
-    busy = false;
-    $('place').textContent = 'Place the order';
-    if (body.productId) {
-      var it = items.filter(function (x) { return x.cart.productId === body.productId; })[0];
-      if (it) {
-        it.cart.unitPrice = body.now;
-        G.Cart.replace(it.cart.id, it.cart);
-      }
-    }
-    paintTotals();
-    fail(body.message + ' Check the total and place it again.');
-  }
-
-  function succeed(body) {
+  function succeed(done) {
     G.Cart.clear();
     $('flow').hidden = true;
     $('done').hidden = false;
-    $('doneNumber').textContent = body.orderNumber;
-    $('doneDate').textContent = body.promisedDate;
-    $('doneTrack').href = 'track.html#' + body.orderNumber;
-    $('doneNote').textContent = values().email
-      ? 'We have emailed you the proof and this order number.'
-      : 'Write the order number down. It is how you follow the order.';
+    $('doneNumber').textContent = done.result.orderNumber;
+    $('doneDate').textContent = done.when.label;
+    $('doneTrack').href = 'track.html#' + done.result.orderNumber;
+    /* No email is sent by anything any more, so the number on this screen is
+       genuinely the only copy the buyer gets. Say so rather than promising an
+       inbox nothing writes to. */
+    $('doneNote').textContent = done.result.assetsComplete
+      ? 'Write the order number down. It is how you follow the order, and we have your design.'
+      : 'Write the order number down. Part of your picture did not finish uploading, so we may message you to send it again.';
     window.scrollTo(0, 0);
   }
 
-  /* -------------------------------------------------------------- turnstile */
+  /* ---------------------------------------------------------------- not on */
 
-  function armTurnstile() {
-    if (!READY) {
-      $('offNotice').hidden = false;
-      /* The button never comes alive in this state, so it has to say why by
-         itself. A dead button labelled "Place the order" reads as broken. */
-      $('place').textContent = 'Ordering is not switched on yet';
-      $('goNote').textContent = 'Ordering switches on shortly. Your cart is kept on this phone until then.';
-      return;
-    }
-    window.onTurnstileReady = function () {
-      window.turnstile.render('#turnstile', {
-        sitekey: window.GIFTY_CONFIG.turnstileSiteKey,
-        callback: function (token) { turnstileToken = token; validate(); },
-        'expired-callback': function () { turnstileToken = null; validate(); },
-        'error-callback': function () { turnstileToken = null; validate(); }
-      });
-    };
-    var s = document.createElement('script');
-    s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileReady';
-    s.async = true;
-    s.defer = true;
-    document.head.appendChild(s);
+  function armOrdering() {
+    if (READY) return;
+    $('offNotice').hidden = false;
+    /* The button never comes alive in this state, so it has to say why by
+       itself. A dead button labelled "Place the order" reads as broken. */
+    $('place').textContent = 'Ordering is not switched on yet';
+    $('goNote').textContent = 'Ordering switches on shortly. Your cart is kept on this phone until then.';
   }
 
   /* ------------------------------------------------------------------- boot */
@@ -418,7 +394,7 @@
         buildZone();
         buildPayments();
         paintTotals();
-        armTurnstile();
+        armOrdering();
 
         ['approve', 'name', 'phone', 'email', 'address', 'reference'].forEach(function (id) {
           $(id).addEventListener('input', validate);
