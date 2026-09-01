@@ -202,7 +202,11 @@
       && v.address.length >= 5
       && !!payment
       && (!payment.needsReference || v.reference.length >= 3)
-      && (!READY || !!turnstileToken);
+      /* Not "!READY ||". With ordering switched off there is nowhere to send
+         this, and letting the button go live sends the buyer's proof at a
+         worker that does not exist yet and answers them with a network error
+         after they have typed out their address. */
+      && READY && !!turnstileToken;
     $('place').disabled = !ok;
     return ok;
   }
@@ -367,6 +371,9 @@
   function armTurnstile() {
     if (!READY) {
       $('offNotice').hidden = false;
+      /* The button never comes alive in this state, so it has to say why by
+         itself. A dead button labelled "Place the order" reads as broken. */
+      $('place').textContent = 'Ordering is not switched on yet';
       $('goNote').textContent = 'Ordering switches on shortly. Your cart is kept on this phone until then.';
       return;
     }

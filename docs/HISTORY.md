@@ -857,3 +857,51 @@ An empty list is never an answer now, whether it arrived from the database a
 moment ago or from the cache seven hours ago. The poisoned entries age out on
 their own rather than needing a migration. Reproduced by writing exactly what
 v0.2.7 left behind into localStorage and confirming the screen recovers.
+
+## v0.3.0. The off switch was wired backwards
+
+A buyer designed a mug, approved the proof, typed out their name, phone and
+address, pressed the button, and got this:
+
+    api.giftylb.com/api/upload  net::ERR_NAME_NOT_RESOLVED
+    We could not reach the order desk just now. Nothing has been charged.
+
+Nothing was wrong with the worker, because there is no worker yet. The whole
+point of `READY` in `js/checkout.js` is that a half configured site never gets
+that far. It is computed correctly:
+
+    var READY = !!(window.GIFTY_API && window.GIFTY_CONFIG && window.GIFTY_CONFIG.turnstileSiteKey);
+
+and `turnstileSiteKey` is still empty, so `READY` was false and the "Ordering is
+not switched on yet" notice was on screen the whole time. The gate in `validate`
+then said:
+
+    && (!READY || !!turnstileToken)
+
+which reads as "a token is only needed when ordering is on". It is the sensible
+looking sentence and it is the wrong one. With ordering off it collapses to
+`true`, so the one condition meant to hold the button shut was the one condition
+that could never fail, and the button went live the moment the address field was
+long enough. The buyer's proof and print file were then uploaded at a hostname
+that does not resolve, and the catch around the order told them to try again
+later, which they cannot, because the thing they are waiting for is a deploy.
+
+The fix is `&& READY && !!turnstileToken`. A missing token now blocks for the
+same reason a missing address does.
+
+The other half of the bug was the button itself. It never comes alive in this
+state, and a dead button that still says "Place the order" reads as broken
+rather than as switched off, so the not ready branch of `armTurnstile` now
+labels it "Ordering is not switched on yet", the same words as the notice above
+it. It wraps to two lines at 375px and does not overflow.
+
+Verified in a 375px iframe against the real page: with the proof approved and
+every field filled, `place.disabled` is still true, clicking it does nothing,
+and the network log records zero requests to `giftylb.com`. Nine routes swept at
+375px afterwards: no horizontal scroll, no console errors. `check-release.mjs`
+exits 0, `test-parity.mjs` 16143 agreed 0 disagreed, `test-mesh.mjs` every part
+wound outward.
+
+This does not switch ordering on. It stops the site from pretending it is on.
+Ordering needs the worker deployed, `turnstileSiteKey` and `GIFTY_API` filled in,
+and `giftylb.com` resolving, all of which are still on the waiting list above.
