@@ -21,8 +21,17 @@ window.GIFTY_CONFIG = {
    it. Cloud Storage left the Spark plan on 2026-02-03, which is the whole
    reason customer uploads go to an image host through a worker instead. */
 
-/* Endpoint for the one worker that handles uploads, orders and order lookup. */
-window.GIFTY_API = 'https://api.giftylb.com';
+/* Endpoint for the one worker that handles uploads, orders and order lookup.
+
+   Empty until the worker is deployed. It used to name api.giftylb.com, which is
+   a domain that has never been registered, so every order ended as a DNS
+   failure dressed up as "we could not reach the order desk". An empty string is
+   the honest version of the same state: the checkout renders the proof and says
+   ordering is not on yet.
+
+   `wrangler deploy` prints the address to paste here. It looks like
+   https://gifty-api.<your-subdomain>.workers.dev with no trailing slash. */
+window.GIFTY_API = '';
 
 /* Turnstile's site key is public by design, the same way the config above is.
    Its secret half lives only in Wrangler. While this is empty the checkout

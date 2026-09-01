@@ -905,3 +905,42 @@ wound outward.
 This does not switch ordering on. It stops the site from pretending it is on.
 Ordering needs the worker deployed, `turnstileSiteKey` and `GIFTY_API` filled in,
 and `giftylb.com` resolving, all of which are still on the waiting list above.
+
+## v0.3.1. There is no domain, so stop building on one
+
+`giftylb.com` has never been registered. Every absolute URL in the repo named it
+anyway, which is how the checkout ended up posting a buyer's proof at
+`api.giftylb.com` and how the homepage carried a `noindex` waiting for a launch
+that has no date. The site's real address is the Pages URL. This release says so
+everywhere instead of treating it as temporary.
+
+The worker had `pattern = "api.giftylb.com"` with `custom_domain = true`, which
+cannot deploy at all without the domain being on Cloudflare first. It is
+`workers_dev = true` now, so the worker gets its own permanent
+`gifty-api.<subdomain>.workers.dev` address, free, and the browser reaches it
+cross origin from `chaos-961.github.io`, which is the only entry left in
+`ALLOWED_ORIGINS`.
+
+`FROM_EMAIL` was `orders@giftylb.com`. Resend will not send from a domain it has
+not verified and verifying a domain needs a domain, so every confirmation would
+have failed. It is `onboarding@resend.dev`, Resend's own shared sender, which
+needs no verification and works on the free plan.
+
+`GIFTY_API` is an empty string rather than a guess. `READY` is false while it is
+empty, so the checkout shows the proof and says ordering is not on yet, which is
+true, instead of failing at DNS, which was a lie about why.
+
+The rest is honesty about the address:
+
+- `index.html` and `shop.html` swap `noindex` for a real `canonical` at the
+  Pages URL. `og:url`, `og:image`, `twitter:image`, the `LocalBusiness` block,
+  `sitemap.xml` and `robots.txt` all name it too.
+- `js/shop.js` no longer writes the origin down for its `Product` JSON-LD. It
+  reads `location.origin + location.pathname` minus the filename, which is right
+  under a path on Pages, right at a bare host on a domain later, and cannot
+  drift from the page the crawler is actually standing on.
+- `CNAME` stays out of the deploy allowlist, unchanged.
+
+375px on eight routes: no horizontal scroll, no console errors. Checkout with
+every field filled and the proof approved still refuses to arm the button, with
+zero requests leaving the page. `check-release.mjs` exits 0.

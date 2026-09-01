@@ -10,4 +10,4 @@ Disallow: /checkout.html
 Disallow: /track.html
 Disallow: /box.html
 
-Sitemap: https://giftylb.com/sitemap.xml
+Sitemap: https://chaos-961.github.io/giftylb-website/sitemap.xml

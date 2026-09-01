@@ -286,7 +286,11 @@
      exactly what this says. */
 
   function paintStructuredData() {
-    var origin = 'https://giftylb.com';
+    /* Read off the page rather than written down, so this cannot name a
+       different site than the one a crawler is standing on. The site lives
+       under a path on Pages today and would live at a bare host on a real
+       domain later, and both come out right here. */
+    var origin = location.origin + location.pathname.replace(/\/[^\/]*$/, '');
     var items = order.map(function (id, i) {
       var r = recipes[id];
       return {

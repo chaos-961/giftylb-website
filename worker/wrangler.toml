@@ -2,14 +2,28 @@ name = "gifty-api"
 main = "src/index.js"
 compatibility_date = "2026-08-01"
 
+# There is no custom domain. giftylb.com is not registered, so this Worker is
+# served from its own free workers.dev address and the site is served from
+# GitHub Pages. Both are real, permanent addresses and ordering works across
+# them. The day a domain exists, add a [[routes]] block with
+# custom_domain = true, add the domain to ALLOWED_ORIGINS, and change
+# GIFTY_API in js/firebase-config.js. Nothing else moves.
+workers_dev = true
+
 # Everything below is public. Every secret is set with `wrangler secret put`
 # and never appears in this file or anywhere else in the repository.
 [vars]
 FIREBASE_PROJECT_ID = "giftylb"
 FIREBASE_API_KEY = "AIzaSyDgiZPH8bepbib5k3AmfS8YX8jY_RZRTos"
 SITE_ORIGIN = "https://chaos-961.github.io/giftylb-website"
-ALLOWED_ORIGINS = "https://chaos-961.github.io,https://giftylb.com,https://www.giftylb.com"
-FROM_EMAIL = "orders@giftylb.com"
+ALLOWED_ORIGINS = "https://chaos-961.github.io"
+
+# Resend will not send from a domain it has not verified, and verifying a
+# domain needs a domain. onboarding@resend.dev is Resend's own shared sender,
+# needs no verification, and works on the free plan. It is the difference
+# between an order that emails a confirmation and an order that reports
+# emailsFailed. Change this to orders@<domain> the day one is verified.
+FROM_EMAIL = "Gifty <onboarding@resend.dev>"
 
 # Secrets, set once each:
 #
@@ -26,7 +40,3 @@ FROM_EMAIL = "orders@giftylb.com"
 #
 # DEBUG is deliberately unset. With it on, refusals carry the underlying
 # message, which is useful locally and is noise a stranger should never see.
-
-[[routes]]
-pattern = "api.giftylb.com"
-custom_domain = true
