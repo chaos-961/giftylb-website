@@ -10,8 +10,9 @@
 }
 .notice--off {
   background: var(--teal-wash);
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--teal-deep) 18%, var(--line));
   color: var(--ink-soft);
+  box-shadow: var(--edge);
 }
 
 .checkout { display: grid; gap: var(--space-6); align-items: start; }
@@ -34,15 +35,17 @@
 .step__n {
   display: grid;
   place-items: center;
-  inline-size: 1.9rem;
-  block-size: 1.9rem;
+  inline-size: 2.1rem;
+  block-size: 2.1rem;
   flex: none;
   border-radius: var(--radius-full);
-  background: var(--teal);
+  background: linear-gradient(180deg, #1CC7B4, #10A79A);
+  background-color: var(--teal);
   color: var(--ink);          /* 6.72:1 */
   font-family: var(--font-display);
   font-size: var(--text-sm);
   font-weight: 700;
+  box-shadow: var(--elev-teal), var(--edge);
 }
 
 /* ---------- The proof ---------- */
@@ -56,7 +59,8 @@
   padding: var(--space-3);
   background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elev-1), var(--edge-quiet);
 }
 
 @media (min-width: 34rem) {
@@ -65,8 +69,9 @@
 
 .proof__art {
   aspect-ratio: 9 / 7;
-  border-radius: var(--radius-sm);
-  background: var(--teal-wash);
+  border-radius: var(--radius-md);
+  background: var(--studio);
+  border: 1px solid var(--line);
   overflow: hidden;
   display: grid;
   place-items: center;
@@ -79,16 +84,28 @@
 
 /* ---------- Approve ---------- */
 
+/* The one checkbox on the site that a person has to mean. It is the size of a
+   card and it lights up when it is ticked, because the next tap after it is the
+   one that spends money. */
 .approve {
   display: flex;
   align-items: start;
   gap: var(--space-3);
-  margin-block-start: var(--space-4);
-  padding: var(--space-4);
+  margin-block-start: var(--space-5);
+  padding: var(--space-5);
   background: var(--paper-warm);
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   cursor: pointer;
+  transition: border-color var(--t-quick) var(--ease-out),
+              background-color var(--t-quick) var(--ease-out),
+              box-shadow var(--t-quick) var(--ease-out);
+}
+.approve:hover { border-color: color-mix(in srgb, var(--teal-deep) 30%, var(--line)); }
+.approve:has(input:checked) {
+  background: var(--teal-wash);
+  border-color: var(--teal);
+  box-shadow: var(--elev-1), var(--edge);
 }
 .approve input {
   inline-size: 22px;
@@ -145,17 +162,22 @@
   display: flex;
   align-items: start;
   gap: var(--space-3);
-  min-block-size: 56px;
-  padding: var(--space-3) var(--space-4);
+  min-block-size: 60px;
+  padding: var(--space-4);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   background: var(--paper);
   cursor: pointer;
   transition: border-color var(--t-instant) var(--ease-out),
-              background-color var(--t-instant) var(--ease-out);
+              background-color var(--t-instant) var(--ease-out),
+              box-shadow var(--t-instant) var(--ease-out);
 }
 .pay:hover { background: var(--paper-warm); }
-.pay:has(input:checked) { border-color: var(--teal); background: var(--teal-wash); }
+.pay:has(input:checked) {
+  border-color: var(--teal);
+  background: var(--teal-wash);
+  box-shadow: var(--elev-1), var(--edge);
+}
 
 .pay input {
   inline-size: 20px;
@@ -173,9 +195,10 @@
   display: grid;
   gap: var(--space-4);
   padding: var(--space-5);
-  background: var(--paper-warm);
+  background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elev-2), var(--edge);
 }
 .checkout__side h2 { font-size: var(--text-lg); }
 
@@ -191,16 +214,38 @@
 .done h1 { font-size: var(--text-3xl); }
 .done .lede { margin-inline: auto; margin-block-start: var(--space-4); }
 
+/* The tick draws itself once. It is the last thing anybody sees in this funnel
+   and the only frame of it worth spending time on. */
 .done__tick {
   display: grid;
   place-items: center;
-  inline-size: 72px;
-  block-size: 72px;
+  inline-size: 84px;
+  block-size: 84px;
   margin-inline: auto;
-  margin-block-end: var(--space-5);
+  margin-block-end: var(--space-6);
   border-radius: var(--radius-full);
   background: var(--teal-wash);
+  border: 1px solid color-mix(in srgb, var(--teal-deep) 22%, var(--line));
   color: var(--teal-deep);
+  box-shadow: var(--elev-teal);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .done__tick { animation: tick-land 700ms var(--ease-spring) both; }
+  .done__tick path {
+    stroke-dasharray: 40;
+    animation: tick-draw 520ms var(--ease-out) 260ms both;
+  }
+}
+
+@keyframes tick-land {
+  from { transform: scale(0.7); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+
+@keyframes tick-draw {
+  from { stroke-dashoffset: 40; }
+  to   { stroke-dashoffset: 0; }
 }
 .done__tick svg { inline-size: 40px; block-size: 40px; }
 
@@ -247,14 +292,19 @@
   position: relative;
   display: grid;
   place-items: center;
-  inline-size: 28px;
-  block-size: 28px;
+  inline-size: 30px;
+  block-size: 30px;
   border-radius: var(--radius-full);
   border: 2px solid var(--line);
   background: var(--paper);
   color: var(--paper);
 }
-.track__step[data-done="yes"] .track__dot { background: var(--teal); border-color: var(--teal); color: var(--ink); }
+.track__step[data-done="yes"] .track__dot {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: var(--ink);
+  box-shadow: var(--elev-teal);
+}
 .track__dot svg { inline-size: 15px; block-size: 15px; }
 
 /* The line joining the dots is drawn on the dot, not between the rows, so it

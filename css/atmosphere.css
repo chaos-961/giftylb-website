@@ -1,0 +1,180 @@
+/* Gifty. The air behind the page.
+ *
+ * Every screen used to be one flat white with a mint band every other section,
+ * which is a layout, not a room. This sheet puts a field behind all of it: three
+ * soft lights that do not move on their own and a grain that stops the large
+ * gradients banding on a cheap panel.
+ *
+ * Three rules govern everything in here, and they are the reason it is safe to
+ * put on a phone:
+ *
+ *   1. It is one fixed layer behind the content, not a per section background,
+ *      so it is composited once and never repainted while the page scrolls.
+ *   2. Nothing loops. The field is linked to the SCROLL, not to a clock, so it
+ *      is perfectly still when the reader is still, costs nothing at idle, and
+ *      reads as depth rather than as a screensaver in the corner of the eye.
+ *      A browser without scroll timelines simply gets the field at rest, which
+ *      is a finished picture.
+ *   3. It never sits under small type. Sections that carry captions keep their
+ *      own opaque ground, so every contrast ratio measured in tokens.css is
+ *      still the ratio that is actually on screen.
+ */
+
+/* ---------------------------------------------------------------- the field */
+
+.atmos {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  /* The layer never changes size, so the browser can keep it on the GPU and
+     forget about it. contain tells it that outright. */
+  contain: strict;
+}
+
+/* Two sheets rather than one. They carry different lights and move at different
+   rates, and that difference is the only thing that makes a flat gradient read
+   as distance. A single sheet at any speed reads as the page sliding. */
+.atmos__near,
+.atmos__far {
+  position: absolute;
+  /* Oversized on every side, because both sheets translate and a sheet the size
+     of the viewport shows its own edge the moment it does. */
+  inset: -30%;
+  will-change: transform;
+}
+
+.atmos__far {
+  background:
+    radial-gradient(46rem 34rem at 14% 8%,  var(--air-teal), transparent 66%),
+    radial-gradient(38rem 30rem at 88% 2%,  var(--air-warm), transparent 62%);
+}
+
+.atmos__near {
+  background:
+    radial-gradient(52rem 40rem at 82% 62%, var(--air-cool), transparent 64%),
+    radial-gradient(40rem 34rem at 8% 88%,  var(--air-deep), transparent 62%);
+}
+
+/* ---------------------------------------------------------------- the grain
+
+   A hundred and eighty pixels of fractal noise, tiled, at three and a half
+   percent. It is doing one job: the field is made of gradients forty rems
+   across, and a gradient that wide steps visibly on an eight bit panel. Noise
+   under it hides the steps. It is not a texture effect and it should not be
+   visible as one. */
+
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.038;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22180%22%20height%3D%22180%22%3E%3Cfilter%20id%3D%22g%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.9%22%20numOctaves%3D%224%22%20stitchTiles%3D%22stitch%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22180%22%20height%3D%22180%22%20filter%3D%22url%28%23g%29%22%2F%3E%3C%2Fsvg%3E");
+  background-size: 180px 180px;
+  contain: strict;
+}
+
+/* A phone panel is small enough that the grain costs more than the banding it
+   hides, and it is the device most likely to be on a battery. */
+@media (max-width: 46rem) {
+  .grain { opacity: 0.025; }
+}
+
+/* ------------------------------------------------------------ the drift
+
+   Linked to the document scroll. The far sheet moves a fifth of the distance
+   the near one does, which is the whole parallax and the only reason the two
+   read as two. Both are pure translate, so this runs on the compositor and
+   never touches layout or paint.
+
+   Nothing is hidden by these keyframes, so a browser without scroll timelines
+   gets the field standing still and the page is finished either way. */
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .atmos__far {
+      animation: drift-far linear both;
+      animation-timeline: scroll(root block);
+    }
+    .atmos__near {
+      animation: drift-near linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+@keyframes drift-far {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(-2%, -7%, 0) scale(1.06); }
+}
+
+@keyframes drift-near {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(4%, -20%, 0) scale(1.12); }
+}
+
+/* ------------------------------------------------------- the reading grounds
+
+   A section that carries captions keeps an opaque ground, because --ink-faint
+   is rated against pure white and nothing else. The field is allowed behind
+   headlines, product art and the hero, and it is not allowed behind small type.
+   That is the whole rule and it is why the contrast table still holds. */
+
+.section--warm {
+  background: var(--paper-warm);
+  position: relative;
+}
+
+/* The seam between an opaque section and the field. A hard edge between two
+   near whites is a line the eye keeps finding; this makes it a fade instead. */
+.section--warm::before,
+.section--warm::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  block-size: var(--space-6);
+  pointer-events: none;
+}
+.section--warm::before {
+  inset-block-start: calc(var(--space-6) * -1);
+  background: linear-gradient(to bottom, transparent, var(--paper-warm));
+}
+.section--warm::after {
+  inset-block-start: 100%;
+  background: linear-gradient(to bottom, var(--paper-warm), transparent);
+}
+
+/* ------------------------------------------------------------ the scroll line
+
+   Two pixels of teal across the top of the page that fills as the document
+   does. It orients: on a long catalogue it is the only thing that says how much
+   is left. It is a scaleX on the compositor and it costs one layer.
+
+   It is not hidden when there is no timeline: it sits at zero width, which is
+   what an unscrolled page should show anyway. */
+
+.scroll-line {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: 40;
+  block-size: 2px;
+  background: linear-gradient(to right, var(--teal-deep), var(--teal));
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  .scroll-line {
+    animation: scroll-fill linear both;
+    animation-timeline: scroll(root block);
+  }
+}
+
+@keyframes scroll-fill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}

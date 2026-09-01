@@ -68,18 +68,73 @@
     return prepared[productId];
   }
 
+  /* ---------------------------------------------------------------- the object
+
+     A card shows the real three dimensional thing, lit by the same studio as
+     the customizer and the homepage. It used to show the flat print rendering,
+     which is the correct answer to "what goes on the press" and the wrong
+     answer to "what am I buying".
+
+     One WebGL context per PRODUCT, not per card. Twelve contexts is most of a
+     browser's budget for the whole tab and the thirteenth silently kills the
+     first; six is comfortable, and two cards of the same product are two
+     updates of one scene. The context lives on a canvas parked off screen,
+     because the renderer sizes its backing store from a bounding rectangle and
+     an element outside the document has none. */
+
+  var scenes = {};      /* productId -> { canvas, api } or null once it failed */
+  var GL_W = 720, GL_H = 560;   /* 9 by 7, the same ratio as the card art */
+
+  function sceneFor(productId) {
+    if (productId in scenes) return scenes[productId];
+    scenes[productId] = null;
+
+    var recipe = recipes[productId];
+    if (!recipe || !recipe.model || !G.Scene || !G.Mesh || !G.Scene.supported()) return null;
+
+    var canvas = document.createElement('canvas');
+    canvas.style.cssText =
+      'position:fixed;inset-block-start:-4000px;inset-inline-start:0;' +
+      /* base.css caps every canvas at max-inline-size 100%, which on a phone
+         clamps this one to the viewport and renders the object into a tall
+         narrow frame it was never composed for. */
+      'max-inline-size:none;max-block-size:none;' +
+      'inline-size:' + GL_W + 'px;block-size:' + GL_H + 'px;pointer-events:none';
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(canvas);
+
+    var api = null;
+    try { api = G.Scene.create(canvas, recipe); } catch (e) { api = null; }
+    if (!api) { canvas.remove(); return null; }
+
+    scenes[productId] = { canvas: canvas, api: api };
+    return scenes[productId];
+  }
+
   function paintCard(art) {
     var recipe = recipes[art.dataset.product];
     var state = JSON.parse(art.dataset.design);
 
     return ensure(recipe.id).then(function (p) {
-      var view = recipe.views[0];
-      G.Render.draw(scratch, recipe, p.cache, p.images, state, 1);
-
       var canvas = document.createElement('canvas');
-      canvas.width = 360;
-      canvas.height = Math.round(360 * view.h / view.w);
-      canvas.getContext('2d').drawImage(scratch, 0, 0, canvas.width, canvas.height);
+      var scene = sceneFor(recipe.id);
+
+      if (scene) {
+        scene.api.update(state);
+        scene.api.draw();
+        canvas.width = scene.canvas.width;
+        canvas.height = scene.canvas.height;
+        canvas.getContext('2d').drawImage(scene.canvas, 0, 0);
+      } else {
+        /* No WebGL, or a recipe with no model block. The flat render is a
+           finished picture of the same design and always has been. */
+        var view = recipe.views[0];
+        G.Render.draw(scratch, recipe, p.cache, p.images, state, 1);
+        canvas.width = 360;
+        canvas.height = Math.round(360 * view.h / view.w);
+        canvas.getContext('2d').drawImage(scratch, 0, 0, canvas.width, canvas.height);
+      }
+
       canvas.setAttribute('role', 'img');
       canvas.setAttribute('aria-label', art.dataset.alt);
 
@@ -181,13 +236,19 @@
        60px of the fold that the first row of designs would rather have. */
     $('clearFilters').hidden = !(filters.occasion || filters.recipient || filters.product);
 
-    found.forEach(function (t) {
+    found.forEach(function (t, index) {
       var recipe = recipes[t.productId];
       if (!recipe) return;
       var price = templatePrice(recipe, t.state);
 
       var li = document.createElement('li');
-      li.className = 'design-card';
+      li.className = 'design-card reveal reveal--scale';
+      li.setAttribute('data-tilt', '');
+      /* The stagger step, capped, so a hundred results do not deal themselves
+         out over six seconds. Only the observer path reads it; the scroll
+         driven path staggers for free because every card crosses the threshold
+         at its own moment. */
+      li.style.setProperty('--i', String(Math.min(index, 7)));
 
       var a = document.createElement('a');
       a.className = 'design-card__link';
@@ -243,6 +304,12 @@
       cards.push({ ready: ready, leadTimeDays: recipe.leadTimeDays });
       watch(art);
     });
+
+    /* These cards did not exist when the reveal observer and the pointer
+       behaviours were wired, so both get a second pass over what was just
+       built. Both are no ops on the paths that do not need them. */
+    if (G.reveal) G.reveal(grid);
+    if (G.Motion) G.Motion.bind(grid);
 
     paintDates();
   }

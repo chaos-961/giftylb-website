@@ -1,10 +1,16 @@
-/* Homepage shell. P1 skeleton: real structure, real copy, no photography yet.
-   The hero stage is a static render. P5 replaces its contents with the live
-   customizer self assembly. Its box does not change, so nothing reflows later. */
+/* Gifty homepage.
+   The hero stage holds a live render by the product engine: the real mug, the
+   real studio lighting, turnable. Its box does not depend on what is inside it,
+   so the fallback illustration, the WebGL object and the flat render all sit in
+   the same rectangle and nothing on the page reflows when one replaces
+   another. */
 
 /* ---------- Hero ---------- */
 
-.hero { padding-block: var(--section-y) var(--space-9); }
+.hero {
+  position: relative;
+  padding-block: var(--space-8) var(--space-9);
+}
 
 .hero__grid {
   display: grid;
@@ -13,10 +19,18 @@
 }
 
 @media (min-width: 56rem) {
-  .hero__grid { grid-template-columns: 1fr 1fr; gap: var(--space-9); }
+  .hero {
+    /* Tall enough that the object has room to be an object, capped so a short
+       laptop never has to scroll to find the button. */
+    min-block-size: min(84svb, 46rem);
+    display: grid;
+    align-content: center;
+    padding-block: var(--space-7) var(--space-10);
+  }
+  .hero__grid { grid-template-columns: 1fr 1.06fr; gap: var(--space-9); }
 }
 
-.hero h1 { margin-block-start: var(--space-3); }
+.hero h1 { margin-block-start: var(--space-4); }
 
 .hero__actions {
   display: flex;
@@ -25,26 +39,78 @@
   margin-block-start: var(--space-6);
 }
 
-.hero__note {
-  margin-block-start: var(--space-4);
+/* Three facts, not three badges. Each one is a thing the buyer would otherwise
+   have to read four paragraphs to find out, and none of them is invented. */
+.hero__proof {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin-block-start: var(--space-6);
+  padding-block-start: var(--space-5);
+  border-block-start: 1px solid var(--line);
   font-size: var(--text-sm);
-  color: var(--ink-faint);
+  color: var(--ink-soft);
 }
+
+.hero__proof li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.hero__proof svg {
+  inline-size: 18px;
+  block-size: 18px;
+  flex: none;
+  color: var(--teal-deep);
+}
+
+/* ---------- The stage ----------
+   A studio, not a card. The gradient inside it is the same one the customizer
+   uses, so a mug photographed on the homepage is standing on the same floor as
+   the mug in the editor. */
 
 .stage {
   position: relative;
   aspect-ratio: 4 / 3;
-  border-radius: var(--radius-lg);
-  background:
-    radial-gradient(120% 90% at 50% 12%, var(--paper) 0%, var(--teal-wash) 100%);
+  border-radius: var(--radius-xl);
+  background: var(--studio);
   border: 1px solid var(--line);
-  box-shadow: var(--elev-2);
+  box-shadow: var(--elev-3), var(--edge);
   display: grid;
   place-items: center;
   overflow: hidden;
 }
 
+/* A soft vignette so the object sits IN the box rather than on top of it. It
+   is the cheapest depth cue there is: one gradient, no blur, no extra layer. */
+.stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(120% 100% at 50% 34%, transparent 52%, rgb(20 32 31 / 0.07) 100%);
+}
+
 .stage svg { inline-size: min(58%, 320px); color: var(--teal-deep); }
+
+/* The object. One rule for the WebGL canvas and the flat render both, because
+   whichever arrives has to land in exactly the same rectangle. */
+.stage__object {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+  touch-action: none;       /* the drag is ours */
+  cursor: grab;
+}
+.stage__object.is-turning { cursor: grabbing; }
+
+/* The illustration steps aside only once a real render is standing in the box.
+   The class comes from the code that put it there. */
+.stage.is-live > svg { display: none; }
 
 .stage__caption {
   position: absolute;
@@ -52,8 +118,8 @@
   inset-inline-start: 50%;
   transform: translateX(-50%);
   padding: var(--space-2) var(--space-4);
-  background: var(--paper);
-  border: 1px solid var(--line);
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
   border-radius: var(--radius-full);
   box-shadow: var(--elev-1);
   font-size: var(--text-xs);
@@ -61,6 +127,95 @@
   color: var(--ink-soft);
   white-space: nowrap;
 }
+
+@supports (backdrop-filter: blur(1px)) {
+  .stage__caption { backdrop-filter: var(--glass-blur); }
+}
+
+/* Turn it. Only worth saying once the thing really is turnable, so the label
+   belongs to the class the renderer sets rather than to the markup. */
+.stage.is-live .stage__caption::before {
+  content: "";
+  inline-size: 6px;
+  block-size: 6px;
+  margin-inline-end: var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--teal);
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* ---------- The parallax ----------
+
+   Keyed to the document scroll rather than to the stage's own view timeline,
+   because a view timeline is already part way along at the top of the page and
+   the object would be visibly offset before anybody had scrolled at all. From a
+   plain scroll of zero, this starts at rest. */
+
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__stage {
+      animation: hero-drift linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 80svb;
+    }
+    .hero__say {
+      animation: hero-hold linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 80svb;
+    }
+  }
+}
+
+@keyframes hero-drift {
+  from { transform: none; }
+  to   { transform: translateY(-7%) scale(0.94); }
+}
+
+/* The words leave slower than the object does, which is the whole parallax. */
+@keyframes hero-hold {
+  from { transform: none; }
+  to   { transform: translateY(-2%); }
+}
+
+/* ---------- The scroll cue ---------- */
+
+.hero__cue {
+  display: none;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-start: var(--space-8);
+  color: var(--ink-soft);
+  text-decoration: none;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  justify-content: center;
+}
+
+@media (min-width: 56rem) {
+  .hero__cue { display: flex; }
+}
+
+.hero__cue svg {
+  inline-size: 18px;
+  block-size: 18px;
+  color: var(--teal-deep);
+}
+
+/* It nods, three times, and stops. A cue that never stops is a distraction, and
+   one that never moves is a label nobody reads. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero__cue svg { animation: cue-nod 1.8s var(--ease-in-out) 3; }
+}
+
+@keyframes cue-nod {
+  0%, 60%, 100% { transform: none; }
+  30%           { transform: translateY(4px); }
+}
+
+.hero__cue:hover { color: var(--ink); }
 
 /* ---------- Product grid ---------- */
 
@@ -72,32 +227,74 @@
 }
 
 .tile {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-5);
+  position: relative;
   background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  transition: transform var(--t-quick) var(--ease-out),
-              box-shadow var(--t-quick) var(--ease-out);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elev-1), var(--edge-quiet);
+  transition: box-shadow var(--t-quick) var(--ease-out);
 }
 
 @media (hover: hover) {
-  .tile:hover { transform: translateY(-3px); box-shadow: var(--elev-2); }
+  .tile:hover { box-shadow: var(--elev-3), var(--edge); }
+}
+
+/* The whole tile is the link, so the focus ring lands on the card rather than
+   on three words inside it. */
+.tile__link {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+  color: var(--ink);
+  text-decoration: none;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
 .tile__art {
+  position: relative;
   display: grid;
   place-items: center;
-  aspect-ratio: 3 / 2;
-  border-radius: var(--radius-sm);
-  background: var(--teal-wash);
+  aspect-ratio: 4 / 3;
+  background: var(--studio);
+  border-block-end: 1px solid var(--line);
   color: var(--teal-deep);
+  overflow: hidden;
 }
-.tile__art svg { inline-size: 44%; }
+.tile__art > svg { inline-size: 38%; }
 
-.tile h3 { font-size: var(--text-lg); }
+/* The real render, dropped in by js/showcase.js once it has one. It sits over
+   the illustration rather than instead of it, and the illustration only stands
+   down when the class that says a render arrived is present. */
+.tile__render {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+}
+.tile__art.is-rendered > svg { display: none; }
+
+/* The object leans forward a little as the cursor comes over the card. It is
+   the same gesture as picking something up off a shelf. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .tile__render,
+  .tile__art > svg {
+    transition: transform var(--t-move) var(--ease-out);
+  }
+  .tile:hover .tile__render,
+  .tile:hover .tile__art > svg { transform: scale(1.06) translateY(-2%); }
+}
+
+.tile__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5) var(--space-5);
+  flex: 1;
+}
+
+.tile h3 { font-size: var(--text-lg); color: var(--ink); }
 
 .tile p {
   font-size: var(--text-sm);
@@ -105,9 +302,36 @@
   line-height: 1.45;
 }
 
-/* ---------- Steps ---------- */
+.tile__go {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block-start: auto;
+  padding-block-start: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--teal-deep);
+}
+
+.tile__go svg {
+  inline-size: 16px;
+  block-size: 16px;
+  transition: transform var(--t-quick) var(--ease-out);
+}
+.tile:hover .tile__go svg { transform: translateX(4px); }
+
+/* The gift box is not one of the five and should not read as one. A dashed
+   edge and the warm ground say "this is the thing you do with the others". */
+.tile--box { border-style: dashed; border-color: color-mix(in srgb, var(--teal-deep) 40%, var(--line)); }
+.tile--box .tile__art { background: linear-gradient(170deg, #FFFFFF 0%, var(--teal-wash) 100%); }
+
+/* ---------- Steps ----------
+   A rail through the three of them, so they read as a sequence rather than as
+   three unrelated cards. On a phone it runs down the side; on a desktop it runs
+   across the top, which is the direction the eye is already travelling. */
 
 .steps {
+  position: relative;
   display: grid;
   gap: var(--space-6);
   margin-block-start: var(--space-7);
@@ -118,22 +342,57 @@
   .steps { grid-template-columns: repeat(3, 1fr); gap: var(--space-7); }
 }
 
-.step { counter-increment: step; }
+.step {
+  position: relative;
+  counter-increment: step;
+  padding-inline-start: var(--space-8);
+}
+
+@media (min-width: 46rem) {
+  .step { padding-inline-start: 0; padding-block-start: var(--space-8); }
+}
 
 .step__num {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
   display: grid;
   place-items: center;
-  inline-size: 2.25rem;
-  block-size: 2.25rem;
+  inline-size: 2.4rem;
+  block-size: 2.4rem;
   border-radius: var(--radius-full);
-  background: var(--teal);
-  color: var(--ink);
+  background: linear-gradient(180deg, #1CC7B4, #10A79A);
+  color: var(--ink);          /* 6.72:1 on --teal */
   font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--text-base);
-  margin-block-end: var(--space-3);
+  box-shadow: var(--elev-teal), var(--edge);
+  z-index: 1;
 }
 .step__num::before { content: counter(step); }
+
+/* The rail. Drawn on the step rather than between the rows, so it cannot fall
+   out of step with the grid, and it stops at the last one. */
+.step:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 2.4rem;
+  inset-inline-start: calc(1.2rem - 1px);
+  inline-size: 2px;
+  block-size: calc(100% + var(--space-6) - 2.4rem);
+  background: linear-gradient(to bottom, var(--teal), color-mix(in srgb, var(--teal) 12%, transparent));
+  border-radius: var(--radius-full);
+}
+
+@media (min-width: 46rem) {
+  .step:not(:last-child)::before {
+    inset-block-start: calc(1.2rem - 1px);
+    inset-inline-start: 2.4rem;
+    inline-size: calc(100% + var(--space-7) - 2.4rem);
+    block-size: 2px;
+    background: linear-gradient(to right, var(--teal), color-mix(in srgb, var(--teal) 12%, transparent));
+  }
+}
 
 .step h3 { margin-block-end: var(--space-2); }
 .step p { color: var(--ink-soft); }
@@ -151,13 +410,36 @@
 }
 
 .zone {
-  padding: var(--space-5);
+  position: relative;
+  padding: var(--space-6);
   background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elev-1), var(--edge-quiet);
+  overflow: hidden;
+  transition: box-shadow var(--t-quick) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .zone:hover { box-shadow: var(--elev-3), var(--edge); }
+}
+
+/* A quiet wash in the corner, so two cards that carry only type still have
+   somewhere for the eye to land. */
+.zone::before {
+  content: "";
+  position: absolute;
+  inset-block-start: -40%;
+  inset-inline-end: -30%;
+  inline-size: 60%;
+  aspect-ratio: 1;
+  border-radius: var(--radius-full);
+  background: radial-gradient(circle, var(--teal-wash), transparent 70%);
+  pointer-events: none;
 }
 
 .zone__days {
+  position: relative;
   font-family: var(--font-display);
   font-size: var(--text-2xl);
   font-weight: 700;
@@ -166,8 +448,37 @@
   letter-spacing: var(--tracking-tight);
 }
 
-.zone h3 { font-size: var(--text-base); margin-block: var(--space-3) var(--space-1); }
-.zone p { font-size: var(--text-sm); color: var(--ink-soft); }
+.zone h3 { position: relative; font-size: var(--text-base); margin-block: var(--space-3) var(--space-1); }
+.zone p { position: relative; font-size: var(--text-sm); color: var(--ink-soft); }
+
+/* ---------- The closer ---------- */
+
+.closer { padding-block-end: var(--space-10); }
+
+.closer__inner {
+  position: relative;
+  max-inline-size: 44rem;
+  margin-inline: auto;
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--line);
+  background:
+    radial-gradient(80% 120% at 50% 0%, var(--teal-wash) 0%, var(--paper) 62%);
+  box-shadow: var(--elev-3), var(--edge);
+  overflow: hidden;
+}
+
+.closer__inner h2 { margin-block-start: var(--space-3); }
+.closer__inner .lede { margin-inline: auto; margin-block-start: var(--space-4); }
+
+.closer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+  margin-block-start: var(--space-7);
+}
 
 /* ---------- 404 ---------- */
 
@@ -179,67 +490,38 @@
 }
 .notfound .wrap { max-inline-size: 34rem; }
 
+.notfound .lede { margin-inline: auto; }
+
+.notfound__code {
+  font-family: var(--font-display);
+  font-size: clamp(5rem, 3rem + 12vw, 10rem);
+  font-weight: 800;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  background: linear-gradient(180deg, var(--teal) 0%, var(--teal-deep) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.notfound__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+  margin-block-start: var(--space-7);
+}
+
 /* ---------- Section rhythm helpers ---------- */
 
 .section__title { margin-block-start: var(--space-3); }
-.section__lede  { margin-block-start: var(--space-4); }
-.hero__lede     { margin-block-start: var(--space-5); }
+.section__lede  { margin-block-start: var(--space-4); max-inline-size: 46ch; }
+.hero__lede     { margin-block-start: var(--space-5); max-inline-size: 40ch; }
 
-/* --ink-soft, not --ink-faint. Warm sections put this on --paper-warm, where
-   --ink-faint measures 4.34:1 and fails AA. It only clears AA on --paper. */
+/* --ink-soft, not --ink-faint. --ink-faint is rated against pure white only,
+   and the field behind the plain sections is not pure white. */
 .footnote {
-  margin-block-start: var(--space-5);
+  margin-block-start: var(--space-6);
   font-size: var(--text-sm);
   color: var(--ink-soft);
 }
-
-/* The whole tile is the link, so the focus ring lands on the card rather than
-   on three words inside it. */
-.tile { padding: 0; }
-.tile__link {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-5);
-  color: var(--ink);
-  text-decoration: none;
-  border-radius: var(--radius-md);
-}
-.tile__link h3 { color: var(--ink); }
-
-/* ---------- The hero assembles itself ----------
-   Two canvases stacked in the stage's own box, which already has its aspect
-   ratio, so swapping the illustration for them moves nothing on the page.
-   The blank mug is underneath and it is a finished picture on its own: if the
-   script stops after inserting these and before starting, the hero still reads
-   as a hero rather than as an empty box. */
-
-.stage__art {
-  position: absolute;
-  inset-block: 0;
-  inset-inline: 0;
-}
-
-.stage__layer {
-  position: absolute;
-  inset-block: 0;
-  inset-inline: 0;
-  inline-size: 100%;
-  block-size: 100%;
-  object-fit: contain;
-}
-
-/* The keyframes own the hidden state, and nothing else does. A static
-   opacity: 0 here would outlive its own animation: the frame that reveals it
-   is a rAF, and a rAF does not fire in a background tab, so the hero would sit
-   on a blank mug for as long as the tab stayed unlooked at. This way the layer
-   is only ever added when it is going to animate, and if it animates in zero
-   time it simply arrives. */
-.stage__layer--top { animation: hero-settle 620ms var(--ease-out) both; }
-
-@keyframes hero-settle {
-  from { opacity: 0; transform: scale(1.05); }
-  to   { opacity: 1; transform: none; }
-}
-
-.stage:has(.stage__art) svg { display: none; }

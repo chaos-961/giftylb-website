@@ -1,0 +1,13 @@
+The sample photographs printed onto the products on the homepage.
+
+Source: picsum.photos, which serves photographs from Unsplash.
+Licence: the Unsplash Licence. Free to use, commercially and otherwise, with no
+permission needed and no attribution required.
+
+  puppy.jpg   picsum id 237    the hero mug and the mug tile
+  coast.jpg   picsum id 1015   the photo block
+  bloom.jpg   picsum id 152    the tote bag
+  dusk.jpg    picsum id 176    spare
+
+They are demonstrations of what a print looks like, not photographs of our own
+work, and nothing on the site claims otherwise. A buyer brings their own.

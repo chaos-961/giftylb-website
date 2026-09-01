@@ -284,8 +284,17 @@
      Painted from the store on every page, so the count is right the moment the
      page renders rather than one frame later. */
 
+  var painted = null;
+
   function paintBadges() {
     var n = Cart.count();
+    /* The badge only jumps when the number actually changed, and never on the
+       first paint. A badge that jumps on every page load is a tic; a badge that
+       jumps the moment something was added two screens ago is the only
+       confirmation that the tap landed. */
+    var moved = painted !== null && painted !== n;
+    painted = n;
+
     var nodes = document.querySelectorAll('[data-cart-count]');
     for (var i = 0; i < nodes.length; i++) {
       nodes[i].textContent = String(n);
@@ -294,7 +303,20 @@
       if (link) {
         link.setAttribute('aria-label', n === 1 ? 'Cart, 1 item' : 'Cart, ' + n + ' items');
       }
+      if (moved && n > 0) bump(nodes[i]);
     }
+  }
+
+  function bump(node) {
+    node.classList.remove('is-bumped');
+    /* Reading a layout value between the two is what makes the class land as a
+       new animation rather than as no change at all. */
+    void node.offsetWidth;
+    node.classList.add('is-bumped');
+    node.addEventListener('animationend', function off() {
+      node.classList.remove('is-bumped');
+      node.removeEventListener('animationend', off);
+    });
   }
 
   /* A second tab that empties the cart must not leave this one showing three

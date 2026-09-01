@@ -1052,3 +1052,157 @@ database really is being read and the geometry really is being rebuilt.
 
 `check-release.mjs` exits 0. `test-mesh.mjs`: every part wound outward. Eight
 routes at 375px: no horizontal scroll, no console errors.
+
+---
+
+## v0.3.3. It stopped looking like a template
+
+Authorised in session 2026-09-01: polish the whole front end, the admin
+included. Design, motion, background, scroll behaviour, and every product
+picture on the site.
+
+The engineering was already sound and the surface was generic: two flat whites
+alternating, outline icons in mint squares, two shadow levels, one fade up, and
+a renderer that drew ceramic as grey plastic. Four things fixed that.
+
+### 1. The renderer got a room
+
+`js/engine/scene.js` lit with three directional lights and a Phong exponent,
+which is why every product came out of it looking like moulded plastic. It now
+has:
+
+- **A procedural studio.** `env(dir, rough)` is a photographer's room: soft
+  ceiling, warm floor, a big key softbox up, left and in front, a cooler fill
+  opposite it, a brightness gradient across the walls, and a dark band at the
+  back wall just under the horizon. Diffuse samples it along the normal,
+  specular along the reflection vector, and roughness widens the sources the way
+  a real blurred reflection does.
+  **The dark band is the single most load bearing line in the file.** A glossy
+  edge with nothing dark to reflect has no edge at all, which is exactly why the
+  first white mug had no silhouette against a white page.
+- **GGX instead of Phong.** Trowbridge-Reitz distribution, Smith geometry,
+  Schlick Fresnel, a dielectric F0 of 0.045 and albedo F0 for metal. Phong has
+  none of those three terms and that is why it reads as plastic.
+- **A clear coat.** A mug is rough ceramic under a hard glaze and one roughness
+  cannot be both, so `coat` layers a second always sharp reflection on top.
+- **A floor.** Every part is drawn a second time through the plane it stands on,
+  faded by how high the part sits, blended under the contact shadow. Two things
+  have to change for it and forgetting either one is the whole effect: the
+  **winding**, because a mirror swaps handedness and the default cull then
+  throws away exactly the surface that should be visible, and the **alpha**,
+  because a floor is not a mirror and a reflection reaching the top of the
+  object reads as a second object standing upside down.
+- **Contact.** Ambient occlusion over the bottom third of the object's height
+  plus a downward facing term, and a contact shadow with two lobes rather than
+  one: a tight dark core where it touches and a wide soft skirt for what the
+  room bounces. One lobe always reads as an airbrushed smudge.
+- **ACES tone mapping**, which rolls highlights off into colour instead of into
+  flat white, and a **dither**.
+
+**Two measured bugs found while tuning it, both from a first version that looked
+plausible and was wrong:**
+
+- **The dither was in linear space.** Half a code value before the gamma is half
+  of the DARKEST eight bit value after it, so a black mug came out covered in
+  visible grain and a white one had none. Moving it after `toSrgb` fixed it. The
+  fix is one line and the symptom looked like a texture bug.
+- **The generic attribute arrays.** The contact shadow's only attribute is
+  generic index 0, which is also `aPos`, and disabling it after that pass turned
+  `aPos` off for everything drawn afterwards. Each mesh pass switches its own
+  three on now rather than trusting what the previous pass left behind.
+
+**Exposure had to be measured, not reasoned about.** The first balance put a
+scanline across a white mug's belly at 188 down to 76, which is a grey mug. Two
+numbers moved it to **239 down to 165**, which is a white one: the ambient
+weight, the direct weight, and one structural fix, which was that the dark back
+wall was being applied to the diffuse term as well and dropping every shadow
+side into the eighties.
+
+### 2. Every product is a photograph now
+
+- **The homepage grid** was six line drawings in six mint squares. It is six
+  real renders carrying real photographs, drawn by `js/showcase.js` after load,
+  one throwaway WebGL context at a time. Six live contexts is most of a
+  browser's budget for the whole tab and the seventh silently kills the first.
+- **The hero** is the real object and it is **turnable**. It spins into view,
+  the photograph settles onto it, then the name types on. Dragging it is the
+  shortest possible demonstration of the sentence the whole site is built on.
+- **The shop cards** were the flat print rendering. They are the object now, one
+  WebGL context per PRODUCT rather than per card, so twelve cards cost six
+  contexts and two cards of the same product are two updates of one scene. The
+  flat render is still the fallback and is still what the proof and the print
+  file come from.
+- **The share card** is a render at eighteen degrees rather than the recipe's
+  opening angle, which needed a five line `turnTo` on the scene API. The recipe
+  angle is chosen to show a buyer that a mug HAS a handle; a share card is
+  chosen to show them the photograph on it.
+
+**A bug that would have shipped invisibly:** `base.css` caps every canvas at
+`max-inline-size: 100%`, which clamped the off screen render canvas to the
+phone's viewport and composed every product into a **360 by 560** frame it was
+never framed for. Both off screen canvases now set `max-inline-size: none`.
+
+### 3. Real photographs
+
+`assets/hero/photo.svg` was a hand drawn vector sunset. It is gone. Four real
+photographs live in `assets/samples/` and are printed onto the products by the
+homepage, the hero and the share card. Provenance and licence in
+`docs/SAMPLE-PHOTOS.txt`: Unsplash, by way of picsum.photos, free for commercial
+use. They are demonstrations of what a print looks like, not photographs of our
+own work, and nothing on the site claims otherwise.
+
+### 4. The surface
+
+- **An atmosphere.** `css/atmosphere.css` is one fixed layer behind everything:
+  two sheets of soft light and a grain over them that stops forty rem gradients
+  banding on an eight bit panel. **Nothing loops.** The field is linked to the
+  SCROLL, not to a clock, so it is perfectly still when the reader is still,
+  costs nothing at idle, and reads as depth rather than as a screensaver.
+  It never sits under small type: sections carrying captions keep an opaque
+  ground, so every ratio in the contrast table is still the ratio on screen.
+- **Four elevation levels**, each a stack of a tight contact term and a wide
+  ambient one, because a single blur always looks like a sticker. Plus `--edge`,
+  one inset hairline, which is the difference between a rectangle of colour and
+  something with a thickness.
+- **A motion layer**, `js/motion.js`: word by word headline reveal, pointer tilt
+  with a moving specular on cards, magnetic call to action buttons, press
+  ripples. All additive, all removed under reduced motion, none of it hiding
+  anything.
+  The magnet writes `--mx` and `--my` rather than an inline transform, because
+  an inline transform is the highest specificity there is and it silently
+  deleted the press scale on the one button that most needs to confirm a tap.
+- **Reveal variants.** Four ways in rather than one fourteen pixel nudge, with a
+  stagger step in the tokens, because using the same entrance for a card grid, a
+  headline and a wide band is what makes a page feel templated even when every
+  other decision on it was right.
+- **A scroll progress line**, a header shade that deepens with the scroll, a
+  hero parallax, a cart badge that jumps when the number really changed and
+  never on first paint, a customizer panel that slides when the tab changes, a
+  proof tick that draws itself once.
+- **Drag inertia** on every 3D preview. Let go while still moving and the object
+  keeps turning and slows down. The release velocity is a running average, not
+  the last sample, because the last sample as a finger lifts is usually zero and
+  the flick died on release every time.
+- **A real footer** on every page, three columns, every link a 44px target.
+- **The admin** got the same tokens, a glass bar, a sign in dot that is the only
+  thing on the screen reporting whether the account is really signed in, status
+  pills with a leading dot so six pastels are not six greys down a long list,
+  and a gate that shakes once on a wrong password. Its stylesheets had been
+  pinned at `?v=0.2.7` since v0.2.7.
+
+### Proven, with pasted output
+
+- `check-release.mjs` exits **0**.
+- `test-mesh.mjs`: **six products, every part wound outward**, after the
+  material rewrite and after resampling the tube paths.
+- **All nine routes at 375px**, measured inside a real 375 wide same origin
+  frame: no horizontal scroll, no spill, no console errors, and the only tap
+  target under 44px anywhere is an inline prose link, which the standing rule
+  allows.
+- **The flick, measured rather than reasoned about**: a synthetic drag changed
+  **21110** sampled pixels, and after the pointer was released the object kept
+  turning for another **1710**.
+- **A white mug's belly** reads **239 at the key edge down to 165 in shadow**,
+  from 188 down to 76 before the exposure pass.
+- The share card is **69856 bytes** and is a render of the real object with a
+  real photograph on it.

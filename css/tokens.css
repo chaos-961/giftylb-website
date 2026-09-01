@@ -11,7 +11,7 @@
   font-weight: 200 800;
   font-stretch: 75% 100%;
   font-display: swap;
-  src: url('../fonts/bricolage-grotesque-var-latin.woff2?v=0.3.2') format('woff2');
+  src: url('../fonts/bricolage-grotesque-var-latin.woff2?v=0.3.3') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
     U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
     U+2212, U+2215, U+FEFF, U+FFFD;
@@ -22,7 +22,7 @@
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url('../fonts/inter-var-latin.woff2?v=0.3.2') format('woff2');
+  src: url('../fonts/inter-var-latin.woff2?v=0.3.3') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
     U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
     U+2212, U+2215, U+FEFF, U+FFFD;
@@ -34,7 +34,7 @@
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
-  src: url('../fonts/caveat-var-latin.woff2?v=0.3.2') format('woff2');
+  src: url('../fonts/caveat-var-latin.woff2?v=0.3.3') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
     U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
     U+2212, U+2215, U+FEFF, U+FFFD;
@@ -109,11 +109,54 @@
   --radius-sm:   6px;
   --radius-md:   12px;
   --radius-lg:   20px;
+  --radius-xl:   28px;
   --radius-full: 999px;
 
-  /* ---------- Elevation. Two levels, deliberately. ---------- */
+  /* ---------- Elevation ----------
+     Four levels rather than two. Two was enough while the page ground was one
+     flat white; once there is an atmosphere behind everything, a card and a
+     floating panel need to read as different distances or the whole page goes
+     soft. Every shadow is a stack: a tight contact term that says "this touches
+     something", and a wide ambient term that says how far above it is. A single
+     blur does one or the other and always looks like a sticker. */
   --elev-1: 0 1px 2px rgb(20 32 31 / 0.04), 0 2px 8px rgb(20 32 31 / 0.05);
   --elev-2: 0 2px 4px rgb(20 32 31 / 0.05), 0 14px 30px rgb(20 32 31 / 0.09);
+  --elev-3: 0 2px 4px rgb(20 32 31 / 0.04),
+            0 10px 22px rgb(20 32 31 / 0.07),
+            0 30px 60px rgb(20 32 31 / 0.10);
+  --elev-4: 0 2px 6px rgb(20 32 31 / 0.05),
+            0 18px 40px rgb(20 32 31 / 0.09),
+            0 48px 90px rgb(20 32 31 / 0.13);
+
+  /* The lift a teal object casts. Grey under a saturated fill reads as dirt. */
+  --elev-teal: 0 2px 6px rgb(15 118 110 / 0.20), 0 12px 28px rgb(20 184 166 / 0.26);
+
+  /* The top edge catching the light. One inset hairline, the difference between
+     a rectangle of colour and something with a thickness to it. */
+  --edge:       inset 0 1px 0 rgb(255 255 255 / 0.72);
+  --edge-quiet: inset 0 1px 0 rgb(255 255 255 / 0.45);
+
+  /* ---------- Atmosphere ----------
+     The page ground is not a colour any more, it is a field. These are the
+     three lights in it. Kept far apart in hue so the drift is readable as
+     movement rather than as one blob breathing. */
+  --air-teal:  rgb(20 184 166 / 0.16);
+  --air-warm:  rgb(255 186 122 / 0.20);
+  --air-cool:  rgb(138 178 255 / 0.16);
+  --air-deep:  rgb(15 118 110 / 0.09);
+
+  /* Glass. Used by anything that floats over the field: the header, the view
+     toggle, the sticky filter bar. Never over plain white, where it does
+     nothing but cost a compositor layer. */
+  --glass:      rgb(255 255 255 / 0.72);
+  --glass-line: rgb(255 255 255 / 0.55);
+  --glass-blur: saturate(1.6) blur(14px);
+
+  /* The studio floor a rendered product sits on. Shared by the hero stage, the
+     customizer stage and every card ground, so a mug looks like it is standing
+     in the same room on all three screens. */
+  --studio: radial-gradient(120% 92% at 50% 4%,
+              #FFFFFF 0%, #F4FBF9 42%, #E8F5F2 74%, #DCEFEB 100%);
 
   /* ---------- Focus. Never the browser default. ----------
      An outline, not a box-shadow. Any component that sets its own box-shadow
@@ -127,10 +170,23 @@
   /* ---------- Motion. One easing family, one duration ladder. ---------- */
   --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  /* Overshoots very slightly and settles. For things that arrive: a chip
+     turning on, a badge counting up, a swatch being chosen. Never for anything
+     that carries text a reader is mid sentence in. */
+  --ease-spring: cubic-bezier(0.34, 1.42, 0.58, 1);
+  /* Leaves fast, lands slow. For things that are being dismissed or committed,
+     where the reader has already decided and waiting on the front of the curve
+     is dead time. */
+  --ease-snap:   cubic-bezier(0.16, 0.9, 0.22, 1);
+
   --t-instant: 120ms;  /* hover, press, toggle */
   --t-quick:   240ms;  /* panels, chips, price tick */
   --t-move:    420ms;  /* page level transitions, sheet open */
   --t-reveal:  700ms;  /* scroll entrances */
+  --t-settle: 1100ms;  /* the once per page moments: the hero, the proof */
+
+  /* One step of a stagger. A list of six is 6 by this, not six times a guess. */
+  --stagger: 62ms;
 
   /* Every animation orients, confirms, or reveals. One that does none is deleted. */
 }
@@ -143,5 +199,7 @@
     --t-quick:   0.01ms;
     --t-move:    0.01ms;
     --t-reveal:  0.01ms;
+    --t-settle:  0.01ms;
+    --stagger:   0ms;
   }
 }

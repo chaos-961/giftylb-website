@@ -430,10 +430,25 @@
         tabs.forEach(function (t) {
           var on = t === tab;
           t.setAttribute('aria-selected', String(on));
-          $(t.getAttribute('aria-controls')).hidden = !on;
+          var panel = $(t.getAttribute('aria-controls'));
+          panel.hidden = !on;
+          /* Three panels share one rectangle, and swapping one for another with
+             nothing in between reads as a repaint rather than as a change. The
+             class is taken off when the animation ends, so it is never on a
+             panel that is simply sitting there. */
+          if (!on) return;
+          panel.classList.remove('is-switching');
+          void panel.offsetWidth;
+          panel.classList.add('is-switching');
         });
       });
     });
+
+    document.addEventListener('animationend', function (e) {
+      if (e.animationName === 'panel-in' && e.target.classList) {
+        e.target.classList.remove('is-switching');
+      }
+    }, true);
   }
 
   /* ------------------------------------------------------------- canvas drag

@@ -2,15 +2,49 @@
    Lifted out of home.css when the shop and the cart arrived, because three
    pages copying a header is how a header starts drifting. */
 
-/* ---------- Header ---------- */
+/* ---------- Header ----------
+   Glass over the field. The solid colour is the declaration and the blur is the
+   upgrade, so a browser without backdrop-filter gets a header that is opaque
+   enough to read against a photograph rather than a transparent one. */
 
 .site-header {
   position: sticky;
   inset-block-start: 0;
   z-index: 20;
-  background: rgb(255 255 255 / 0.86);
-  backdrop-filter: blur(10px);
+  background: rgb(255 255 255 / 0.82);
   border-block-end: 1px solid var(--line);
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .site-header { background: rgb(255 255 255 / 0.68); backdrop-filter: var(--glass-blur); }
+}
+
+/* The shadow under the header. It is a gradient on a pseudo element rather than
+   a box-shadow on the bar, so the scroll timeline below can fade it with an
+   opacity, which the compositor takes, instead of animating a shadow, which it
+   does not. It is present at rest, quietly: a header that only grows a shadow
+   once you scroll looks detached for the first screen. */
+.site-header::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline: 0;
+  block-size: 18px;
+  background: linear-gradient(to bottom, rgb(20 32 31 / 0.055), transparent);
+  pointer-events: none;
+}
+
+@supports (animation-timeline: scroll()) {
+  .site-header::after {
+    animation: header-shade linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 160px;
+  }
+}
+
+@keyframes header-shade {
+  from { opacity: 0.15; }
+  to   { opacity: 1; }
 }
 
 .site-header__inner {
@@ -20,9 +54,12 @@
   min-block-size: 60px;
 }
 
+/* ---------- Wordmark ---------- */
+
 .wordmark {
   display: inline-flex;
   align-items: center;
+  gap: 1px;
   min-block-size: 44px;   /* thumb target, not just the text box */
   font-family: var(--font-display);
   font-weight: 700;
@@ -34,8 +71,28 @@
 }
 .wordmark span { color: var(--teal-deep); }
 
+/* The dot. It is the one piece of identity this site has that is not type, so
+   it earns a press state: it squashes when the wordmark is clicked, which is
+   the smallest possible confirmation that the tap landed. */
+.wordmark::after {
+  content: "";
+  inline-size: 6px;
+  block-size: 6px;
+  margin-inline-start: 3px;
+  margin-block-start: 0.5em;
+  border-radius: var(--radius-full);
+  background: var(--teal);
+  transition: transform var(--t-quick) var(--ease-spring);
+}
+.wordmark:hover::after { transform: translateY(-3px) scale(1.35); }
+.wordmark:active::after { transform: scale(0.7); }
+
+/* ---------- Nav ---------- */
+
 .site-nav { display: flex; align-items: center; gap: var(--space-5); }
+
 .site-nav a {
+  position: relative;
   display: inline-flex;
   align-items: center;
   min-block-size: 44px;
@@ -47,6 +104,22 @@
 }
 .site-nav a:hover { color: var(--ink); }
 .site-nav a[aria-current="page"] { color: var(--ink); font-weight: 600; }
+
+/* The underline grows from the middle out. It is a scaleX on a pseudo element
+   that is always in the layout, so nothing on the bar moves when it appears. */
+.site-nav a::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 10px;
+  inset-inline: 0;
+  block-size: 2px;
+  border-radius: var(--radius-full);
+  background: var(--teal);
+  transform: scaleX(0);
+  transition: transform var(--t-quick) var(--ease-out);
+}
+.site-nav a:hover::after { transform: scaleX(1); }
+.site-nav a[aria-current="page"]::after { transform: scaleX(1); }
 
 /* Below the breakpoint only Shop stays. A phone still needs one way into the
    catalogue from every page, and the rest of the links are homepage anchors. */
@@ -67,9 +140,11 @@
   border-radius: var(--radius-full);
   color: var(--ink);
   text-decoration: none;
-  transition: background-color var(--t-instant) var(--ease-out);
+  transition: background-color var(--t-instant) var(--ease-out),
+              transform var(--t-instant) var(--ease-out);
 }
-.cart-link:hover { background: var(--paper-warm); }
+.cart-link:hover { background: var(--teal-wash); transform: translateY(-1px); }
+.cart-link:active { transform: scale(0.94); }
 .cart-link svg { inline-size: 22px; block-size: 22px; }
 
 .cart-link__count {
@@ -87,26 +162,96 @@
   line-height: 18px;
   text-align: center;
   font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 2px var(--paper);
 }
 
-/* ---------- Footer ---------- */
+/* The badge jumps when the number changes. js/cart.js adds the class and takes
+   it off when the animation ends, so nothing here exists at rest. It is the
+   only confirmation that a tap on Add to cart, two screens away, landed. */
+.cart-link__count.is-bumped { animation: badge-bump 520ms var(--ease-spring) 1; }
+
+@keyframes badge-bump {
+  0%   { transform: scale(1); }
+  32%  { transform: scale(1.55); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-link__count.is-bumped { animation: none; }
+}
+
+/* ---------- Footer ----------
+   Three columns on a desktop, one on a phone. It used to be one line, which is
+   fine for a skeleton and reads as an unfinished site once everything above it
+   is finished. */
 
 .site-footer {
+  position: relative;
+  margin-block-start: var(--space-9);
   border-block-start: 1px solid var(--line);
-  padding-block: var(--space-7);
+  padding-block: var(--space-8) var(--space-6);
   font-size: var(--text-sm);
   color: var(--ink-soft);
+  background: linear-gradient(to bottom, transparent, rgb(236 253 249 / 0.5));
 }
 
 .site-footer__inner {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3) var(--space-5);
-  align-items: baseline;
-  justify-content: space-between;
+  display: grid;
+  gap: var(--space-6);
 }
 
-.site-footer a { color: var(--ink-soft); }
+@media (min-width: 46rem) {
+  .site-footer__inner {
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: var(--space-7);
+  }
+}
+
+.site-footer__brand .wordmark {
+  font-size: var(--text-2xl);
+  margin-inline-end: 0;
+}
+
+.site-footer__say {
+  margin-block-start: var(--space-2);
+  max-inline-size: 30ch;
+  color: var(--ink-soft);
+}
+
+.site-footer h2 {
+  font-size: var(--text-xs);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-block-end: var(--space-3);
+}
+
+.site-footer ul { display: grid; gap: var(--space-1); }
+
+/* A footer link is a real tap target, not a line of prose. Seven of them in a
+   column at 44px is three hundred pixels, which is what a footer is for. */
+.site-footer a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 44px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  transition: color var(--t-instant) var(--ease-out);
+}
+.site-footer a:hover { color: var(--teal-deep); text-decoration: underline; }
+
+.site-footer__base {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  justify-content: space-between;
+  margin-block-start: var(--space-7);
+  padding-block-start: var(--space-4);
+  border-block-start: 1px solid var(--line);
+  font-size: var(--text-xs);
+}
 
 /* ---------- Shared element transition ----------
    A template card carries the design straight into the customizer instead of
@@ -143,3 +288,12 @@
   animation-duration: var(--t-quick);
   animation-timing-function: var(--ease-out);
 }
+
+/* The header does not cross fade with the page. It is the one thing that is
+   genuinely the same object on both screens, so it holds still while the
+   content under it changes, which is what makes the navigation read as one
+   site rather than as two documents. */
+.site-header { view-transition-name: site-header; }
+
+::view-transition-old(site-header),
+::view-transition-new(site-header) { animation: none; }

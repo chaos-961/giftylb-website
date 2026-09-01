@@ -7,41 +7,104 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 
-<link rel="stylesheet" href="../css/tokens.css?v=0.3.2">
-<link rel="stylesheet" href="../css/base.css?v=0.3.2">
+<link rel="stylesheet" href="../css/tokens.css?v=0.3.3">
+<link rel="stylesheet" href="../css/base.css?v=0.3.3">
 
 <style>
-  body { display: grid; place-items: center; min-block-size: 100svb; background: var(--paper-warm); }
+  /* The gate. One card on the same field the storefront and the dashboard both
+     sit on, so the three screens read as one product. */
+  body {
+    display: grid;
+    place-items: center;
+    min-block-size: 100svb;
+    padding: var(--space-5);
+    background: var(--paper-warm);
+    background-image:
+      radial-gradient(44rem 32rem at 12% -6%, rgb(20 184 166 / 0.16), transparent 62%),
+      radial-gradient(38rem 30rem at 92% 8%, rgb(255 186 122 / 0.16), transparent 60%),
+      radial-gradient(46rem 34rem at 78% 96%, rgb(138 178 255 / 0.14), transparent 64%);
+    background-attachment: fixed;
+  }
+
   .gate {
-    inline-size: min(22rem, calc(100vw - 2rem));
+    inline-size: min(23rem, 100%);
     padding: var(--space-7);
     background: var(--paper);
     border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--elev-2);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--elev-4), var(--edge);
   }
+
+  /* It arrives rather than appearing. This is the only screen in the project
+     with nothing else on it, so the one card gets the one animation. */
+  @media (prefers-reduced-motion: no-preference) {
+    .gate { animation: gate-in 620ms var(--ease-out) both; }
+  }
+
+  @keyframes gate-in {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to   { opacity: 1; transform: none; }
+  }
+
   .gate h1 {
-    font-size: var(--text-xl);
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    font-size: var(--text-2xl);
     letter-spacing: -0.03em;
-    margin-block-end: var(--space-5);
+    margin-block-end: var(--space-2);
   }
   .gate h1 span { color: var(--teal-deep); }
+  .gate h1::after {
+    content: "";
+    inline-size: 6px;
+    block-size: 6px;
+    margin-inline-start: 3px;
+    margin-block-start: 0.5em;
+    border-radius: var(--radius-full);
+    background: var(--teal);
+  }
+
+  .gate__sub {
+    font-size: var(--text-sm);
+    color: var(--ink-soft);
+    margin-block-end: var(--space-6);
+  }
+
   .gate label { display: block; font-size: var(--text-sm); font-weight: 600; margin-block-end: var(--space-2); }
   .gate input {
     inline-size: 100%;
     min-block-size: 48px;
-    padding-inline: var(--space-3);
+    padding-inline: var(--space-4);
     border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     background: var(--paper);
     font-size: var(--text-base);
+    transition: border-color var(--t-instant) var(--ease-out);
   }
+  .gate input:hover { border-color: var(--ink-faint); }
+  .gate input:focus-visible { border-color: var(--teal-deep); }
   .gate .btn { inline-size: 100%; margin-block-start: var(--space-4); }
-  .gate p {
+  .gate p.msg {
     margin-block-start: var(--space-4);
     font-size: var(--text-sm);
     min-block-size: 1.4em;
     color: var(--signal);      /* 4.53:1 */
+  }
+
+  /* A wrong password shakes the card once. It is the whole error message: the
+     text underneath says what happened, and this says it landed. */
+  .gate.is-wrong { animation: gate-no 420ms var(--ease-in-out) 1; }
+
+  @keyframes gate-no {
+    0%, 100% { transform: none; }
+    18%      { transform: translateX(-7px); }
+    42%      { transform: translateX(6px); }
+    68%      { transform: translateX(-3px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gate.is-wrong { animation: none; }
   }
 </style>
 </head>
@@ -49,13 +112,14 @@
 
 <form class="gate" id="gate" autocomplete="off">
   <h1>Gift<span>y</span></h1>
+  <p class="gate__sub">The shop's own screens. Orders, products, templates and settings.</p>
   <label for="pw">Password</label>
   <input type="password" id="pw" autocomplete="current-password" autofocus>
   <button class="btn btn--primary" type="submit" id="go">Open</button>
-  <p id="msg" role="status"></p>
+  <p class="msg" id="msg" role="status"></p>
 </form>
 
-<script defer src="payload.js?v=0.3.2"></script>
+<script defer src="payload.js?v=0.3.3"></script>
 <script>
 /* The gate. Derives a key from the password, decrypts the dashboard, and hands
    the document over to it. A wrong password fails at the cipher, so there is
@@ -77,6 +141,10 @@
     for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
     return out;
   };
+
+  form.addEventListener('animationend', function (e) {
+    if (e.animationName === 'gate-no') form.classList.remove('is-wrong');
+  });
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
@@ -111,6 +179,12 @@
       .catch(function () {
         go.disabled = false;
         msg.textContent = 'That password does not open it.';
+        /* The shake is the confirmation that the attempt landed. Removed the
+           moment it ends, so a second wrong password shakes it again rather
+           than doing nothing. */
+        form.classList.remove('is-wrong');
+        void form.offsetWidth;
+        form.classList.add('is-wrong');
         document.getElementById('pw').select();
       });
   });

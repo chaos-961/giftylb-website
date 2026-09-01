@@ -21,10 +21,3 @@ window.GIFTY_CONFIG = {
    it. Cloud Storage left the Spark plan on 2026-02-03, which is the whole
    reason every image on an order rides inside the database instead, base64 and
    split into chunks. See js/order.js. */
-
-/* Analytics. Cookieless, so there is no consent banner on this site and there
-   is not going to be one. While this is empty nothing at all is loaded, which
-   is why a site without analytics makes no third party request rather than a
-   failing one. Empty is also the honest setting right now: the site talks to
-   the database and to nothing else. */
-window.GIFTY_CONFIG.analyticsToken = '';

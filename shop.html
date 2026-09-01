@@ -7,8 +7,8 @@
 <meta name="description" content="Browse gifts by occasion, by who it is for, or by the thing itself. Every design shows the day it lands.">
 <meta name="theme-color" content="#14B8A6">
 <link rel="canonical" href="https://chaos-961.github.io/giftylb-website/shop.html">
-<link rel="icon" href="favicon.svg?v=0.3.2" type="image/svg+xml">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.3.2">
+<link rel="icon" href="favicon.svg?v=0.3.3" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.3.3">
 
 <!-- Share card. The picture is a real render by the product engine, not a
      mock up of one, so what gets shared is what gets made. Absolute URLs
@@ -28,18 +28,45 @@
 <meta name="twitter:description" content="Browse gifts by occasion, by who it is for, or by the thing itself. Every design shows the day it lands.">
 <meta name="twitter:image" content="https://chaos-961.github.io/giftylb-website/assets/og.jpg">
 
-<meta name="version" content="0.3.2">
+<meta name="version" content="0.3.3">
 
-<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.3.2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.3.2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.3.3" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.3.3" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="css/tokens.css?v=0.3.2">
-<link rel="stylesheet" href="css/base.css?v=0.3.2">
-<link rel="stylesheet" href="css/chrome.css?v=0.3.2">
-<link rel="stylesheet" href="css/shop.css?v=0.3.2">
-<link rel="stylesheet" href="css/box.css?v=0.3.2">
+<link rel="stylesheet" href="css/tokens.css?v=0.3.3">
+<link rel="stylesheet" href="css/base.css?v=0.3.3">
+<link rel="stylesheet" href="css/atmosphere.css?v=0.3.3">
+<link rel="stylesheet" href="css/chrome.css?v=0.3.3">
+<link rel="stylesheet" href="css/shop.css?v=0.3.3">
+<link rel="stylesheet" href="css/box.css?v=0.3.3">
+<script>
+/* Two decisions, both before anything paints, both only ever ADDING a class.
+   Nothing on this page is hidden unless one of them is present.
+
+   reveal-js  the scroll driven reveal is unavailable, so the observer path in
+              js/main.js will run instead and it is allowed to hide things.
+   lift-in    motion is welcome, so the first screen may deal itself out. There
+              is no scroll above the fold to key an animation to, so this one is
+              a plain delay and it has to be decided here or the first frame is
+              already painted before it lands. */
+(function(w,d){var ok=w.CSS&&CSS.supports&&CSS.supports('animation-timeline','view()');
+var red=w.matchMedia&&w.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(!ok&&!red&&'IntersectionObserver' in w)d.documentElement.classList.add('reveal-js');
+if(!red)d.documentElement.classList.add('lift-in');})(window,document);
+</script>
 </head>
 <body>
+
+<!-- The air behind the page. Two sheets of soft light that move with the scroll
+     and stand perfectly still when the reader does, and a grain over them that
+     keeps forty rem wide gradients from banding on an eight bit panel. -->
+<div class="atmos" aria-hidden="true">
+  <div class="atmos__far"></div>
+  <div class="atmos__near"></div>
+</div>
+<div class="grain" aria-hidden="true"></div>
+<div class="scroll-line" aria-hidden="true"></div>
+
 
 <a class="skip-link" href="#main">Skip to content</a>
 
@@ -167,23 +194,60 @@
 </main>
 
 <footer class="site-footer">
-  <div class="wrap site-footer__inner">
-    <p>Gifty. Custom gifts, made in Beirut.</p>
-    <p><span id="year">2026</span> Gifty</p>
+  <div class="wrap">
+    <div class="site-footer__inner">
+      <div class="site-footer__brand">
+        <a class="wordmark" href="index.html">Gift<span>y</span></a>
+        <p class="site-footer__say">
+          Custom gifts you design yourself and see before you buy. Printed and delivered in Lebanon.
+        </p>
+      </div>
+
+      <nav aria-labelledby="ft-make">
+        <h2 id="ft-make">Make</h2>
+        <ul role="list">
+          <li><a href="shop.html">All the designs</a></li>
+          <li><a href="customize.html?p=mug">Mug</a></li>
+          <li><a href="customize.html?p=cap">Cap</a></li>
+          <li><a href="customize.html?p=bottle">Bottle</a></li>
+          <li><a href="customize.html?p=tote">Tote bag</a></li>
+          <li><a href="customize.html?p=photo-block">Photo block</a></li>
+          <li><a href="box.html">Gift box</a></li>
+        </ul>
+      </nav>
+
+      <nav aria-labelledby="ft-know">
+        <h2 id="ft-know">Know</h2>
+        <ul role="list">
+          <li><a href="index.html#how">How it works</a></li>
+          <li><a href="index.html#delivery">Delivery and zones</a></li>
+          <li><a href="track.html">Follow your order</a></li>
+          <li><a href="cart.html">Your cart</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="site-footer__base">
+      <p>Made in Beirut. Cash on delivery, Whish Money or OMT.</p>
+      <p><span id="year">2026</span> Gifty</p>
+    </div>
   </div>
 </footer>
 
-<script defer src="js/firebase-config.js?v=0.3.2"></script>
-<script defer src="js/data.js?v=0.3.2"></script>
-<script defer src="js/recipe.js?v=0.3.2"></script>
-<script defer src="js/engine/warp.js?v=0.3.2"></script>
-<script defer src="js/engine/design.js?v=0.3.2"></script>
-<script defer src="js/engine/render.js?v=0.3.2"></script>
-<script defer src="js/engine/price.js?v=0.3.2"></script>
-<script defer src="js/delivery.js?v=0.3.2"></script>
-<script defer src="js/bundle.js?v=0.3.2"></script>
-<script defer src="js/cart.js?v=0.3.2"></script>
-<script defer src="js/shop.js?v=0.3.2"></script>
-<script defer src="js/main.js?v=0.3.2"></script>
+<script defer src="js/firebase-config.js?v=0.3.3"></script>
+<script defer src="js/data.js?v=0.3.3"></script>
+<script defer src="js/recipe.js?v=0.3.3"></script>
+<script defer src="js/engine/warp.js?v=0.3.3"></script>
+<script defer src="js/engine/mesh.js?v=0.3.3"></script>
+<script defer src="js/engine/design.js?v=0.3.3"></script>
+<script defer src="js/engine/render.js?v=0.3.3"></script>
+<script defer src="js/engine/scene.js?v=0.3.3"></script>
+<script defer src="js/engine/price.js?v=0.3.3"></script>
+<script defer src="js/delivery.js?v=0.3.3"></script>
+<script defer src="js/bundle.js?v=0.3.3"></script>
+<script defer src="js/cart.js?v=0.3.3"></script>
+<script defer src="js/shop.js?v=0.3.3"></script>
+<script defer src="js/main.js?v=0.3.3"></script>
+<script defer src="js/motion.js?v=0.3.3"></script>
 </body>
 </html>

@@ -5,12 +5,15 @@
 
 /* ---------- Page head ---------- */
 
-.page-head { padding-block: var(--space-6) var(--space-4); }
-.page-head h1 { font-size: var(--text-2xl); margin-block-start: var(--space-2); }
-.page-head .lede { margin-block-start: var(--space-3); font-size: var(--text-base); }
+.page-head { padding-block: var(--space-7) var(--space-4); }
+.page-head .eyebrow { margin-block-end: var(--space-3); }
+.page-head h1 { font-size: var(--text-3xl); }
+.page-head .lede { margin-block-start: var(--space-3); font-size: var(--text-lg); }
 
 /* ---------- The promise bar ----------
-   The date is the product. It sits above the catalogue, not buried in it. */
+   The date is the product. It sits above the catalogue, not buried in it, and
+   it is the one thing on this screen that is allowed to look like a statement
+   rather than a control. */
 
 .promise-bar {
   display: flex;
@@ -18,23 +21,51 @@
   align-items: center;
   gap: var(--space-2) var(--space-4);
   padding: var(--space-3) var(--space-4);
-  background: var(--teal-wash);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  background: linear-gradient(120deg, var(--teal-wash), rgb(255 255 255 / 0.7));
+  border: 1px solid color-mix(in srgb, var(--teal-deep) 18%, var(--line));
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elev-1), var(--edge);
 }
 
 .promise-bar__line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--teal-deep);   /* 5.47:1 on --paper, 5.28:1 on --teal-wash */
+  font-weight: 700;
+  color: var(--teal-deep);   /* 5.47:1 on --paper, 5.21:1 on --teal-wash */
   margin-inline-end: auto;
+}
+
+/* A dot that pulses twice when the date lands, and never again. The date is
+   worked out asynchronously and a line of text quietly replacing another line
+   of text is a change nobody sees. */
+.promise-bar__line::before {
+  content: "";
+  inline-size: 8px;
+  block-size: 8px;
+  flex: none;
+  border-radius: var(--radius-full);
+  background: var(--teal);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .promise-bar__line::before { animation: dot-pulse 1.4s var(--ease-out) 2; }
+}
+
+/* Transform and opacity only. An expanding box-shadow ring is the obvious way
+   to write this and it repaints the bar on every frame, which is the one thing
+   this project does not allow an animation to do. */
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  40%      { transform: scale(1.55); opacity: 0.55; }
 }
 
 .zone-pick { display: inline-flex; }
 
 .zone-select {
   min-block-size: 44px;
-  padding-inline: var(--space-3);
+  padding-inline: var(--space-4);
   border: 1px solid var(--line);
   border-radius: var(--radius-full);
   background: var(--paper);
@@ -42,11 +73,16 @@
   font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
+  box-shadow: var(--elev-1);
+  transition: border-color var(--t-instant) var(--ease-out),
+              box-shadow var(--t-instant) var(--ease-out);
 }
+.zone-select:hover { border-color: var(--teal-deep); box-shadow: var(--elev-2); }
 
 /* ---------- Chips ---------- */
 
 .chip {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -62,35 +98,49 @@
   cursor: pointer;
   transition: background-color var(--t-instant) var(--ease-out),
               color var(--t-instant) var(--ease-out),
-              border-color var(--t-instant) var(--ease-out);
+              border-color var(--t-instant) var(--ease-out),
+              transform var(--t-instant) var(--ease-out),
+              box-shadow var(--t-instant) var(--ease-out);
 }
-.chip:hover { background: var(--paper-warm); color: var(--ink); }
+.chip:hover {
+  background: var(--paper-warm);
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--teal-deep) 28%, var(--line));
+}
+.chip:active { transform: scale(0.96); }
 
 .chip[aria-pressed="true"] {
   background: var(--teal);
   border-color: var(--teal);
   color: var(--ink);          /* 6.72:1. White here would be 2.49:1. */
-  font-weight: 600;
+  font-weight: 700;
+  box-shadow: var(--elev-teal), var(--edge);
 }
 
 /* ---------- Filters ----------
    Three axes, one scroller each. A phone gets the whole occasion list without
    a menu, and the row scrolls rather than wrapping into four lines. */
 
-.filters { margin-block-start: var(--space-5); }
+.filters {
+  margin-block-start: var(--space-5);
+  padding-block-end: var(--space-2);
+}
 
 .filter-row + .filter-row { margin-block-start: var(--space-3); }
 
 .filter-row__label {
   display: block;
   font-size: var(--text-xs);
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: var(--ink-faint);   /* 4.55:1 on --paper */
+  color: var(--ink-soft);
   margin-block-end: var(--space-2);
 }
 
+/* The row fades out at its trailing edge rather than stopping dead, which is
+   what tells a thumb there is more of it. A mask, so it works over the field
+   behind and over a card, and it costs no extra element. */
 .filter-row__chips {
   display: flex;
   gap: var(--space-2);
@@ -99,6 +149,8 @@
   scrollbar-width: none;
   padding-block-end: var(--space-1);
   scroll-padding-inline: var(--gutter);
+  -webkit-mask-image: linear-gradient(to right, #000 88%, transparent 100%);
+  mask-image: linear-gradient(to right, #000 88%, transparent 100%);
 }
 .filter-row__chips::-webkit-scrollbar { display: none; }
 
@@ -111,7 +163,7 @@
   min-block-size: 44px;
   color: var(--teal-deep);
   font-size: var(--text-sm);
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 0.16em;
   cursor: pointer;
@@ -122,6 +174,7 @@
 .results-count {
   margin-block: var(--space-5) var(--space-3);
   font-size: var(--text-sm);
+  font-weight: 600;
   color: var(--ink-soft);
 }
 
@@ -136,16 +189,16 @@
 }
 
 .design-card {
+  position: relative;
   background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  transition: transform var(--t-quick) var(--ease-out),
-              box-shadow var(--t-quick) var(--ease-out);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elev-1), var(--edge-quiet);
+  transition: box-shadow var(--t-quick) var(--ease-out);
 }
 
 @media (hover: hover) {
-  .design-card:hover { transform: translateY(-3px); box-shadow: var(--elev-2); }
+  .design-card:hover { box-shadow: var(--elev-3), var(--edge); }
 }
 
 .design-card__link {
@@ -154,18 +207,29 @@
   block-size: 100%;
   color: var(--ink);
   text-decoration: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
 .design-card__art {
   position: relative;
   aspect-ratio: 9 / 7;
-  background: var(--teal-wash);
+  background: var(--studio);
+  border-block-end: 1px solid var(--line);
   display: grid;
   place-items: center;
   overflow: hidden;
 }
-.design-card__art canvas { inline-size: 100%; block-size: 100%; object-fit: contain; }
+.design-card__art canvas {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+  transition: transform var(--t-move) var(--ease-out);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .design-card:hover .design-card__art canvas { transform: scale(1.05); }
+}
 
 /* The card paints as soon as the recipe art is decoded, which is a fetch and a
    warp away. Until then the tile is a tinted ground, never a jumping skeleton,
@@ -191,7 +255,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  padding: var(--space-3) var(--space-3) var(--space-4);
+  padding: var(--space-3) var(--space-4) var(--space-4);
   flex: 1;
 }
 
@@ -206,19 +270,23 @@
 .design-card__meta {
   font-size: var(--text-xs);
   color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
 }
 
 .design-card__ready {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   margin-block-start: auto;
-  padding-block-start: var(--space-2);
+  padding-block-start: var(--space-3);
   font-size: var(--text-xs);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--teal-deep);
 }
 
 .design-card__todo {
   font-size: var(--text-xs);
-  color: var(--ink-faint);
+  color: var(--ink-soft);
 }
 
 .no-results {
@@ -258,34 +326,51 @@
   font-size: var(--text-sm);
   font-weight: 600;
   text-decoration: none;
+  box-shadow: var(--elev-1);
+  transition: transform var(--t-instant) var(--ease-out),
+              box-shadow var(--t-instant) var(--ease-out),
+              border-color var(--t-instant) var(--ease-out);
 }
-.blank-row a:hover { background: var(--paper-warm); }
-.blank-row svg { inline-size: 22px; block-size: 22px; color: var(--teal-deep); }
+.blank-row a:hover {
+  background: var(--paper-warm);
+  border-color: color-mix(in srgb, var(--teal-deep) 30%, var(--line));
+  box-shadow: var(--elev-2);
+  transform: translateY(-2px);
+}
+.blank-row svg { inline-size: 24px; block-size: 24px; color: var(--teal-deep); }
 
 /* ---------- Cart ---------- */
 
 .cart-layout { display: grid; gap: var(--space-6); align-items: start; }
 
 @media (min-width: 56rem) {
-  .cart-layout { grid-template-columns: 1fr 20rem; gap: var(--space-8); }
+  .cart-layout { grid-template-columns: 1fr 21rem; gap: var(--space-8); }
+  .cart-side { position: sticky; inset-block-start: 78px; }
 }
 
 .cart-list { display: grid; gap: var(--space-3); }
 
 .cart-item {
   display: grid;
-  grid-template-columns: 5.5rem 1fr;
+  grid-template-columns: 6rem 1fr;
   gap: var(--space-4);
   padding: var(--space-3);
   background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elev-1), var(--edge-quiet);
+  transition: box-shadow var(--t-quick) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .cart-item:hover { box-shadow: var(--elev-2); }
 }
 
 .cart-item__art {
   aspect-ratio: 9 / 7;
-  border-radius: var(--radius-sm);
-  background: var(--teal-wash);
+  border-radius: var(--radius-md);
+  background: var(--studio);
+  border: 1px solid var(--line);
   overflow: hidden;
 }
 .cart-item__art img { inline-size: 100%; block-size: 100%; object-fit: contain; }
@@ -298,7 +383,7 @@
   font-size: var(--text-base);
 }
 .cart-item__lines { font-size: var(--text-xs); color: var(--ink-soft); }
-.cart-item__price { font-weight: 600; }
+.cart-item__price { font-weight: 700; font-variant-numeric: tabular-nums; }
 
 .cart-item__actions {
   display: flex;
@@ -314,6 +399,8 @@
   border: 1px solid var(--line);
   border-radius: var(--radius-full);
   overflow: hidden;
+  background: var(--paper);
+  box-shadow: var(--elev-1);
 }
 .qty button {
   inline-size: 44px;
@@ -324,13 +411,15 @@
   font-size: var(--text-lg);
   line-height: 1;
   cursor: pointer;
+  transition: background-color var(--t-instant) var(--ease-out);
 }
-.qty button:hover:not(:disabled) { background: var(--paper-warm); }
+.qty button:hover:not(:disabled) { background: var(--teal-wash); }
+.qty button:active:not(:disabled) { background: var(--teal); }
 .qty button:disabled { color: var(--ink-faint); cursor: default; }
 .qty output {
   min-inline-size: 2rem;
   text-align: center;
-  font-weight: 600;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
@@ -353,35 +442,38 @@
   display: grid;
   gap: var(--space-4);
   padding: var(--space-5);
-  background: var(--paper-warm);
+  background: var(--paper);
   border: 1px solid var(--line);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elev-2), var(--edge);
 }
 
 .cart-side h2 { font-size: var(--text-lg); }
 
 .cart-side__zone { display: grid; gap: var(--space-2); }
-/* --ink-soft, not --ink-faint. This card sits on --paper-warm, where
-   --ink-faint measures 4.34:1 and fails. */
 .cart-side__area { font-size: var(--text-xs); color: var(--ink-soft); }
 
 .totals { display: grid; gap: var(--space-2); font-size: var(--text-sm); }
 .totals div { display: flex; justify-content: space-between; gap: var(--space-4); }
+.totals span:last-child { font-variant-numeric: tabular-nums; }
 .totals .totals__grand {
   padding-block-start: var(--space-3);
   border-block-start: 1px solid var(--line);
   font-family: var(--font-display);
-  font-size: var(--text-lg);
+  font-size: var(--text-xl);
   font-weight: 700;
 }
 
 .cart-promise {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   padding: var(--space-3);
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
+  background: var(--teal-wash);
+  border: 1px solid color-mix(in srgb, var(--teal-deep) 18%, var(--line));
+  border-radius: var(--radius-md);
   font-size: var(--text-sm);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--teal-deep);
 }
 
@@ -397,6 +489,7 @@
   padding: var(--space-4);
   border: 1px solid var(--signal);
   border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--signal) 5%, var(--paper));
   color: var(--signal);
   font-size: var(--text-sm);
 }

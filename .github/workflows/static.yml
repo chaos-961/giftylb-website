@@ -31,7 +31,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _site/css _site/js _site/js/engine _site/fonts _site/admin _site/data
-          mkdir -p _site/assets/hero
+          mkdir -p _site/assets/samples
           mkdir -p _site/assets/products/mug _site/assets/products/cap
           mkdir -p _site/assets/products/bottle _site/assets/products/tote
           mkdir -p _site/assets/products/photo-block _site/assets/products/gift-box
@@ -61,6 +61,7 @@ jobs:
 
           cp css/tokens.css _site/css/tokens.css
           cp css/base.css _site/css/base.css
+          cp css/atmosphere.css _site/css/atmosphere.css
           cp css/chrome.css _site/css/chrome.css
           cp css/home.css _site/css/home.css
           cp css/shop.css _site/css/shop.css
@@ -71,6 +72,8 @@ jobs:
           cp js/firebase-config.js _site/js/firebase-config.js
           cp js/main.js _site/js/main.js
           cp js/hero.js _site/js/hero.js
+          cp js/motion.js _site/js/motion.js
+          cp js/showcase.js _site/js/showcase.js
           cp js/bundle.js _site/js/bundle.js
           cp js/box.js _site/js/box.js
           cp js/data.js _site/js/data.js
@@ -128,7 +131,14 @@ jobs:
           cp assets/products/gift-box/mask-box.svg _site/assets/products/gift-box/mask-box.svg
           cp assets/products/gift-box/mask-ribbon.svg _site/assets/products/gift-box/mask-ribbon.svg
 
-          cp assets/hero/photo.svg _site/assets/hero/photo.svg
+          # The sample photographs the homepage prints onto the products. Real
+          # pictures rather than a vector stand in, because a mug is being sold
+          # on how a photograph looks wrapped around it. Free to use, from
+          # Unsplash by way of picsum.photos. See assets/samples/SOURCE.txt.
+          cp assets/samples/puppy.jpg _site/assets/samples/puppy.jpg
+          cp assets/samples/coast.jpg _site/assets/samples/coast.jpg
+          cp assets/samples/bloom.jpg _site/assets/samples/bloom.jpg
+          cp assets/samples/dusk.jpg _site/assets/samples/dusk.jpg
           cp assets/og.jpg _site/assets/og.jpg
 
           cp fonts/bricolage-grotesque-var-latin.woff2 _site/fonts/bricolage-grotesque-var-latin.woff2

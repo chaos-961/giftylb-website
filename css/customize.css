@@ -72,8 +72,17 @@ body.customizer {
   /* The preview is the hero and stays the largest thing on screen. The dock
      is capped below so it can never grow past this. */
   min-block-size: 40dvb;
-  background:
-    radial-gradient(120% 80% at 50% 8%, var(--paper) 0%, var(--teal-wash) 100%);
+  background: var(--studio);
+}
+
+/* The vignette. One gradient, no blur and no extra element, and it is what puts
+   the object IN the room rather than on top of a coloured rectangle. */
+.cz-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 100% at 50% 30%, transparent 54%, rgb(20 32 31 / 0.08) 100%);
 }
 
 .cz-canvas-wrap {
@@ -120,8 +129,11 @@ body.customizer {
 /* The one place on this screen where a hint has to sit on top of the artwork,
    so it is a pill rather than a line of text, and it fades once the buyer has
    turned the thing themselves. */
+/* Above the stage vignette, which is a pseudo element on the stage and
+   therefore paints after everything inside it. */
 .cz-view {
   position: absolute;
+  z-index: 2;
   inset-block-end: var(--space-3);
   inset-inline-start: 50%;
   transform: translateX(-50%);
@@ -162,6 +174,8 @@ body.customizer {
 }
 
 .cz-chip {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -205,11 +219,13 @@ body.customizer {
 
 .cz-dock {
   flex: none;
+  position: relative;
+  z-index: 1;
   background: var(--paper);
   border-block-start: 1px solid var(--line);
-  border-start-start-radius: var(--radius-lg);
-  border-start-end-radius: var(--radius-lg);
-  box-shadow: var(--elev-2);
+  border-start-start-radius: var(--radius-xl);
+  border-start-end-radius: var(--radius-xl);
+  box-shadow: 0 -2px 6px rgb(20 32 31 / 0.05), 0 -18px 40px rgb(20 32 31 / 0.09), var(--edge);
   display: flex;
   flex-direction: column;
   min-block-size: 0;
@@ -248,6 +264,21 @@ body.customizer {
   background: var(--teal-wash);
   color: var(--teal-deep);
   border-color: color-mix(in srgb, var(--teal-deep) 22%, var(--line));
+  font-weight: 700;
+}
+.cz-tab:active { transform: scale(0.97); }
+
+/* The panel slides in from the side the tab is on. It is a hundred and eighty
+   milliseconds and it does one job: it says the dock changed, on a screen where
+   three panels share exactly the same rectangle. The class belongs to the code
+   that switches tabs, so a panel that was simply rendered is not animated. */
+@media (prefers-reduced-motion: no-preference) {
+  .cz-panel.is-switching { animation: panel-in 260ms var(--ease-out) 1; }
+}
+
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
 }
 
 .cz-panels {
@@ -337,10 +368,12 @@ input[type="range"] {
   padding: 0;
   transition: transform var(--t-instant) var(--ease-out);
 }
-.cz-swatch:hover { transform: scale(1.06); }
+.cz-swatch:hover { transform: scale(1.1); }
+.cz-swatch:active { transform: scale(0.94); }
 .cz-swatch[aria-pressed="true"] {
   outline: var(--focus-width) solid var(--teal-deep);
-  outline-offset: 2px;
+  outline-offset: 3px;
+  transform: scale(1.06);
 }
 
 .cz-partname {
@@ -357,6 +390,7 @@ input[type="range"] {
 
 .cz-pricebar {
   flex: none;
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-3);
