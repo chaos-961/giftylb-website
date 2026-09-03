@@ -35,7 +35,12 @@
       "id": "acrylic",
       "name": "The photo",
       "viewId": "front",
-      "rect": { "x": 268, "y": 120, "w": 364, "h": 356 },
+      "rect": {
+        "x": 268,
+        "y": 120,
+        "w": 364,
+        "h": 356
+      },
       "warp": {
         "type": "quad",
         "quad": [
@@ -58,7 +63,12 @@
       "id": "caption",
       "name": "Engraved caption",
       "viewId": "front",
-      "rect": { "x": 238, "y": 486, "w": 424, "h": 50 },
+      "rect": {
+        "x": 238,
+        "y": 486,
+        "w": 424,
+        "h": 50
+      },
       "warp": {
         "type": "quad",
         "quad": [
@@ -125,7 +135,12 @@
     }
   ],
   "model": {
-    "camera": { "fov": 30, "yawDeg": -21, "pitchDeg": 10, "dist": 0.94 },
+    "camera": {
+      "fov": 30,
+      "yawDeg": -21,
+      "pitchDeg": 10,
+      "dist": 0.94
+    },
     "shadow": 0.34,
     "parts": [
       {
@@ -133,11 +148,11 @@
         "color": "#EEF4F4",
         "gloss": 0.95,
         "size": [1.62, 1.58, 0.14],
-        "bevel": 0.028,
+        "bevel": 0.018,
         "arcSteps": 4,
         "flatSteps": 5,
         "printFace": "+z",
-        "at": [0, 0.07, 0],
+        "at": [0, 0.09, 0],
         "prints": [
           {
             "zoneId": "acrylic",
@@ -145,7 +160,20 @@
           }
         ],
         "rough": 0.045,
-        "coat": 0.55
+        "coat": 0.55,
+        "rotX": -3
+      },
+      {
+        "kind": "box",
+        "color": "#2B3332",
+        "gloss": 0.2,
+        "size": [1.68, 0.05, 0.2],
+        "bevel": 0.012,
+        "arcSteps": 2,
+        "flatSteps": 2,
+        "printFace": "none",
+        "at": [0, -0.715, 0],
+        "rough": 0.6
       },
       {
         "kind": "box",

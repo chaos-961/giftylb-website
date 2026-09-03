@@ -340,27 +340,45 @@
 
     /* An optional rigid placement, so a lid can be described at the origin and
        then put on top of the box rather than authored in world coordinates. */
-    if (part.at || part.scale || part.rotY) {
+    if (part.at || part.scale || part.rotY || part.rotX || part.rotZ) {
       var at = part.at || [0, 0, 0];
       var sc = part.scale || [1, 1, 1];
       if (typeof sc === 'number') sc = [sc, sc, sc];
+      /* Scale first, then lean (X), then roll (Z), then turn (Y), then move.
+         The order is fixed so a recipe can be read: a ribbon tail is authored
+         hanging straight down, tilted outward, then swung round to its corner.
+         Rotations are rigid, so the normals take exactly the same rotations
+         and only the scale needs the inverse transpose. */
+      var rx = (part.rotX || 0) * Math.PI / 180;
+      var rz = (part.rotZ || 0) * Math.PI / 180;
       var ry = (part.rotY || 0) * Math.PI / 180;
+      var cx = Math.cos(rx), sx = Math.sin(rx);
+      var cz = Math.cos(rz), sz = Math.sin(rz);
       var cs = Math.cos(ry), sn = Math.sin(ry);
       var p = mesh.position, nm = mesh.normal;
+      function turn(v) {
+        var x = v[0], y = v[1], z = v[2], t;
+        t = y * cx - z * sx; z = y * sx + z * cx; y = t;        /* about X */
+        t = x * cz - y * sz; y = x * sz + y * cz; x = t;        /* about Z */
+        t = x * cs + z * sn; z = -x * sn + z * cs; x = t;       /* about Y */
+        v[0] = x; v[1] = y; v[2] = z;
+        return v;
+      }
+      var v = [0, 0, 0];
       for (var i = 0; i < p.length; i += 3) {
-        var x = p[i] * sc[0], y = p[i + 1] * sc[1], z = p[i + 2] * sc[2];
-        p[i] = x * cs + z * sn + at[0];
-        p[i + 1] = y + at[1];
-        p[i + 2] = -x * sn + z * cs + at[2];
+        v[0] = p[i] * sc[0]; v[1] = p[i + 1] * sc[1]; v[2] = p[i + 2] * sc[2];
+        turn(v);
+        p[i] = v[0] + at[0];
+        p[i + 1] = v[1] + at[1];
+        p[i + 2] = v[2] + at[2];
         /* A normal transforms by the inverse transpose, which for a diagonal
            scale is one over the scale. Get this wrong and a squashed part
            lights as though it were not squashed. */
-        var nx = nm[i] / sc[0], ny = nm[i + 1] / sc[1], nz = nm[i + 2] / sc[2];
-        var nl = Math.sqrt(nx * nx + ny * ny + nz * nz) || 1;
-        nx /= nl; ny /= nl; nz /= nl;
-        nm[i] = nx * cs + nz * sn;
-        nm[i + 1] = ny;
-        nm[i + 2] = -nx * sn + nz * cs;
+        v[0] = nm[i] / sc[0]; v[1] = nm[i + 1] / sc[1]; v[2] = nm[i + 2] / sc[2];
+        var nl = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]) || 1;
+        v[0] /= nl; v[1] /= nl; v[2] /= nl;
+        turn(v);
+        nm[i] = v[0]; nm[i + 1] = v[1]; nm[i + 2] = v[2];
       }
     }
 

@@ -69,26 +69,6 @@
      have painted. On the scroll driven path there is nothing to do: a view()
      timeline attaches itself the moment the element exists. Defined before both
      early returns so a caller never has to know which path it got. */
-  G.reveal = function () {};
-
-  if (!document.documentElement.classList.contains('reveal-js')) return;
-
-  var targets = document.querySelectorAll('.reveal');
-  if (!targets.length) return;
-
-  var io = new IntersectionObserver(function (entries) {
-    for (var i = 0; i < entries.length; i++) {
-      if (!entries[i].isIntersecting) continue;
-      entries[i].target.classList.add('is-in');
-      io.unobserve(entries[i].target);
-    }
-  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.05 });
-
-  for (var i = 0; i < targets.length; i++) io.observe(targets[i]);
-
-  G.reveal = function (root) {
-    var late = (root || document).querySelectorAll('.reveal:not(.is-in)');
-    for (var k = 0; k < late.length; k++) io.observe(late[k]);
-  };
-
+  /* The observer itself moved to js/nav.js in v0.3.5, because every page has
+     reveals now and only this one loaded this file. Nothing to do here. */
 })(window.Gifty = window.Gifty || {});

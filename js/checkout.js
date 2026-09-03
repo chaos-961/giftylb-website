@@ -191,22 +191,72 @@
     };
   }
 
+  /* What has to be true before an order is placed, each with the sentence
+     that goes next to the box when it is not. The button is not greyed out
+     until these pass: a disabled button with no explanation was the worst
+     version of this form, so it is live whenever ordering is on, and pressing
+     it with something missing says what and puts the cursor there. */
+  var RULES = [
+    { id: 'name', ok: function (v) { return v.name.length >= 2; }, say: 'Your name, so the driver knows who to ask for.' },
+    { id: 'phone', ok: function (v) { return v.phone.replace(/\D/g, '').length >= 6; }, say: 'A phone number the driver can call.' },
+    { id: 'address', ok: function (v) { return v.address.length >= 5; }, say: 'The street and the building, at least.' },
+    { id: 'reference', ok: function (v) { return !payment || !payment.needsReference || v.reference.length >= 3; }, say: 'The reference the transfer gave you.' },
+    { id: 'approve', ok: function () { return $('approve').checked; }, say: 'Tick this once the proof looks right.' }
+  ];
+  var touched = {};
+
+  function say(id, message) {
+    var out = $('err-' + id);
+    if (!out) return;
+    out.hidden = !message;
+    out.textContent = message || '';
+    var field = $(id);
+    if (field && id !== 'approve') field.setAttribute('aria-invalid', message ? 'true' : 'false');
+    if (id === 'approve') $('approveBox').classList.toggle('is-missing', !!message);
+  }
+
+  function problems() {
+    var v = values();
+    return RULES.filter(function (r) { return !r.ok(v); });
+  }
+
   function validate() {
     if (busy) return false;
-    var v = values();
-    var ok = $('approve').checked
-      && v.name.length >= 2
-      && v.phone.length >= 6
-      && v.address.length >= 5
-      && !!payment
-      && (!payment.needsReference || v.reference.length >= 3)
-      /* Not "!READY ||". A flag that says a thing is not configured has to gate
-         with &&: written "!READY || ..." it reads as "only required when on"
-         and means "never required", which is how a buyer once got all the way
-         to a network error after typing out their address. */
-      && READY;
-    $('place').disabled = !ok;
+    var bad = problems();
+    RULES.forEach(function (r) {
+      if (!touched[r.id]) return;
+      var miss = bad.some(function (b) { return b.id === r.id; });
+      say(r.id, miss ? r.say : '');
+    });
+    /* Not "!READY ||". A flag that says a thing is not configured has to gate
+       with &&: written "!READY || ..." it reads as "only required when on"
+       and means "never required", which is how a buyer once got all the way
+       to a network error after typing out their address. */
+    var ok = !bad.length && !!payment && READY;
+    $('place').disabled = !READY;
     return ok;
+  }
+
+  /* Pressed with something missing: every rule is marked, the first missing
+     box gets the cursor, and the side says why the order did not go. */
+  function explain() {
+    RULES.forEach(function (r) { touched[r.id] = true; });
+    var bad = problems();
+    validate();
+    if (!payment) {
+      $('formError').hidden = false;
+      $('formError').textContent = 'Pick how you want to pay, just above.';
+    } else if (bad.length) {
+      $('formError').hidden = false;
+      $('formError').textContent = bad.length === 1 ? 'One thing above still needs filling in.' : 'A couple of things above still need filling in.';
+    }
+    var first = bad[0] && $(bad[0].id);
+    if (first && first.focus) {
+      first.focus({ preventScroll: true });
+      first.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    } else if (!payment && $('pays')) {
+      $('pays').scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
   }
 
   /* ------------------------------------------------------------------ order */
@@ -220,7 +270,7 @@
   }
 
   function place() {
-    if (!validate()) return;
+    if (!validate()) { explain(); return; }
     busy = true;
     $('formError').hidden = true;
     $('place').disabled = true;
@@ -406,8 +456,13 @@
         ['approve', 'name', 'phone', 'email', 'address', 'reference'].forEach(function (id) {
           $(id).addEventListener('input', validate);
           $(id).addEventListener('change', validate);
+          /* A box is judged once the buyer has left it, never while they are
+             still typing in it. */
+          $(id).addEventListener('blur', function () { touched[id] = true; validate(); });
         });
         $('place').addEventListener('click', place);
+        var form = $('checkoutForm');
+        if (form) form.addEventListener('submit', function (e) { e.preventDefault(); place(); });
         validate();
       })
       .catch(function (err) {

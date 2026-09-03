@@ -1347,3 +1347,108 @@ address found none of them.
 
 Both test orders were deleted, document, subcollections and throttle document,
 and `orders` and `throttle` were both confirmed empty afterwards.
+
+
+## v0.3.5, 2026-09-04. Better shapes, more to change, a phone menu, and one bad proof
+
+Authorised in session 2026-09-04 as one polish release: models, customization,
+mobile UI, scroll animation, bugs, push. Then the user reported that the admin
+was showing a mug "not correctly", which turned out to be the most important
+line in the release.
+
+### The proof was wrong, and so was the print file
+
+The admin was fine. The proof it showed for order `GFT-674332` was a white mug
+with the buyer's photograph as a thin strip in the top left of the wrap and the
+name where it should be. The strip was the bug. The customizer works out a
+photo's zoom, `k`, against the upload's own pixel size, and the snapshot saves
+that `k` together with `natW` and `natH`. Across a page the upload is gone and
+`State.hydrate` reloads the 1800px autosave copy, then set `natW` and `natH`
+from that copy while keeping the old `k`. A 4000px phone photo therefore drew
+at 45% of the size the buyer chose, in one corner, on the checkout proof and on
+the print file both. Any photo under 1800px on its longest edge was unaffected,
+which is why every test order and every sample photograph passed.
+
+The fix is one line: `k` is rescaled by the ratio of the saved width to the
+copy's width, so the drawn size is exactly what was chosen and the resolution
+gate now reports the copy, which is what will really print. Proven with a 3200
+by 2400 canvas photo at zoom 160: drawn width 1385.6 before and 1385.6 after a
+reload with the cache cleared, and the centre and corner pixels of the two
+renders agree to within one level.
+
+`GFT-674332` was placed with the old code. Its proof and its print file are
+wrong and the buyer's full photograph is in `orders/GFT-674332/print`, so it
+can be remade by hand or re-placed once this is live.
+
+### The models, as data
+
+`js/engine/mesh.js` gained `rotX` and `rotZ` next to `rotY`, applied scale,
+then X, then Z, then Y, then move, with the normals taking the same rotations.
+That is the whole of the engine change. With it:
+
+- **bottle**: a lipped lid with a collar groove and a dome, a carry loop as a
+  tube in the lid's metal, a softer shoulder, a chamfered base, a band with a
+  rounded section.
+- **cap**: a lower crown that stops looking like a bowler, a bill that subtends
+  130 degrees instead of 152 and curls down harder.
+- **photo block**: the pane leans back three degrees into a dark slot cut into
+  the base, and its bevel is a polished chamfer rather than a soft round.
+- **gift box**: the ribbon is ten thin strips lying on the lid and the sides
+  rather than two slabs passing through the box, with a knot, two tails on the
+  lid, and the card leaning against the front at sixteen degrees with its foot
+  on the floor.
+
+`test-mesh.mjs`: six products, every part wound outward, 18 parts on the box.
+Rendered through `tools/probe-3d.html` against the local bundle (the emulator
+port refused, so the storefront fell back to `data/catalogue.json`, which is
+the way to see local recipe edits without seeding).
+
+### More to change
+
+Text: alignment, tracking, all caps, an outline in a contrast colour chosen
+from the text colour, a drop shadow, and a curve of up to sixty degrees each
+way, drawn one glyph at a time along an arc. Typed line breaks are honoured
+where the recipe allows more than one line, and the words box is a textarea
+that grows a row per allowed line. Photo: a quarter turn, a mirror, six looks
+(as it is, black and white, sepia, warm, cool, pop) as a cached pass over the
+pixels, and four windows (full, soft corners, round, heart). Zone: a background
+colour on the mug wrap and the tote, priced as an extra and bounded by
+`maxExtras` like every other one.
+
+Every new field has a default in `Design.TEXT_DEFAULTS` and
+`Design.PHOTO_DEFAULTS`, rides through `State.snapshot` and `hydrate`, is
+copied by `fromTemplate`, and is range checked by `check-release.mjs` 5c.
+Proven in headless Chrome at 375px: heart-shaped sepia rotated photo, butter
+fill, two priced lines, curved right-aligned caps with an outline, price
+breakdown `Mug $12, Photo print $3, Text line x2 $3, Background colour $1.50`,
+undo walking back through every one, and the snapshot carrying all of it.
+
+### The front end
+
+- A phone menu, `js/nav.js` and a sheet under the header. Before this a phone
+  could not reach "How it works" or "Delivery" from any page but the homepage.
+- A back to top button after a screen and a half, parked below the edge by a
+  transform rather than an opacity so the rule that hides it cannot strand it.
+- `--header-h`, `scroll-padding-block-start` on the root, and the three sticky
+  sidebars reading the token instead of 76 and 78.
+- The hover tilt never worked: the CSS was written for a `.tilt` class nothing
+  set. And once the selector matched, the tile's own reveal animation, a
+  `transform` with fill `both`, kept overriding it. The lean now lives on the
+  individual `rotate` and `translate` properties, which compose with an
+  animated transform. Measured: `rotate: 0.7 0.8 0.001 3.4deg` on hover,
+  `0deg` after leave.
+- On a phone the hero's object comes right after the headline.
+- The steps rail fills as each step comes into view, a scale on the pseudo
+  element under a view() timeline.
+- A questions section with six real answers and `FAQPage` structured data.
+- Checkout: the fields are a form, each required box says what it needs once
+  it has been left, and pressing the button with something missing focuses the
+  first missing box instead of sitting greyed out with no explanation.
+- The cart has a total bar stuck to the bottom of a phone screen.
+- "From $12" stamped on each homepage tile by the showcase from the recipe it
+  drew, so it is the catalogue's number and not a second price list.
+- The reveal observer moved from `js/main.js` to `js/nav.js`, so `.reveal` is
+  safe on every page.
+
+Nine routes at 375px in real headless Chrome: no console errors, no horizontal
+overflow, nothing left at opacity 0.

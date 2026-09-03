@@ -186,6 +186,7 @@
     $('totalSavingRow').hidden = saving <= 0;
     $('totalDelivery').textContent = money(zone.fee);
     $('totalGrand').textContent = money(Math.round((subtotal + zone.fee - saving) * 100) / 100);
+    if ($('barTotal')) $('barTotal').textContent = $('totalGrand').textContent;
 
     var promise = G.Delivery.promise(G.Cart.leadTimeDays(), zoneId);
     $('cartPromise').textContent = G.Delivery.sentence(promise);

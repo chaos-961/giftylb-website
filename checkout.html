@@ -7,21 +7,21 @@
 <meta name="description" content="See exactly what goes to print, approve it, and tell us where to send it.">
 <meta name="theme-color" content="#14B8A6">
 <meta name="robots" content="noindex">
-<link rel="icon" href="favicon.svg?v=0.3.4" type="image/svg+xml">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.3.4">
+<link rel="icon" href="favicon.svg?v=0.3.5" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.3.5">
 
-<meta name="version" content="0.3.4">
+<meta name="version" content="0.3.5">
 
-<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.3.4" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.3.4" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.3.5" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.3.5" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="css/tokens.css?v=0.3.4">
-<link rel="stylesheet" href="css/base.css?v=0.3.4">
-<link rel="stylesheet" href="css/atmosphere.css?v=0.3.4">
-<link rel="stylesheet" href="css/chrome.css?v=0.3.4">
-<link rel="stylesheet" href="css/shop.css?v=0.3.4">
-<link rel="stylesheet" href="css/box.css?v=0.3.4">
-<link rel="stylesheet" href="css/checkout.css?v=0.3.4">
+<link rel="stylesheet" href="css/tokens.css?v=0.3.5">
+<link rel="stylesheet" href="css/base.css?v=0.3.5">
+<link rel="stylesheet" href="css/atmosphere.css?v=0.3.5">
+<link rel="stylesheet" href="css/chrome.css?v=0.3.5">
+<link rel="stylesheet" href="css/shop.css?v=0.3.5">
+<link rel="stylesheet" href="css/box.css?v=0.3.5">
+<link rel="stylesheet" href="css/checkout.css?v=0.3.5">
 <script>
 /* Two decisions, both before anything paints, both only ever ADDING a class.
    Nothing on this page is hidden unless one of them is present.
@@ -61,6 +61,10 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
       <a href="index.html#how">How it works</a>
       <a href="index.html#delivery">Delivery</a>
     </nav>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="navSheet" aria-label="Menu">
+      <svg class="bars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
     <a class="cart-link" href="cart.html" aria-label="Cart">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M5 8h14l1 12H4z"/>
@@ -70,6 +74,20 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
     </a>
   </div>
 </header>
+<!-- The phone menu. Hidden until js/nav.js opens it; a page without the script
+     has a header with Shop and the cart, which is what it had before. -->
+<div class="nav-sheet" id="navSheet" hidden>
+  <nav class="nav-sheet__panel" aria-label="Menu">
+      <a href="shop.html">All the designs <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
+      <a href="box.html">Build a gift box <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
+      <a href="cart.html">Your cart <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
+    <div class="nav-sheet__minor">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#delivery">Delivery and zones</a>
+      <a href="track.html">Follow your order</a>
+    </div>
+  </nav>
+</div>
 
 <main id="main">
   <div class="wrap">
@@ -91,7 +109,7 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
     <!-- ----------------------------------------------------------- order -->
     <div id="flow">
 
-      <div class="page-head">
+      <div class="page-head reveal">
         <h1>Check it, then order.</h1>
         <p class="lede">This is exactly what goes to print. Nothing is made until you say so.</p>
       </div>
@@ -110,7 +128,7 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
 
       <div class="checkout" id="checkout" hidden>
 
-        <div class="checkout__main">
+        <form class="checkout__main" id="checkoutForm" novalidate>
           <section aria-labelledby="proofHead">
             <h2 class="step" id="proofHead"><span class="step__n">1</span> Your proof</h2>
             <ul class="proofs" id="proofs" role="list"></ul>
@@ -122,6 +140,7 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
                 <span class="approve__sub">We print exactly this. Colours on a screen and colours on a mug are never a perfect match.</span>
               </span>
             </label>
+            <p class="field__error" id="err-approve" hidden></p>
           </section>
 
           <section aria-labelledby="detailsHead">
@@ -130,16 +149,18 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
             <div class="field">
               <label for="name">Your name</label>
               <input type="text" id="name" autocomplete="name" maxlength="80" required>
+              <p class="field__error" id="err-name" hidden></p>
             </div>
             <div class="field">
               <label for="phone">Phone</label>
               <input type="tel" id="phone" autocomplete="tel" maxlength="24" placeholder="03 123 456" required>
+              <p class="field__error" id="err-phone" hidden></p>
               <p class="field__hint">So the driver can call when they are outside.</p>
             </div>
             <div class="field">
               <label for="email">Email <span class="field__opt">optional</span></label>
               <input type="email" id="email" autocomplete="email" maxlength="120">
-              <p class="field__hint">Where we send the confirmation and the tracking link.</p>
+              <p class="field__hint">In case the phone does not answer. Nothing is sent to it otherwise.</p>
             </div>
             <div class="field">
               <label for="zone">Area</label>
@@ -149,6 +170,7 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
             <div class="field">
               <label for="address">Address</label>
               <textarea id="address" rows="3" maxlength="400" autocomplete="street-address" required></textarea>
+              <p class="field__error" id="err-address" hidden></p>
               <p class="field__hint">Street, building, floor, and a landmark if there is one.</p>
             </div>
           </section>
@@ -160,6 +182,7 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
             <div class="field" id="refField" hidden>
               <label for="reference">Transfer reference</label>
               <input type="text" id="reference" maxlength="60">
+              <p class="field__error" id="err-reference" hidden></p>
               <p class="field__hint">The number the transfer gives you, so we can match it.</p>
             </div>
 
@@ -168,7 +191,7 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
               <textarea id="notes" rows="2" maxlength="600"></textarea>
             </div>
           </section>
-        </div>
+        </form>
 
         <aside class="checkout__side" aria-label="Total">
           <h2>The order</h2>
@@ -183,7 +206,7 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
 
           <p class="cart-error" id="formError" hidden role="alert"></p>
 
-          <button class="btn btn--primary checkout__go" type="button" id="place" disabled>
+          <button class="btn btn--primary checkout__go" type="submit" form="checkoutForm" id="place" disabled>
             Place the order
           </button>
           <p class="cart-note" id="goNote">Cash on delivery. No account, no card.</p>
@@ -236,21 +259,22 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
   </div>
 </footer>
 
-<script defer src="js/firebase-config.js?v=0.3.4"></script>
-<script defer src="js/data.js?v=0.3.4"></script>
-<script defer src="js/recipe.js?v=0.3.4"></script>
-<script defer src="js/engine/warp.js?v=0.3.4"></script>
-<script defer src="js/engine/design.js?v=0.3.4"></script>
-<script defer src="js/engine/render.js?v=0.3.4"></script>
-<script defer src="js/engine/state.js?v=0.3.4"></script>
-<script defer src="js/engine/price.js?v=0.3.4"></script>
-<script defer src="js/proof.js?v=0.3.4"></script>
-<script defer src="js/delivery.js?v=0.3.4"></script>
-<script defer src="js/bundle.js?v=0.3.4"></script>
-<script defer src="js/cart.js?v=0.3.4"></script>
-<script defer src="js/order.js?v=0.3.4"></script>
-<script defer src="js/checkout.js?v=0.3.4"></script>
-<script defer src="js/main.js?v=0.3.4"></script>
-<script defer src="js/motion.js?v=0.3.4"></script>
+<script defer src="js/firebase-config.js?v=0.3.5"></script>
+<script defer src="js/data.js?v=0.3.5"></script>
+<script defer src="js/recipe.js?v=0.3.5"></script>
+<script defer src="js/engine/warp.js?v=0.3.5"></script>
+<script defer src="js/engine/design.js?v=0.3.5"></script>
+<script defer src="js/engine/render.js?v=0.3.5"></script>
+<script defer src="js/engine/state.js?v=0.3.5"></script>
+<script defer src="js/engine/price.js?v=0.3.5"></script>
+<script defer src="js/proof.js?v=0.3.5"></script>
+<script defer src="js/delivery.js?v=0.3.5"></script>
+<script defer src="js/bundle.js?v=0.3.5"></script>
+<script defer src="js/cart.js?v=0.3.5"></script>
+<script defer src="js/nav.js?v=0.3.5"></script>
+<script defer src="js/order.js?v=0.3.5"></script>
+<script defer src="js/checkout.js?v=0.3.5"></script>
+<script defer src="js/main.js?v=0.3.5"></script>
+<script defer src="js/motion.js?v=0.3.5"></script>
 </body>
 </html>

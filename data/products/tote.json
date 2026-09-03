@@ -37,7 +37,12 @@
       "id": "front-print",
       "name": "Print area",
       "viewId": "front",
-      "rect": { "x": 300, "y": 240, "w": 300, "h": 290 },
+      "rect": {
+        "x": 300,
+        "y": 240,
+        "w": 300,
+        "h": 290
+      },
       "warp": {
         "type": "quad",
         "quad": [
@@ -55,7 +60,17 @@
         "photo",
         "text"
       ],
-      "background": null
+      "background": null,
+      "fills": [
+        { "hex": "#14201F", "name": "Ink" },
+        { "hex": "#0F766E", "name": "Deep teal" },
+        { "hex": "#1E3A8A", "name": "Navy" },
+        { "hex": "#B91C1C", "name": "Red" },
+        { "hex": "#DB2777", "name": "Pink" },
+        { "hex": "#D97706", "name": "Amber" },
+        { "hex": "#FDE68A", "name": "Butter" },
+        { "hex": "#CFFAFE", "name": "Sky" }
+      ]
     }
   ],
   "textRules": [
@@ -99,6 +114,12 @@
       "label": "Coloured bag",
       "amount": 2,
       "when": { "partNotDefault": "cloth" }
+    },
+    {
+      "id": "fill",
+      "label": "Background colour",
+      "amount": 2,
+      "when": { "zoneHasFill": "front-print" }
     }
   ],
   "model": {

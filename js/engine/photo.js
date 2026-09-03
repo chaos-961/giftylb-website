@@ -54,7 +54,8 @@
           natW: img.naturalWidth,
           natH: img.naturalHeight,
           saveSrc: downscale(img, G.State.AUTOSAVE_MAX_EDGE) || img.src,
-          k: 1, ox: 0, oy: 0
+          k: 1, ox: 0, oy: 0,
+          rot: 0, flip: false, filter: 'none', shape: 'rect'
         };
         Photo.fitCover(photo, zone, canvasW);
         return photo;
@@ -63,6 +64,25 @@
         if (err && err.message && err.message.indexOf('WhatsApp') > 0) throw err;
         throw new Error('We could not open that image. It may be a format we do not read yet.');
       });
+  };
+
+  /* A quarter turn swaps the picture's width and height, so the layout it was
+     panned and zoomed against no longer exists. It is refitted to cover, which
+     is where every photo starts, rather than left hanging off one edge. */
+  Photo.turn = function (photo, zone) {
+    photo.rot = ((+photo.rot || 0) + 90) % 360;
+    var dims = G.Design.photoDims(photo.image, photo.rot);
+    photo.natW = dims.w; photo.natH = dims.h;
+    return Photo.fitCover(photo, zone);
+  };
+
+  /* Mirrored about the middle of the zone, so a face that was on the left is
+     now on the right and nothing else about the crop changes. */
+  Photo.mirror = function (photo, zone) {
+    photo.flip = !photo.flip;
+    var size = G.Design.sizeFor(zone);
+    photo.ox = size.w - (photo.ox + photo.natW * photo.k);
+    return Photo.clamp(photo, zone);
   };
 
   /* Centre the photo and scale it so it covers the zone with nothing empty. */

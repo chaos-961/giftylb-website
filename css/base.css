@@ -15,6 +15,8 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-behavior: smooth;
+  /* Anchors and focus land below the sticky header, not under it. */
+  scroll-padding-block-start: calc(var(--header-h) + var(--space-4));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -464,21 +466,30 @@ ul[role="list"], ol[role="list"] { list-style: none; padding-inline-start: 0; }
    is exactly the card it was before. */
 
 @media (hover: hover) and (pointer: fine) {
-  .tilt {
-    transform:
-      perspective(900px)
-      rotateX(calc(var(--ty, 0) * -3.4deg))
-      rotateY(calc(var(--tx, 0) * 3.4deg))
-      translateY(var(--tz, 0px));
-    transform-style: preserve-3d;
-    transition: transform var(--t-quick) var(--ease-out);
+  /* The lean lives on the individual rotate and translate properties, not on
+     transform. Every card that tilts is also a .reveal, and a reveal is an
+     animation on transform with a fill of both, which keeps applying its last
+     keyframe for the life of the page and would silently delete a transform
+     set here. The individual properties compose with it instead. The axis is
+     (-ty, tx, 0): a rotation about that line by the pointer's distance from
+     the centre is, for the few degrees involved, rotateX(-ty) then
+     rotateY(tx), which is what a card leaning toward the cursor is. The
+     vanishing point sits on the grid, so the six tiles share one. */
+  :has(> [data-tilt]) { perspective: 1100px; }
+  [data-tilt][data-tilt] {
+    rotate: calc(-1 * var(--ty, 0)) var(--tx, 0) 0.001 calc(var(--tk, 0) * 3.4deg);
+    translate: 0 var(--tz, 0px);
+    transition: rotate var(--t-quick) var(--ease-out), translate var(--t-quick) var(--ease-out),
+                box-shadow var(--t-quick) var(--ease-out);
   }
-  .tilt.is-tilting { transition: transform 60ms linear; }
+  [data-tilt][data-tilt].is-tilting {
+    transition: rotate 60ms linear, translate 60ms linear, box-shadow var(--t-quick) var(--ease-out);
+  }
 
   /* The specular. A soft light that follows the cursor across the card. It is
      a pseudo element the card owns, and it is transparent until the pointer
      gives it somewhere to be. */
-  .tilt::after {
+  [data-tilt]::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -492,7 +503,7 @@ ul[role="list"], ol[role="list"] { list-style: none; padding-inline-start: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tilt { transform: none; }
+  [data-tilt] { rotate: none; translate: none; }
 }
 
 /* ---------- Counting ----------

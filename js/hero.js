@@ -95,7 +95,13 @@
 
         /* Redrawn whenever the canvas changes size, or the mug is framed for a
            box it no longer has. Passive, and it never turns anything. */
-        window.addEventListener('resize', function () { scene.resize(); });
+        /* Coalesced into one frame. A phone's address bar fires resize on
+           every flip, and each one used to be a full re-render. */
+        var resizing = null;
+        window.addEventListener('resize', function () {
+          if (resizing) return;
+          resizing = requestAnimationFrame(function () { resizing = null; scene.resize(); });
+        });
 
         function label(text) {
           canvas.setAttribute('aria-label',

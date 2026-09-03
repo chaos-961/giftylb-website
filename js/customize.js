@@ -27,8 +27,10 @@
   ['preview', 'preview3d', 'viewToggle', 'viewTurn', 'viewFlat',
    'loading', 'productName', 'undoBtn', 'restoredChip', 'startOver', 'dpiChip',
    'photoInput', 'photoBtnLabel', 'removePhoto', 'photoHint', 'photoControls',
-   'zoom', 'panX', 'panY', 'recentre', 'textInput', 'charCount', 'fontChips',
-   'textColours', 'textColourField', 'textSize', 'textY', 'colourParts',
+   'zoom', 'panX', 'panY', 'recentre', 'rotateBtn', 'flipBtn', 'photoFilters', 'photoShapes',
+   'textInput', 'charCount', 'linesHint', 'fontChips',
+   'textColours', 'textColourField', 'textSize', 'textY', 'textAlign', 'textArc', 'arcValue',
+   'textSpacing', 'textEffects', 'textCaps', 'textOutline', 'textShadow', 'colourParts',
    'priceAmount', 'priceBreakdown', 'priceBreakdownBtn', 'addBtn', 'dock', 'zonePicker',
    'addedChip', 'addedText', 'deliverLine']
     .forEach(function (id) { el[id] = $(id); });
@@ -263,7 +265,7 @@
     var has = !!(photo && photo.image);
     el.photoControls.hidden = !has;
     el.removePhoto.hidden = !has;
-    el.photoBtnLabel.textContent = has ? 'Use a different photo' : 'Add a photo';
+    el.photoBtnLabel.textContent = has ? 'Change photo' : 'Add a photo';
     /* In 3D a drag turns the object, so promising that it moves the photo
        would be a lie. The sliders do the same job in both views. */
     var flat = (mode === 'flat');
@@ -286,6 +288,45 @@
     el.panY.value = rangeY < 0 ? Math.round(photo.oy / rangeY * 100) : 50;
     el.panX.disabled = rangeX >= 0;
     el.panY.disabled = rangeY >= 0;
+
+    markChips(el.photoFilters, 'filter', photo.filter || 'none');
+    markChips(el.photoShapes, 'shape', photo.shape || 'rect');
+  }
+
+  /* One row of pressable words. The pressed one is whichever matches the
+     state, and pressing another commits it, so undo walks back through them
+     like any other change. */
+  function buildChips(container, key, items, onPick) {
+    container.innerHTML = '';
+    items.forEach(function (it) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'cz-chipbtn';
+      b.dataset[key] = it.id;
+      b.textContent = it.label;
+      b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', function () { onPick(it.id); markChips(container, key, it.id); });
+      container.appendChild(b);
+    });
+  }
+
+  function markChips(container, key, value) {
+    if (!container) return;
+    [].forEach.call(container.children, function (c) {
+      c.setAttribute('aria-pressed', String(c.dataset[key] === String(value)));
+    });
+  }
+
+  var FILTER_NAMES = { none: 'As it is', mono: 'Black and white', sepia: 'Sepia', warm: 'Warm', cool: 'Cool', pop: 'Pop' };
+  var SHAPE_NAMES = { rect: 'Full', soft: 'Soft corners', round: 'Round', heart: 'Heart' };
+
+  function buildPhotoChips() {
+    buildChips(el.photoFilters, 'filter', G.Design.FILTERS.map(function (f) { return { id: f, label: FILTER_NAMES[f] || f }; }), function (f) {
+      store.commit(function (s) { s.zones[zone.id].photo.filter = f; });
+    });
+    buildChips(el.photoShapes, 'shape', G.Design.SHAPES.map(function (f) { return { id: f, label: SHAPE_NAMES[f] || f }; }), function (f) {
+      store.commit(function (s) { s.zones[zone.id].photo.shape = f; });
+    });
   }
 
   function setPhoto(file) {
@@ -350,6 +391,32 @@
     });
   }
 
+  /* A print zone that allows a background gets its own swatch row, with a
+     hollow "none" first. It lives on the colour tab because that is where a
+     buyer looks for colour, whichever part of the thing it lands on. */
+  function buildFillRows() {
+    (recipe.printZones || []).forEach(function (z) {
+      if (!z.fills || !z.fills.length) return;
+      var wrap = document.createElement('div');
+      wrap.className = 'cz-part';
+      wrap.dataset.fillZone = z.id;
+      var h = document.createElement('p');
+      h.className = 'cz-partname';
+      h.textContent = (z.name || z.id) + ' background';
+      var row = document.createElement('div');
+      row.className = 'cz-swatches';
+      row.setAttribute('role', 'group');
+      row.setAttribute('aria-label', h.textContent);
+      wrap.appendChild(h); wrap.appendChild(row);
+      el.colourParts.appendChild(wrap);
+      var palette = [{ hex: 'NONE', name: 'No background' }].concat(z.fills);
+      buildSwatches(row, palette, store.get().zones[z.id].fill || 'NONE', function (hex) {
+        store.commit(function (s) { s.zones[z.id].fill = hex === 'NONE' ? null : hex; });
+      });
+      row.firstChild.classList.add('cz-swatch--none');
+    });
+  }
+
   function buildColourParts() {
     el.colourParts.innerHTML = '';
     recipe.colorParts.forEach(function (part) {
@@ -368,6 +435,7 @@
         store.commit(function (s) { s.colors[part.id] = hex; });
       });
     });
+    buildFillRows();
   }
 
   /* Switching the active zone re-points every text and photo control at it.
@@ -385,6 +453,12 @@
     document.getElementById('tab-text').hidden = !canText;
 
     el.textInput.maxLength = rule.maxChars || 40;
+    var maxLines = rule.maxLines || 1;
+    el.linesHint.hidden = maxLines < 2;
+    el.linesHint.textContent = 'Up to ' + maxLines + ' lines. Press Enter for a new one.';
+    /* An etch has no colour and no shadow, and a stroke around a groove is
+       nonsense, so those three go away on an engraved zone. */
+    el.textEffects.hidden = !!rule.engraved;
     el.fontChips.innerHTML = '';
     buildFontChips();
 
@@ -501,6 +575,7 @@
     wireTabs();
     wireDrag();
     buildColourParts();
+    buildPhotoChips();
     buildZonePicker();
     applyZone(zone);
 
@@ -516,6 +591,14 @@
 
     el.recentre.addEventListener('click', function () {
       store.commit(function (s) { G.Photo.fitCover(s.zones[zone.id].photo, zone); });
+      syncPhotoControls();
+    });
+    el.rotateBtn.addEventListener('click', function () {
+      store.commit(function (s) { G.Photo.turn(s.zones[zone.id].photo, zone); });
+      syncPhotoControls();
+    });
+    el.flipBtn.addEventListener('click', function () {
+      store.commit(function (s) { G.Photo.mirror(s.zones[zone.id].photo, zone); });
       syncPhotoControls();
     });
 
@@ -557,8 +640,43 @@
       var v = G.Design.applyTextRules(rule, el.textInput.value);
       store.touch(function (s) { s.zones[zone.id].text.value = v; });
       el.charCount.textContent = v.length + '/' + (rule.maxChars || 40);
+      growTextBox();
     });
     el.textInput.addEventListener('change', function () { store.commit(function () {}); });
+    /* Enter is a new line only while the product has room for one. Past that
+       it does nothing, rather than adding a line that will never print. */
+    el.textInput.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter') return;
+      var lines = el.textInput.value.split('\n').length;
+      if (lines >= (rule.maxLines || 1)) e.preventDefault();
+    });
+
+    [].forEach.call(el.textAlign.children, function (b) {
+      b.addEventListener('click', function () {
+        store.commit(function (s) { s.zones[zone.id].text.align = b.dataset.align; });
+        markSeg(b.dataset.align);
+      });
+    });
+    el.textArc.addEventListener('input', function () {
+      store.touch(function (s) { s.zones[zone.id].text.arc = +el.textArc.value; });
+      sayArc(+el.textArc.value);
+    });
+    el.textArc.addEventListener('change', function () { store.commit(function () {}); });
+    el.textSpacing.addEventListener('input', function () {
+      store.touch(function (s) { s.zones[zone.id].text.spacing = +el.textSpacing.value / 100; });
+    });
+    el.textSpacing.addEventListener('change', function () { store.commit(function () {}); });
+
+    function toggle(btn, key) {
+      btn.addEventListener('click', function () {
+        var on = btn.getAttribute('aria-pressed') !== 'true';
+        store.commit(function (s) { s.zones[zone.id].text[key] = on; });
+        btn.setAttribute('aria-pressed', String(on));
+      });
+    }
+    toggle(el.textCaps, 'caps');
+    toggle(el.textOutline, 'outline');
+    toggle(el.textShadow, 'shadow');
 
     el.textSize.addEventListener('input', function () {
       store.touch(function (s) { s.zones[zone.id].text.size = +el.textSize.value / 100; });
@@ -619,15 +737,38 @@
     });
   }
 
+  function markSeg(align) {
+    [].forEach.call(el.textAlign.children, function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.align === align));
+    });
+  }
+
+  function sayArc(v) {
+    el.arcValue.textContent = !v ? 'Straight' : (v > 0 ? 'Smile' : 'Frown');
+  }
+
+  function growTextBox() {
+    var rows = Math.min(rule.maxLines || 1, el.textInput.value.split('\n').length);
+    el.textInput.rows = Math.max(1, rows);
+  }
+
   function syncAll() {
     var s = store.get();
     syncPhotoControls();
 
-    var t = s.zones[zone.id].text || {};
+    var t = Object.assign({}, G.Design.TEXT_DEFAULTS, s.zones[zone.id].text || {});
     el.textInput.value = t.value || '';
+    growTextBox();
     el.charCount.textContent = (t.value || '').length + '/' + (rule.maxChars || 40);
     el.textSize.value = Math.round((t.size || 0.2) * 100);
     el.textY.value = Math.round((t.y == null ? 0.5 : t.y) * 100);
+    el.textArc.value = t.arc || 0;
+    sayArc(t.arc || 0);
+    el.textSpacing.value = Math.round((t.spacing || 0) * 100);
+    markSeg(t.align || 'center');
+    el.textCaps.setAttribute('aria-pressed', String(!!t.caps));
+    el.textOutline.setAttribute('aria-pressed', String(!!t.outline));
+    el.textShadow.setAttribute('aria-pressed', String(!!t.shadow));
 
     [].forEach.call(el.fontChips.children, function (c) {
       c.setAttribute('aria-pressed', String(c.dataset.font === t.font));
@@ -639,6 +780,9 @@
     var groups = el.colourParts.querySelectorAll('.cz-swatches');
     recipe.colorParts.forEach(function (part, i) {
       markSwatch(groups[i], s.colors[part.id]);
+    });
+    [].forEach.call(el.colourParts.querySelectorAll('[data-fill-zone]'), function (wrap) {
+      markSwatch(wrap.querySelector('.cz-swatches'), s.zones[wrap.dataset.fillZone].fill || 'NONE');
     });
   }
 
@@ -662,9 +806,11 @@
     });
 
     Object.keys(src.zones || {}).forEach(function (id) {
-      if (!state.zones[id] || !src.zones[id].text) return;
+      if (!state.zones[id]) return;
+      if (src.zones[id].fill) state.zones[id].fill = src.zones[id].fill;
+      if (!src.zones[id].text) return;
       var from = src.zones[id].text, into = state.zones[id].text;
-      ['value', 'font', 'color', 'size', 'y'].forEach(function (k) {
+      ['value', 'font', 'color', 'size', 'y', 'align', 'spacing', 'caps', 'outline', 'shadow', 'arc'].forEach(function (k) {
         if (from[k] != null) into[k] = from[k];
       });
       var zrule = (recipe.textRules || []).filter(function (r) { return r.zoneId === id; })[0] || {};

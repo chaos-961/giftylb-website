@@ -285,7 +285,7 @@ body.customizer {
   padding: var(--space-4) var(--space-3);
   overflow-y: auto;
   overscroll-behavior: contain;
-  max-block-size: 30dvb;
+  max-block-size: 34dvb;
 }
 
 .cz-panel { display: flex; flex-direction: column; gap: var(--space-4); }
@@ -427,6 +427,68 @@ input[type="range"] {
 }
 .cz-breakdown li { display: flex; justify-content: space-between; gap: var(--space-4); }
 .cz-breakdown li + li { margin-block-start: var(--space-1); }
+
+/* The words box grows a row per line the product allows and no further. It is
+   a textarea so a typed line break is a real second line on the mug, and it
+   is styled as the input it replaced so nothing else on the dock moved. */
+textarea#textInput {
+  min-block-size: 48px;
+  padding: 12px var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-base);
+  line-height: 1.4;
+  resize: none;
+  overflow: hidden;
+  inline-size: 100%;
+}
+textarea#textInput:focus-visible { border-color: var(--teal-deep); }
+
+.cz-half { flex: 1; }
+
+/* Three positions in one pill. The pressed one is the teal wash, the same
+   language the tabs above speak. */
+.cz-seg {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-full);
+  background: var(--paper);
+  gap: 2px;
+  align-self: start;
+}
+.cz-seg button {
+  min-inline-size: 48px;
+  min-block-size: 38px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--ink-soft);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background-color var(--t-instant) var(--ease-out), color var(--t-instant) var(--ease-out);
+}
+.cz-seg button[aria-pressed="true"] {
+  background: var(--teal-wash);
+  color: var(--teal-deep);
+}
+
+/* A swatch that means "none" is a hollow one with a line through it. */
+.cz-swatch--none {
+  background: var(--paper) !important;
+  position: relative;
+}
+.cz-swatch--none::after {
+  content: "";
+  position: absolute;
+  inset: 46% 18%;
+  border-block-start: 2px solid var(--ink-faint);
+  transform: rotate(-45deg);
+}
 
 /* --------------------------------------------------------------- desktop */
 

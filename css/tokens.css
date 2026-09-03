@@ -11,7 +11,7 @@
   font-weight: 200 800;
   font-stretch: 75% 100%;
   font-display: swap;
-  src: url('../fonts/bricolage-grotesque-var-latin.woff2?v=0.3.4') format('woff2');
+  src: url('../fonts/bricolage-grotesque-var-latin.woff2?v=0.3.5') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
     U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
     U+2212, U+2215, U+FEFF, U+FFFD;
@@ -22,7 +22,7 @@
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url('../fonts/inter-var-latin.woff2?v=0.3.4') format('woff2');
+  src: url('../fonts/inter-var-latin.woff2?v=0.3.5') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
     U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
     U+2212, U+2215, U+FEFF, U+FFFD;
@@ -34,7 +34,7 @@
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
-  src: url('../fonts/caveat-var-latin.woff2?v=0.3.4') format('woff2');
+  src: url('../fonts/caveat-var-latin.woff2?v=0.3.5') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
     U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
     U+2212, U+2215, U+FEFF, U+FFFD;
@@ -102,6 +102,9 @@
   --space-10: 5rem;
 
   --section-y: clamp(3.5rem, 2.2rem + 5.5vw, 6.5rem);
+  /* The sticky header's height. Anything that has to clear it, an anchor
+     landing, a sticky sidebar, reads this rather than guessing a number. */
+  --header-h: 60px;
   --gutter:    clamp(1.125rem, 0.7rem + 1.8vw, 2rem);
   --page-max:  76rem;
 

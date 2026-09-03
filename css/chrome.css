@@ -121,13 +121,119 @@
 .site-nav a:hover::after { transform: scaleX(1); }
 .site-nav a[aria-current="page"]::after { transform: scaleX(1); }
 
-/* Below the breakpoint only Shop stays. A phone still needs one way into the
-   catalogue from every page, and the rest of the links are homepage anchors. */
+/* Below the breakpoint only Shop stays in the bar. The rest moves into the
+   sheet behind the menu button, so a phone can reach every page from every
+   page, which before v0.3.5 it could not. */
 .site-nav a:not(.site-nav__primary) { display: none; }
 
 @media (min-width: 46rem) {
   .site-nav a:not(.site-nav__primary) { display: inline-flex; }
 }
+
+/* ---------- Phone menu ---------- */
+
+.nav-toggle {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color var(--t-instant) var(--ease-out);
+}
+.nav-toggle:hover { background: var(--teal-wash); }
+.nav-toggle svg { inline-size: 22px; block-size: 22px; }
+.nav-toggle .x { display: none; }
+.nav-toggle[aria-expanded="true"] .bars { display: none; }
+.nav-toggle[aria-expanded="true"] .x { display: block; }
+
+@media (min-width: 46rem) {
+  .nav-toggle { display: none; }
+}
+
+/* The sheet drops from under the header and the page behind it dims. It is
+   hidden with the attribute and shown by a class the script sets, so a page
+   where the script never ran has no sheet and a header that still works. */
+.nav-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+  background: rgb(20 32 31 / 0.36);
+}
+.nav-sheet__panel {
+  margin-block-start: calc(var(--header-h) + 1px);
+  padding: var(--space-3) var(--gutter) var(--space-5);
+  background: var(--paper);
+  border-block-end: 1px solid var(--line);
+  border-end-start-radius: var(--radius-xl);
+  border-end-end-radius: var(--radius-xl);
+  box-shadow: var(--elev-3);
+  display: grid;
+  gap: var(--space-1);
+}
+.nav-sheet a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-block-size: 50px;
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-lg);
+  text-decoration: none;
+  transition: background-color var(--t-instant) var(--ease-out);
+}
+.nav-sheet a:hover { background: var(--teal-wash); }
+.nav-sheet a[aria-current="page"] { color: var(--teal-deep); }
+.nav-sheet a svg { inline-size: 18px; block-size: 18px; color: var(--teal-deep); }
+.nav-sheet__minor { border-block-start: 1px solid var(--line); margin-block-start: var(--space-2); padding-block-start: var(--space-2); }
+.nav-sheet__minor a { font-family: var(--font-ui); font-weight: 500; font-size: var(--text-base); min-block-size: 46px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .nav-sheet.is-open { animation: sheet-dim 220ms var(--ease-out) both; }
+  .nav-sheet.is-open .nav-sheet__panel { animation: sheet-in 260ms var(--ease-out) both; }
+}
+@keyframes sheet-dim { from { background: rgb(20 32 31 / 0); } to { background: rgb(20 32 31 / 0.36); } }
+@keyframes sheet-in {
+  from { opacity: 0; transform: translateY(-14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* The page does not scroll behind an open sheet. */
+html[data-menu] { overflow: hidden; }
+html[data-menu] body { overscroll-behavior: none; }
+
+/* ---------- Back to the top ----------
+   Parked below the bottom edge by a transform, never by opacity, so the rule
+   that hides it is not a rule that can leave it hidden. */
+.to-top {
+  position: fixed;
+  inset-block-end: calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+  inset-inline-end: var(--space-5);
+  z-index: 18;
+  inline-size: 48px;
+  block-size: 48px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-full);
+  background: var(--paper);
+  color: var(--teal-deep);
+  box-shadow: var(--elev-2), var(--edge);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  pointer-events: none;
+  transform: translateY(calc(100% + var(--space-6) + 20px));
+  transition: transform var(--t-quick) var(--ease-out);
+}
+.to-top svg { inline-size: 20px; block-size: 20px; }
+.to-top.is-shown { transform: none; pointer-events: auto; }
+.to-top:hover { color: var(--ink); }
+.to-top:active { transform: scale(0.94); }
 
 /* ---------- Cart link ---------- */
 

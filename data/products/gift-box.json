@@ -50,7 +50,12 @@
       "id": "card",
       "name": "The card",
       "viewId": "front",
-      "rect": { "x": 480, "y": 381, "w": 230, "h": 178 },
+      "rect": {
+        "x": 480,
+        "y": 381,
+        "w": 230,
+        "h": 178
+      },
       "warp": {
         "type": "quad",
         "quad": [
@@ -86,7 +91,12 @@
   ],
   "pricing": [],
   "model": {
-    "camera": { "fov": 30, "yawDeg": -28, "pitchDeg": 19, "dist": 0.94 },
+    "camera": {
+      "fov": 30,
+      "yawDeg": -28,
+      "pitchDeg": 19,
+      "dist": 0.94
+    },
     "shadow": 0.32,
     "parts": [
       {
@@ -117,12 +127,12 @@
         "kind": "box",
         "colorPart": "ribbon",
         "gloss": 0.5,
-        "size": [0.22, 1.24, 1.33],
-        "bevel": 0.02,
-        "arcSteps": 3,
-        "flatSteps": 3,
+        "size": [1.82, 0.03, 0.22],
+        "bevel": 0.01,
+        "arcSteps": 2,
+        "flatSteps": 2,
         "printFace": "none",
-        "at": [0, -0.18, 0],
+        "at": [0, 0.435, 0],
         "rough": 0.22,
         "coat": 0.18
       },
@@ -130,12 +140,116 @@
         "kind": "box",
         "colorPart": "ribbon",
         "gloss": 0.5,
-        "size": [1.83, 1.24, 0.22],
-        "bevel": 0.02,
-        "arcSteps": 3,
-        "flatSteps": 3,
+        "size": [0.22, 0.03, 1.32],
+        "bevel": 0.01,
+        "arcSteps": 2,
+        "flatSteps": 2,
         "printFace": "none",
-        "at": [0, -0.18, 0],
+        "at": [0, 0.435, 0],
+        "rough": 0.22,
+        "coat": 0.18
+      },
+      {
+        "kind": "box",
+        "colorPart": "ribbon",
+        "gloss": 0.5,
+        "size": [0.03, 0.32, 0.22],
+        "bevel": 0.01,
+        "arcSteps": 2,
+        "flatSteps": 2,
+        "printFace": "none",
+        "at": [0.905, 0.26, 0],
+        "rough": 0.22,
+        "coat": 0.18
+      },
+      {
+        "kind": "box",
+        "colorPart": "ribbon",
+        "gloss": 0.5,
+        "size": [0.03, 0.32, 0.22],
+        "bevel": 0.01,
+        "arcSteps": 2,
+        "flatSteps": 2,
+        "printFace": "none",
+        "at": [-0.905, 0.26, 0],
+        "rough": 0.22,
+        "coat": 0.18
+      },
+      {
+        "kind": "box",
+        "colorPart": "ribbon",
+        "gloss": 0.5,
+        "size": [0.22, 0.32, 0.03],
+        "bevel": 0.01,
+        "arcSteps": 2,
+        "flatSteps": 2,
+        "printFace": "none",
+        "at": [0, 0.26, 0.655],
+        "rough": 0.22,
+        "coat": 0.18
+      },
+      {
+        "kind": "box",
+        "colorPart": "ribbon",
+        "gloss": 0.5,
+        "size": [0.22, 0.32, 0.03],
+        "bevel": 0.01,
+        "arcSteps": 2,
+        "flatSteps": 2,
+        "printFace": "none",
+        "at": [0, 0.26, -0.655],
+        "rough": 0.22,
+        "coat": 0.18
+      },
+      {
+        "kind": "box",
+        "colorPart": "ribbon",
+        "gloss": 0.5,
+        "size": [0.03, 0.9, 0.22],
+        "bevel": 0.01,
+        "arcSteps": 2,
+        "flatSteps": 2,
+        "printFace": "none",
+        "at": [0.865, -0.35, 0],
+        "rough": 0.22,
+        "coat": 0.18
+      },
+      {
+        "kind": "box",
+        "colorPart": "ribbon",
+        "gloss": 0.5,
+        "size": [0.03, 0.9, 0.22],
+        "bevel": 0.01,
+        "arcSteps": 2,
+        "flatSteps": 2,
+        "printFace": "none",
+        "at": [-0.865, -0.35, 0],
+        "rough": 0.22,
+        "coat": 0.18
+      },
+      {
+        "kind": "box",
+        "colorPart": "ribbon",
+        "gloss": 0.5,
+        "size": [0.22, 0.9, 0.03],
+        "bevel": 0.01,
+        "arcSteps": 2,
+        "flatSteps": 2,
+        "printFace": "none",
+        "at": [0, -0.35, 0.615],
+        "rough": 0.22,
+        "coat": 0.18
+      },
+      {
+        "kind": "box",
+        "colorPart": "ribbon",
+        "gloss": 0.5,
+        "size": [0.22, 0.9, 0.03],
+        "bevel": 0.01,
+        "arcSteps": 2,
+        "flatSteps": 2,
+        "printFace": "none",
+        "at": [0, -0.35, -0.615],
         "rough": 0.22,
         "coat": 0.18
       },
@@ -147,7 +261,7 @@
         "ring": 28,
         "flatten": 0.4,
         "path": [
-          [0.0, 0.43],
+          [0, 0.43],
           [-0.03105, 0.45913],
           [-0.07574, 0.50096],
           [-0.12569, 0.54292],
@@ -168,10 +282,11 @@
           [-0.12411, 0.40889],
           [-0.07364, 0.41131],
           [-0.03017, 0.41641],
-          [0.0, 0.42]
+          [0, 0.42]
         ],
         "rough": 0.2,
-        "coat": 0.2
+        "coat": 0.2,
+        "at": [0, 0.03, 0]
       },
       {
         "kind": "tube",
@@ -181,7 +296,7 @@
         "ring": 28,
         "flatten": 0.4,
         "path": [
-          [0.0, 0.43],
+          [0, 0.43],
           [0.03105, 0.45913],
           [0.07574, 0.50096],
           [0.12569, 0.54292],
@@ -202,10 +317,52 @@
           [0.12411, 0.40889],
           [0.07364, 0.41131],
           [0.03017, 0.41641],
-          [-0.0, 0.42]
+          [0, 0.42]
         ],
         "rough": 0.2,
-        "coat": 0.2
+        "coat": 0.2,
+        "at": [0, 0.03, 0]
+      },
+      {
+        "kind": "box",
+        "colorPart": "ribbon",
+        "gloss": 0.5,
+        "size": [0.17, 0.13, 0.15],
+        "bevel": 0.045,
+        "arcSteps": 3,
+        "flatSteps": 2,
+        "printFace": "none",
+        "at": [0, 0.5, 0],
+        "rough": 0.22,
+        "coat": 0.18
+      },
+      {
+        "kind": "box",
+        "colorPart": "ribbon",
+        "gloss": 0.5,
+        "size": [0.56, 0.02, 0.15],
+        "bevel": 0.01,
+        "arcSteps": 2,
+        "flatSteps": 2,
+        "printFace": "none",
+        "at": [0.3, 0.46, 0.24],
+        "rough": 0.22,
+        "coat": 0.18,
+        "rotY": -32
+      },
+      {
+        "kind": "box",
+        "colorPart": "ribbon",
+        "gloss": 0.5,
+        "size": [0.56, 0.02, 0.15],
+        "bevel": 0.01,
+        "arcSteps": 2,
+        "flatSteps": 2,
+        "printFace": "none",
+        "at": [-0.3, 0.46, 0.24],
+        "rough": 0.22,
+        "coat": 0.18,
+        "rotY": 32
       },
       {
         "kind": "box",
@@ -216,14 +373,15 @@
         "arcSteps": 2,
         "flatSteps": 4,
         "printFace": "+z",
-        "at": [0.76, -0.47, 0.79],
+        "at": [0.76, -0.483, 0.695],
         "prints": [
           {
             "zoneId": "card",
             "rect": [0.07, 0.09, 0.86, 0.82]
           }
         ],
-        "rough": 0.92
+        "rough": 0.92,
+        "rotX": -16
       }
     ],
     "reflect": 0.26

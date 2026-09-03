@@ -345,7 +345,7 @@
 
 @media (min-width: 56rem) {
   .cart-layout { grid-template-columns: 1fr 21rem; gap: var(--space-8); }
-  .cart-side { position: sticky; inset-block-start: 78px; }
+  .cart-side { position: sticky; inset-block-start: calc(var(--header-h) + var(--space-4)); }
 }
 
 .cart-list { display: grid; gap: var(--space-3); }
@@ -492,4 +492,34 @@
   background: color-mix(in srgb, var(--signal) 5%, var(--paper));
   color: var(--signal);
   font-size: var(--text-sm);
+}
+
+
+/* ---------- The cart's bar on a phone ----------
+   Below the two column width the totals sit under the whole list, which on a
+   long cart is a screen away from the thing the buyer came to press. This bar
+   is the total and the button, stuck to the bottom of the screen while the
+   list scrolls under it. It is display none where the sidebar already sits in
+   view. */
+.cart-bar {
+  position: sticky;
+  inset-block-end: var(--space-3);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  margin-block-start: var(--space-4);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elev-3), var(--edge);
+}
+.cart-bar__label { font-size: var(--text-xs); color: var(--ink-faint); text-transform: uppercase; letter-spacing: var(--tracking-wide); font-weight: 700; }
+.cart-bar strong { display: block; font-family: var(--font-display); font-size: var(--text-xl); color: var(--ink); line-height: 1.1; }
+.cart-bar .btn { flex: none; }
+
+@media (min-width: 56rem) {
+  .cart-bar { display: none; }
 }

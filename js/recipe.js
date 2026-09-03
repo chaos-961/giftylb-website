@@ -156,13 +156,14 @@
       var rule = (recipe.textRules || []).filter(function (r) { return r.zoneId === z.id; })[0];
       state.zones[z.id] = {
         photo: null,
-        text: {
+        fill: null,
+        text: Object.assign({
           value: '',
           font: (rule && rule.defaultFont) || 'display',
           color: (rule && rule.defaultColor) || '#14201F',
           size: 0.2,
           y: 0.5
-        }
+        }, G.Design ? G.Design.TEXT_DEFAULTS : {})
       };
     });
     return state;

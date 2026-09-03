@@ -19,7 +19,7 @@
   }
   .gb-stage { grid-area: stage; }
   .gb-controls { grid-area: controls; }
-  .gb-side { grid-area: side; position: sticky; inset-block-start: 76px; }
+  .gb-side { grid-area: side; position: sticky; inset-block-start: calc(var(--header-h) + var(--space-4)); }
 }
 
 /* ---------- The box itself ---------- */

@@ -40,8 +40,17 @@
       "id": "wrap",
       "name": "The wrap",
       "viewId": "front",
-      "rect": { "x": 200, "y": 212, "w": 440, "h": 286 },
-      "warp": { "type": "cylinder", "wrapDeg": 200, "bowPx": 34 },
+      "rect": {
+        "x": 200,
+        "y": 212,
+        "w": 440,
+        "h": 286
+      },
+      "warp": {
+        "type": "cylinder",
+        "wrapDeg": 200,
+        "bowPx": 34
+      },
       "widthMm": 200,
       "heightMm": 95,
       "minDpi": 150,
@@ -50,7 +59,17 @@
         "photo",
         "text"
       ],
-      "background": null
+      "background": null,
+      "fills": [
+        { "hex": "#14201F", "name": "Ink" },
+        { "hex": "#0F766E", "name": "Deep teal" },
+        { "hex": "#1E3A8A", "name": "Navy" },
+        { "hex": "#B91C1C", "name": "Red" },
+        { "hex": "#DB2777", "name": "Pink" },
+        { "hex": "#D97706", "name": "Amber" },
+        { "hex": "#FDE68A", "name": "Butter" },
+        { "hex": "#CFFAFE", "name": "Sky" }
+      ]
     }
   ],
   "textRules": [
@@ -94,10 +113,21 @@
       "label": "Coloured mug",
       "amount": 2,
       "when": { "partNotDefault": "body" }
+    },
+    {
+      "id": "fill",
+      "label": "Background colour",
+      "amount": 1.5,
+      "when": { "zoneHasFill": "wrap" }
     }
   ],
   "model": {
-    "camera": { "fov": 30, "yawDeg": 34, "pitchDeg": 12, "dist": 1 },
+    "camera": {
+      "fov": 30,
+      "yawDeg": 34,
+      "pitchDeg": 12,
+      "dist": 1
+    },
     "shadow": 0.32,
     "parts": [
       {

@@ -36,7 +36,7 @@
      cached. */
   var PARTS = [
     'js/data.js', 'js/recipe.js', 'js/engine/warp.js', 'js/engine/mesh.js',
-    'js/engine/design.js', 'js/engine/render.js', 'js/engine/scene.js'
+    'js/engine/design.js', 'js/engine/price.js', 'js/engine/render.js', 'js/engine/scene.js'
   ];
 
   /* Big enough that a tile on a two times display still resolves, small enough
@@ -152,7 +152,20 @@
   function queue(slots, i) {
     if (i >= slots.length) return;
     var slot = slots[i];
-    shoot(slot.getAttribute('data-product')).then(function (canvas) {
+    var id = slot.getAttribute('data-product');
+    /* The price, from the recipe the render came from. It goes on the tile's
+       text rather than in the markup because the markup would be a second
+       price list, and there is only ever one. */
+    G.Recipe.load(id).then(function (recipe) {
+      var tile = slot.closest('.tile');
+      if (!tile || tile.querySelector('.tile__from') || recipe.basePrice == null) return;
+      var from = document.createElement('span');
+      from.className = 'tile__from';
+      from.textContent = 'From ' + G.Price.format(recipe.basePrice, recipe.currency);
+      var go = tile.querySelector('.tile__go');
+      if (go) go.parentNode.insertBefore(from, go); else tile.appendChild(from);
+    }).catch(function () {});
+    shoot(id).then(function (canvas) {
       if (canvas) {
         canvas.className = 'tile__render';
         canvas.setAttribute('aria-hidden', 'true');

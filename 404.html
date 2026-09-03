@@ -7,18 +7,18 @@
 <meta name="description" content="That page is not here. Head back to the Gifty homepage.">
 <meta name="theme-color" content="#14B8A6">
 <meta name="robots" content="noindex">
-<link rel="icon" href="favicon.svg?v=0.3.4" type="image/svg+xml">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.3.4">
+<link rel="icon" href="favicon.svg?v=0.3.5" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.3.5">
 
 
-<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.3.4" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.3.4" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.3.5" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.3.5" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="css/tokens.css?v=0.3.4">
-<link rel="stylesheet" href="css/base.css?v=0.3.4">
-<link rel="stylesheet" href="css/atmosphere.css?v=0.3.4">
-<link rel="stylesheet" href="css/chrome.css?v=0.3.4">
-<link rel="stylesheet" href="css/home.css?v=0.3.4">
+<link rel="stylesheet" href="css/tokens.css?v=0.3.5">
+<link rel="stylesheet" href="css/base.css?v=0.3.5">
+<link rel="stylesheet" href="css/atmosphere.css?v=0.3.5">
+<link rel="stylesheet" href="css/chrome.css?v=0.3.5">
+<link rel="stylesheet" href="css/home.css?v=0.3.5">
 <script>
 (function(w,d){var ok=w.CSS&&CSS.supports&&CSS.supports('animation-timeline','view()');
 var red=w.matchMedia&&w.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -39,6 +39,7 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
 <div class="scroll-line" aria-hidden="true"></div>
 
 
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="wrap site-header__inner">
     <a class="wordmark" href="index.html">Gift<span>y</span></a>
@@ -47,6 +48,10 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
       <a href="index.html#how">How it works</a>
       <a href="index.html#delivery">Delivery</a>
     </nav>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="navSheet" aria-label="Menu">
+      <svg class="bars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
     <a class="cart-link" href="cart.html" aria-label="Cart">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M5 8h14l1 12H4z"/>
@@ -56,6 +61,20 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
     </a>
   </div>
 </header>
+<!-- The phone menu. Hidden until js/nav.js opens it; a page without the script
+     has a header with Shop and the cart, which is what it had before. -->
+<div class="nav-sheet" id="navSheet" hidden>
+  <nav class="nav-sheet__panel" aria-label="Menu">
+      <a href="shop.html">All the designs <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
+      <a href="box.html">Build a gift box <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
+      <a href="cart.html">Your cart <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
+    <div class="nav-sheet__minor">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#delivery">Delivery and zones</a>
+      <a href="track.html">Follow your order</a>
+    </div>
+  </nav>
+</div>
 
 <main class="notfound" id="main">
   <div class="wrap">
@@ -112,8 +131,9 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
   </div>
 </footer>
 
-<script defer src="js/cart.js?v=0.3.4"></script>
-<script defer src="js/main.js?v=0.3.4"></script>
-<script defer src="js/motion.js?v=0.3.4"></script>
+<script defer src="js/cart.js?v=0.3.5"></script>
+<script defer src="js/nav.js?v=0.3.5"></script>
+<script defer src="js/main.js?v=0.3.5"></script>
+<script defer src="js/motion.js?v=0.3.5"></script>
 </body>
 </html>

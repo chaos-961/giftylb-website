@@ -33,6 +33,10 @@
     perTextLine: function (state, recipe, arg) {
       return textLineCount(state, recipe, arg);
     },
+    zoneHasFill: function (state, recipe, arg) {
+      var z = zoneOf(state, arg);
+      return z.fill ? 1 : 0;
+    },
     partNotDefault: function (state, recipe, arg) {
       var part = (recipe.colorParts || []).filter(function (p) { return p.id === arg; })[0];
       if (!part) return 0;

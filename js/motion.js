@@ -65,8 +65,9 @@
 
      Everything is written into custom properties and the card decides what to
      do with them, which keeps the geometry here and the look in the stylesheet.
-     --tx and --ty run minus one to one from the centre. --px and --py are the
-     pointer in percent, for the highlight.
+     --tx and --ty run minus one to one from the centre and --tk is the distance,
+     so the stylesheet has an axis and an angle. --px and --py are the pointer
+     in percent, for the highlight.
 
      The values are set on a pointermove, which fires at whatever rate the
      device runs, and the whole cost is four setProperty calls and a compositor
@@ -89,8 +90,11 @@
       if (!rect) measure();
       var x = (e.clientX - rect.left) / rect.width;
       var y = (e.clientY - rect.top) / rect.height;
-      card.style.setProperty('--tx', (x * 2 - 1).toFixed(3));
-      card.style.setProperty('--ty', (y * 2 - 1).toFixed(3));
+      var tx = x * 2 - 1, ty = y * 2 - 1;
+      card.style.setProperty('--tx', tx.toFixed(3));
+      card.style.setProperty('--ty', ty.toFixed(3));
+      /* How far from the centre, which is the angle; the two above are the axis. */
+      card.style.setProperty('--tk', Math.min(1, Math.sqrt(tx * tx + ty * ty)).toFixed(3));
       card.style.setProperty('--px', (x * 100).toFixed(1) + '%');
       card.style.setProperty('--py', (y * 100).toFixed(1) + '%');
     });
@@ -99,6 +103,7 @@
       card.classList.remove('is-tilting');
       card.style.setProperty('--tx', '0');
       card.style.setProperty('--ty', '0');
+      card.style.setProperty('--tk', '0');
       card.style.setProperty('--tz', '0px');
       card.style.setProperty('--sheen', '0');
       rect = null;
@@ -158,11 +163,11 @@
     btn.classList.add('is-rippling');
   }
 
-  document.addEventListener('animationend', function (e) {
+  function unripple(e) {
     if (e.animationName === 'btn-ripple' && e.target.classList) {
       e.target.classList.remove('is-rippling');
     }
-  }, true);
+  }
 
   /* -------------------------------------------------------------------- go */
 
@@ -175,11 +180,12 @@
     if (reduced) return;
 
     document.addEventListener('pointerdown', ripple);
+    document.addEventListener('animationend', unripple, true);
 
     if (!fine) return;
 
     nodes = document.querySelectorAll('[data-tilt]');
-    for (i = 0; i < nodes.length; i++) tilt(nodes[i]);
+    for (i = 0; i < nodes.length; i++) { nodes[i].dataset.tilted = '1'; tilt(nodes[i]); }
 
     nodes = document.querySelectorAll('[data-magnet]');
     for (i = 0; i < nodes.length; i++) magnet(nodes[i]);

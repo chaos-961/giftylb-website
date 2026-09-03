@@ -30,10 +30,13 @@
       var z = state.zones[id];
       out.zones[id] = {
         text: z.text ? JSON.parse(JSON.stringify(z.text)) : null,
+        fill: z.fill || null,
         photo: z.photo ? {
           id: z.photo.id, saveSrc: z.photo.saveSrc,
           natW: z.photo.natW, natH: z.photo.natH,
-          k: z.photo.k, ox: z.photo.ox, oy: z.photo.oy
+          k: z.photo.k, ox: z.photo.ox, oy: z.photo.oy,
+          rot: z.photo.rot || 0, flip: !!z.photo.flip,
+          filter: z.photo.filter || 'none', shape: z.photo.shape || 'rect'
         } : null
       };
     });
@@ -47,7 +50,7 @@
 
     Object.keys(snap.zones || {}).forEach(function (id) {
       var z = snap.zones[id];
-      state.zones[id] = { text: z.text ? JSON.parse(JSON.stringify(z.text)) : null, photo: null };
+      state.zones[id] = { text: z.text ? JSON.parse(JSON.stringify(z.text)) : null, fill: z.fill || null, photo: null };
       if (!z.photo) return;
 
       /* Within a session the full resolution upload is still in the cache, so
@@ -61,8 +64,20 @@
       } else if (z.photo.saveSrc) {
         pending.push(G.Recipe.loadImage(z.photo.saveSrc).then(function (img) {
           State.imageCache[z.photo.id] = img;
+          /* The size the design was laid out against, not the file's: a
+             quarter turn swaps the two, and the pan and zoom were saved
+             against the turned picture. */
+          var dims = G.Design.photoDims(img, z.photo.rot || 0);
+          /* The zoom was chosen against the upload, and the copy that survives
+             a session is smaller than the upload. Left alone, k draws the copy
+             at the upload's zoom and a big phone photo lands on the proof and
+             the print file at half size, in one corner of the wrap. So k is
+             rescaled to keep the drawn size, and the resolution gate then
+             reports the copy, which is what will really print. Shipped wrong
+             through v0.3.4; the fix is one line and it is this one. */
+          var ratio = (z.photo.natW && dims.w) ? z.photo.natW / dims.w : 1;
           state.zones[id].photo = Object.assign({}, z.photo, {
-            image: img, natW: img.naturalWidth, natH: img.naturalHeight
+            image: img, natW: dims.w, natH: dims.h, k: z.photo.k * ratio
           });
         }).catch(function () { /* a dropped photo must not take the design with it */ }));
       }
@@ -184,7 +199,7 @@
     var zones = snap.zones || {};
     return Object.keys(zones).some(function (id) {
       var z = zones[id];
-      return (z.photo && z.photo.saveSrc) || (z.text && z.text.value && z.text.value.trim());
+      return (z.photo && z.photo.saveSrc) || z.fill || (z.text && z.text.value && z.text.value.trim());
     });
   };
 

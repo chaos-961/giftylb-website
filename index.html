@@ -11,8 +11,8 @@
      not registered. The day it is, this line and the absolute URLs below move
      to it, and Pages serves a redirect from here. -->
 <link rel="canonical" href="https://chaos-961.github.io/giftylb-website/">
-<link rel="icon" href="favicon.svg?v=0.3.4" type="image/svg+xml">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.3.4">
+<link rel="icon" href="favicon.svg?v=0.3.5" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.3.5">
 
 <!-- Share card. The picture is a real render by the product engine, not a
      mock up of one, so what gets shared is what gets made. Absolute URLs
@@ -32,16 +32,16 @@
 <meta name="twitter:description" content="Put your photo, a name, or your colors on a mug, cap, bottle, tote or photo block. See it before you buy it. Delivered anywhere in Lebanon.">
 <meta name="twitter:image" content="https://chaos-961.github.io/giftylb-website/assets/og.jpg">
 
-<meta name="version" content="0.3.4">
+<meta name="version" content="0.3.5">
 
-<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.3.4" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.3.4" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.3.5" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.3.5" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="css/tokens.css?v=0.3.4">
-<link rel="stylesheet" href="css/base.css?v=0.3.4">
-<link rel="stylesheet" href="css/atmosphere.css?v=0.3.4">
-<link rel="stylesheet" href="css/chrome.css?v=0.3.4">
-<link rel="stylesheet" href="css/home.css?v=0.3.4">
+<link rel="stylesheet" href="css/tokens.css?v=0.3.5">
+<link rel="stylesheet" href="css/base.css?v=0.3.5">
+<link rel="stylesheet" href="css/atmosphere.css?v=0.3.5">
+<link rel="stylesheet" href="css/chrome.css?v=0.3.5">
+<link rel="stylesheet" href="css/home.css?v=0.3.5">
 <script>
 /* Two decisions, both before anything paints, both only ever ADDING a class.
    Nothing on this page is hidden unless one of them is present.
@@ -74,6 +74,20 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
   "areaServed": { "@type": "Country", "name": "Lebanon" },
   "currenciesAccepted": "USD",
   "paymentAccepted": "Cash on delivery, Whish Money, OMT"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Do I need an account?", "acceptedAnswer": { "@type": "Answer", "text": "No. You design it, you see it, you give us a name, a phone number and an address, and it is on its way." } },
+    { "@type": "Question", "name": "How do I pay?", "acceptedAnswer": { "@type": "Answer", "text": "Cash to the driver when it arrives, or a Whish Money or OMT transfer before we make it. There is no card step and no deposit." } },
+    { "@type": "Question", "name": "Will the print look like the preview?", "acceptedAnswer": { "@type": "Answer", "text": "The preview is the file that goes to the press, so the layout and the words are exact. Screen and print colours are never a perfect match, which is why you approve the print first." } },
+    { "@type": "Question", "name": "What if my photo is too small?", "acceptedAnswer": { "@type": "Answer", "text": "The customizer warns you while you place it and shows the crop at print size. Zoom out a little or use a bigger photo." } },
+    { "@type": "Question", "name": "When does it arrive?", "acceptedAnswer": { "@type": "Answer", "text": "Every product shows its own date. Beirut and the area around it is usually one to two working days, the rest of Lebanon two to three. Sundays are skipped." } },
+    { "@type": "Question", "name": "Can I change or cancel an order?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, until we start making it. Message us on WhatsApp with your order number." } }
+  ]
 }
 </script>
 </head>
@@ -133,6 +147,10 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
       <a href="index.html#how">How it works</a>
       <a href="index.html#delivery">Delivery</a>
     </nav>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="navSheet" aria-label="Menu">
+      <svg class="bars" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <svg class="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
     <a class="cart-link" href="cart.html" aria-label="Cart">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M5 8h14l1 12H4z"/>
@@ -142,6 +160,20 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
     </a>
   </div>
 </header>
+<!-- The phone menu. Hidden until js/nav.js opens it; a page without the script
+     has a header with Shop and the cart, which is what it had before. -->
+<div class="nav-sheet" id="navSheet" hidden>
+  <nav class="nav-sheet__panel" aria-label="Menu">
+      <a href="shop.html">All the designs <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
+      <a href="box.html">Build a gift box <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
+      <a href="cart.html">Your cart <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
+    <div class="nav-sheet__minor">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#delivery">Delivery and zones</a>
+      <a href="track.html">Follow your order</a>
+    </div>
+  </nav>
+</div>
 
 <main id="main">
 
@@ -176,7 +208,7 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
       </div>
 
       <div class="hero__stage lift" style="--i:2">
-        <div class="stage" role="img" aria-label="A mug with a photograph printed on it and a name underneath">
+        <div class="stage">
           <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
             <path d="M11 15h21v18a7 7 0 0 1-7 7h-7a7 7 0 0 1-7-7z"/>
             <path d="M32 20h4.5a5.5 5.5 0 0 1 0 11H32"/>
@@ -185,7 +217,7 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
             <circle cx="25" cy="22.4" r="1.4"/>
             <path d="M16.5 34h12"/>
           </svg>
-          <p class="stage__caption" id="stageCaption">Live preview, not a mockup sent later</p>
+          <p class="stage__caption">Live preview, not a mockup sent later</p>
         </div>
       </div>
     </div>
@@ -287,10 +319,11 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
       <p class="eyebrow reveal">How it works</p>
       <h2 class="reveal reveal--blur section__title">Three steps, about a minute.</h2>
 
-      <!-- The rail is a line that fills as the three steps come past. It is a
-           scaleY driven by the scroll, so it costs one compositor layer and
-           nothing else, and a browser without scroll timelines gets a plain
-           line, which is what a list of three steps wanted anyway. -->
+      <!-- The rail is a line that fills as the three steps come past: a scale
+           on the step's own pseudo element, driven by a view() timeline, so it
+           costs one compositor layer and nothing else. A browser without
+           scroll timelines gets a plain line, which is what a list of three
+           steps wanted anyway. The rule is in home.css next to the rail. -->
       <ol class="steps stagger" role="list">
         <li class="step reveal reveal--side">
           <span class="step__num" aria-hidden="true"></span>
@@ -335,6 +368,40 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
       <p class="reveal footnote">
         Working days, Sundays skipped. The fee depends on the zone and it shows in the cart before you order.
       </p>
+    </div>
+  </section>
+
+  <section class="section" id="questions">
+    <div class="wrap">
+      <p class="eyebrow reveal">Questions</p>
+      <h2 class="reveal reveal--blur section__title">The things people ask.</h2>
+
+      <div class="faq reveal reveal--rise">
+        <details>
+          <summary>Do I need an account?</summary>
+          <p>No. You design it, you see it, you give us a name, a phone number and an address, and it is on its way. Your cart stays on your phone until you order.</p>
+        </details>
+        <details>
+          <summary>How do I pay?</summary>
+          <p>Cash to the driver when it arrives, or a Whish Money or OMT transfer before we make it. There is no card step and there is no deposit.</p>
+        </details>
+        <details>
+          <summary>Will the print look like the preview?</summary>
+          <p>The preview is the file that goes to the press, drawn by the same engine, so the layout and the words are exact. Colours on a screen and colours on a mug or a cloth bag are never a perfect match, which is why you approve the print before anything is made.</p>
+        </details>
+        <details>
+          <summary>What if my photo is too small?</summary>
+          <p>The customizer tells you while you are placing it, and shows you the crop at the size it would print. Zoom out a little or use a bigger photo, and the warning goes away. We never block an order over it.</p>
+        </details>
+        <details>
+          <summary>When does it arrive?</summary>
+          <p>Every product shows its own date, worked out from how long it takes to make and where you are. Beirut and the area around it is usually one to two working days. The rest of Lebanon is two to three. Sundays are skipped.</p>
+        </details>
+        <details>
+          <summary>Can I change or cancel an order?</summary>
+          <p>Yes, until we start making it. Message us on WhatsApp with the order number from your confirmation screen and we will sort it out.</p>
+        </details>
+      </div>
     </div>
   </section>
 
@@ -396,12 +463,13 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
   </div>
 </footer>
 
-<script defer src="js/firebase-config.js?v=0.3.4"></script>
-<script defer src="js/bundle.js?v=0.3.4"></script>
-<script defer src="js/cart.js?v=0.3.4"></script>
-<script defer src="js/main.js?v=0.3.4"></script>
-<script defer src="js/motion.js?v=0.3.4"></script>
-<script defer src="js/hero.js?v=0.3.4"></script>
-<script defer src="js/showcase.js?v=0.3.4"></script>
+<script defer src="js/firebase-config.js?v=0.3.5"></script>
+<script defer src="js/bundle.js?v=0.3.5"></script>
+<script defer src="js/cart.js?v=0.3.5"></script>
+<script defer src="js/nav.js?v=0.3.5"></script>
+<script defer src="js/main.js?v=0.3.5"></script>
+<script defer src="js/motion.js?v=0.3.5"></script>
+<script defer src="js/hero.js?v=0.3.5"></script>
+<script defer src="js/showcase.js?v=0.3.5"></script>
 </body>
 </html>

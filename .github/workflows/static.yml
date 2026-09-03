@@ -83,6 +83,7 @@ jobs:
           cp js/customize.js _site/js/customize.js
           cp js/delivery.js _site/js/delivery.js
           cp js/cart.js _site/js/cart.js
+          cp js/nav.js _site/js/nav.js
           cp js/cart-page.js _site/js/cart-page.js
           cp js/shop.js _site/js/shop.js
           cp js/checkout.js _site/js/checkout.js
