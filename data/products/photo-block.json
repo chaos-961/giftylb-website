@@ -23,10 +23,22 @@
       "maskUrl": "assets/products/photo-block/mask-base.svg",
       "default": "#D9A066",
       "palette": [
-        { "hex": "#D9A066", "name": "Oak" },
-        { "hex": "#8B5E34", "name": "Walnut" },
-        { "hex": "#14201F", "name": "Black" },
-        { "hex": "#FFFFFF", "name": "White" }
+        {
+          "hex": "#D9A066",
+          "name": "Oak"
+        },
+        {
+          "hex": "#8B5E34",
+          "name": "Walnut"
+        },
+        {
+          "hex": "#14201F",
+          "name": "Black"
+        },
+        {
+          "hex": "#FFFFFF",
+          "name": "White"
+        }
       ]
     }
   ],
@@ -44,10 +56,22 @@
       "warp": {
         "type": "quad",
         "quad": [
-          [268, 120],
-          [632, 120],
-          [632, 476],
-          [268, 476]
+          [
+            268,
+            120
+          ],
+          [
+            632,
+            120
+          ],
+          [
+            632,
+            476
+          ],
+          [
+            268,
+            476
+          ]
         ]
       },
       "widthMm": 150,
@@ -72,10 +96,22 @@
       "warp": {
         "type": "quad",
         "quad": [
-          [248, 490],
-          [652, 490],
-          [652, 534],
-          [248, 534]
+          [
+            248,
+            490
+          ],
+          [
+            652,
+            490
+          ],
+          [
+            652,
+            534
+          ],
+          [
+            248,
+            534
+          ]
         ]
       },
       "widthMm": 170,
@@ -119,19 +155,25 @@
       "id": "photo",
       "label": "Photo print",
       "amount": 0,
-      "when": { "zoneHasPhoto": "acrylic" }
+      "when": {
+        "zoneHasPhoto": "acrylic"
+      }
     },
     {
       "id": "caption",
       "label": "Engraved caption",
       "amount": 3,
-      "when": { "perTextLine": "caption" }
+      "when": {
+        "perTextLine": "caption"
+      }
     },
     {
       "id": "base",
       "label": "Base finish",
       "amount": 2,
-      "when": { "partNotDefault": "base" }
+      "when": {
+        "partNotDefault": "base"
+      }
     }
   ],
   "model": {
@@ -142,59 +184,93 @@
       "dist": 0.94
     },
     "shadow": 0.34,
+    "reflect": 0.4,
     "parts": [
       {
         "kind": "box",
         "color": "#EEF4F4",
         "gloss": 0.95,
-        "size": [1.62, 1.58, 0.14],
-        "bevel": 0.018,
+        "rough": 0.045,
+        "coat": 0.55,
+        "size": [
+          1.62,
+          1.58,
+          0.26
+        ],
+        "bevel": 0.02,
         "arcSteps": 4,
         "flatSteps": 5,
         "printFace": "+z",
-        "at": [0, 0.09, 0],
+        "at": [
+          0,
+          0.09,
+          0
+        ],
+        "rotX": -3,
         "prints": [
           {
             "zoneId": "acrylic",
-            "rect": [0.03, 0.03, 0.94, 0.94]
+            "rect": [
+              0.035,
+              0.035,
+              0.93,
+              0.93
+            ]
           }
-        ],
-        "rough": 0.045,
-        "coat": 0.55,
-        "rotX": -3
+        ]
       },
       {
         "kind": "box",
         "color": "#2B3332",
         "gloss": 0.2,
-        "size": [1.68, 0.05, 0.2],
+        "rough": 0.6,
+        "size": [
+          1.68,
+          0.05,
+          0.3
+        ],
         "bevel": 0.012,
         "arcSteps": 2,
         "flatSteps": 2,
         "printFace": "none",
-        "at": [0, -0.715, 0],
-        "rough": 0.6
+        "at": [
+          0,
+          -0.715,
+          0
+        ]
       },
       {
         "kind": "box",
         "colorPart": "base",
         "gloss": 0.24,
-        "size": [1.95, 0.3, 0.62],
+        "rough": 0.48,
+        "coat": 0.06,
+        "size": [
+          1.95,
+          0.3,
+          0.62
+        ],
         "bevel": 0.035,
         "arcSteps": 4,
         "flatSteps": 5,
         "printFace": "+z",
-        "at": [0, -0.87, 0],
+        "at": [
+          0,
+          -0.87,
+          0
+        ],
         "prints": [
           {
             "zoneId": "caption",
-            "rect": [0.04, 0.16, 0.92, 0.68]
+            "rect": [
+              0.06,
+              0.165,
+              0.88,
+              0.67
+            ]
           }
-        ],
-        "rough": 0.48,
-        "coat": 0.06
+        ]
       }
-    ],
-    "reflect": 0.4
+    ]
   }
 }

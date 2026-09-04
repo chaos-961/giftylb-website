@@ -3,6 +3,10 @@
  * The design is a plain JSON object plus one decoded image per zone. Everything
  * that is not JSON lives in an image cache keyed by data URL, which is what
  * makes both the undo stack and the autosave trivial: they only ever move JSON.
+ *
+ * A generated picture, the moon of a date, is the one photo that carries no
+ * pixels in the snapshot at all: it carries the date, and is drawn again from
+ * it whenever the design is opened, by any page, through the loader below.
  */
 (function (G) {
   'use strict';
@@ -23,35 +27,99 @@
 
   /* --------------------------------------------------------------- snapshot */
 
+  /* Every scalar on a photo rides through, so a new option cannot be lost on
+     undo or on a reload by being missing from a list here. Only the decoded
+     image stays behind, and the autosave copy is left off a generated one. */
   State.snapshot = function (state) {
     var out = { productId: state.productId, colors: {}, zones: {} };
     Object.keys(state.colors || {}).forEach(function (k) { out.colors[k] = state.colors[k]; });
     Object.keys(state.zones || {}).forEach(function (id) {
       var z = state.zones[id];
+      var photo = null;
+      if (z.photo) {
+        photo = {};
+        Object.keys(z.photo).forEach(function (k) {
+          if (k === 'image') return;
+          if (k === 'saveSrc' && z.photo.moon) return;
+          photo[k] = z.photo[k];
+        });
+      }
       out.zones[id] = {
         text: z.text ? JSON.parse(JSON.stringify(z.text)) : null,
         fill: z.fill || null,
-        photo: z.photo ? {
-          id: z.photo.id, saveSrc: z.photo.saveSrc,
-          natW: z.photo.natW, natH: z.photo.natH,
-          k: z.photo.k, ox: z.photo.ox, oy: z.photo.oy,
-          rot: z.photo.rot || 0, flip: !!z.photo.flip,
-          filter: z.photo.filter || 'none', shape: z.photo.shape || 'rect'
-        } : null
+        fill2: z.fill2 || null,
+        pattern: z.pattern || null,
+        photo: photo
       };
     });
     return out;
   };
 
-  State.hydrate = function (snap) {
+  /* --------------------------------------------------------------- the moon
+     The moon renderer and its ephemeris are fifty kilobytes nobody needs
+     until a design carries a date, so they load on first use, from whichever
+     page met one. */
+  State.moon = function () {
+    if (G.Moon) return Promise.resolve(G.Moon);
+    if (State._moonLoading) return State._moonLoading;
+    var meta = document.querySelector('meta[name="version"]');
+    var v = meta ? '?v=' + meta.getAttribute('content') : '';
+    function load(src) {
+      return new Promise(function (resolve, reject) {
+        var s = document.createElement('script');
+        s.src = src + v;
+        s.onload = resolve;
+        s.onerror = function () { reject(new Error('could not load ' + src)); };
+        document.head.appendChild(s);
+      });
+    }
+    State._moonLoading = load('js/lunar.js').then(function () { return load('js/engine/moon.js'); })
+      .then(function () { return G.Moon; });
+    return State._moonLoading;
+  };
+
+  /* A photo record for the moon of one moment. The rendered disc is cached
+     under an id made from the date, so the same night is drawn once. */
+  State.moonPhoto = function (iso, zone) {
+    return State.moon().then(function (Moon) {
+      var id = 'moon:' + iso;
+      var cached = State.imageCache[id];
+      var ready = cached ? Promise.resolve(cached) : Moon.render({ date: new Date(iso) });
+      return ready.then(function (canvas) {
+        State.imageCache[id] = canvas;
+        var photo = Object.assign({}, G.Design.PHOTO_DEFAULTS, {
+          id: id, image: canvas, natW: canvas.width, natH: canvas.height,
+          moon: { iso: iso }, k: 1, ox: 0, oy: 0
+        });
+        if (zone) G.Photo.placeFeature(photo, zone);
+        return photo;
+      });
+    });
+  };
+
+  State.hydrate = function (snap, recipe) {
     var pending = [];
     var state = { productId: snap.productId, colors: {}, zones: {} };
     Object.keys(snap.colors || {}).forEach(function (k) { state.colors[k] = snap.colors[k]; });
 
     Object.keys(snap.zones || {}).forEach(function (id) {
       var z = snap.zones[id];
-      state.zones[id] = { text: z.text ? JSON.parse(JSON.stringify(z.text)) : null, fill: z.fill || null, photo: null };
+      state.zones[id] = {
+        text: z.text ? JSON.parse(JSON.stringify(z.text)) : null,
+        fill: z.fill || null, fill2: z.fill2 || null, pattern: z.pattern || null,
+        photo: null
+      };
       if (!z.photo) return;
+
+      if (z.photo.moon && z.photo.moon.iso) {
+        var zone = recipe && (recipe.printZones || []).filter(function (pz) { return pz.id === id; })[0];
+        pending.push(State.moonPhoto(z.photo.moon.iso, z.photo.k == null ? zone : null).then(function (photo) {
+          var keep = Object.assign({}, z.photo);
+          delete keep.image;
+          state.zones[id].photo = Object.assign(photo, z.photo.k == null ? {} : keep, { image: photo.image });
+        }).catch(function () { /* no moon is a blank poster, not a broken page */ }));
+        return;
+      }
 
       /* Within a session the full resolution upload is still in the cache, so
          undo costs nothing and loses no pixels. Across sessions only the
@@ -199,7 +267,7 @@
     var zones = snap.zones || {};
     return Object.keys(zones).some(function (id) {
       var z = zones[id];
-      return (z.photo && z.photo.saveSrc) || z.fill || (z.text && z.text.value && z.text.value.trim());
+      return (z.photo && (z.photo.saveSrc || z.photo.moon)) || z.fill || (z.text && z.text.value && z.text.value.trim());
     });
   };
 

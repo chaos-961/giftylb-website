@@ -103,7 +103,6 @@
     var zoneId = G.Cart.zone() || settings.defaultZone;
     var zone = G.Delivery.zone(zoneId);
     var subtotal = G.Cart.subtotal();
-    var saving = G.Cart.discount(settings);
     var money = function (n) { return G.Price.format(n, settings.currency); };
 
     var list = $('sideItems');
@@ -119,8 +118,6 @@
     });
 
     $('sumItems').textContent = money(subtotal);
-    $('sumSaving').textContent = '-' + money(saving);
-    $('sumSavingRow').hidden = saving <= 0;
     $('sumDelivery').textContent = money(zone.fee);
     $('sumTotal').textContent = money(orderTotal(zone));
     $('zoneHint').textContent = zone.area + '. Delivery ' + money(zone.fee) + '.';
@@ -131,7 +128,7 @@
   /* The one figure the whole screen agrees on, so the panel, the button and
      the request can never quote three different numbers. */
   function orderTotal(zone) {
-    return Math.round((G.Cart.subtotal() + zone.fee - G.Cart.discount(settings)) * 100) / 100;
+    return Math.round((G.Cart.subtotal() + zone.fee) * 100) / 100;
   }
 
   /* ------------------------------------------------------------------ form */
@@ -307,7 +304,6 @@
           lines.push({
             productId: it.cart.productId,
             productName: it.recipe.name,
-            boxId: it.cart.boxId || null,
             qty: it.cart.qty,
             unitPrice: it.cart.unitPrice,
             leadTimeDays: it.recipe.leadTimeDays || 1,
@@ -319,7 +315,8 @@
         $('place').textContent = 'Placing the order';
 
         var subtotal = Math.round(G.Cart.subtotal() * 100) / 100;
-        var discount = Math.round(G.Cart.discount(settings) * 100) / 100;
+        /* Always 0. The order rule reads totals.discount whether or not there is one, so the key stays. */
+        var discount = 0;
 
         var order = {
           orderNumber: '',

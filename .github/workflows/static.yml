@@ -31,10 +31,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p _site/css _site/js _site/js/engine _site/fonts _site/admin _site/data
-          mkdir -p _site/assets/samples
+          mkdir -p _site/assets/samples _site/assets/moon _site/assets/products/moon-print
           mkdir -p _site/assets/products/mug _site/assets/products/cap
           mkdir -p _site/assets/products/bottle _site/assets/products/tote
-          mkdir -p _site/assets/products/photo-block _site/assets/products/gift-box
+          mkdir -p _site/assets/products/photo-block
 
           cp index.html _site/index.html
           cp 404.html _site/404.html
@@ -43,7 +43,7 @@ jobs:
           cp cart.html _site/cart.html
           cp checkout.html _site/checkout.html
           cp track.html _site/track.html
-          cp box.html _site/box.html
+          cp moon.html _site/moon.html
           cp admin/index.html _site/admin/index.html
           cp admin/payload.js _site/admin/payload.js
           cp .nojekyll _site/.nojekyll
@@ -67,15 +67,13 @@ jobs:
           cp css/shop.css _site/css/shop.css
           cp css/checkout.css _site/css/checkout.css
           cp css/customize.css _site/css/customize.css
-          cp css/box.css _site/css/box.css
+          cp css/moon.css _site/css/moon.css
 
           cp js/firebase-config.js _site/js/firebase-config.js
           cp js/main.js _site/js/main.js
           cp js/hero.js _site/js/hero.js
           cp js/motion.js _site/js/motion.js
           cp js/showcase.js _site/js/showcase.js
-          cp js/bundle.js _site/js/bundle.js
-          cp js/box.js _site/js/box.js
           cp js/data.js _site/js/data.js
           cp js/recipe.js _site/js/recipe.js
           cp js/proof.js _site/js/proof.js
@@ -96,6 +94,9 @@ jobs:
           cp js/engine/state.js _site/js/engine/state.js
           cp js/engine/photo.js _site/js/engine/photo.js
           cp js/engine/price.js _site/js/engine/price.js
+          cp js/engine/moon.js _site/js/engine/moon.js
+          cp js/lunar.js _site/js/lunar.js
+          cp js/moon.js _site/js/moon.js
 
           # The seed files under data/ are still NOT copied. One built file is:
           # data/catalogue.json is the fallback the storefront serves when a live
@@ -128,14 +129,17 @@ jobs:
           cp assets/products/photo-block/base.svg _site/assets/products/photo-block/base.svg
           cp assets/products/photo-block/mask-base.svg _site/assets/products/photo-block/mask-base.svg
 
-          cp assets/products/gift-box/base.svg _site/assets/products/gift-box/base.svg
-          cp assets/products/gift-box/mask-box.svg _site/assets/products/gift-box/mask-box.svg
-          cp assets/products/gift-box/mask-ribbon.svg _site/assets/products/gift-box/mask-ribbon.svg
-
           # The sample photographs the homepage prints onto the products. Real
           # pictures rather than a vector stand in, because a mug is being sold
           # on how a photograph looks wrapped around it. Free to use, from
           # Unsplash by way of picsum.photos. See assets/samples/SOURCE.txt.
+          cp assets/products/moon-print/base.svg _site/assets/products/moon-print/base.svg
+          cp assets/products/moon-print/mask-frame.svg _site/assets/products/moon-print/mask-frame.svg
+
+          # The moon's two NASA maps, one kilopixel each. See js/engine/moon.js.
+          cp assets/moon/color.jpg _site/assets/moon/color.jpg
+          cp assets/moon/normal.jpg _site/assets/moon/normal.jpg
+
           cp assets/samples/puppy.jpg _site/assets/samples/puppy.jpg
           cp assets/samples/coast.jpg _site/assets/samples/coast.jpg
           cp assets/samples/bloom.jpg _site/assets/samples/bloom.jpg

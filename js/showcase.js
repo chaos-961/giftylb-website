@@ -36,7 +36,8 @@
      cached. */
   var PARTS = [
     'js/data.js', 'js/recipe.js', 'js/engine/warp.js', 'js/engine/mesh.js',
-    'js/engine/design.js', 'js/engine/price.js', 'js/engine/render.js', 'js/engine/scene.js'
+    'js/engine/design.js', 'js/engine/price.js', 'js/engine/render.js', 'js/engine/scene.js',
+    'js/engine/state.js', 'js/engine/photo.js'
   ];
 
   /* Big enough that a tile on a two times display still resolves, small enough
@@ -55,7 +56,10 @@
       acrylic: { photo: 'assets/samples/coast.jpg' },
       caption: { text: 'Batroun, July', font: 'ui', color: '#FFFFFF' }
     },
-    'gift-box': { card: { text: 'Happy birthday, Rana', font: 'hand', color: '#14201F' } }
+    'moon-print': {
+      poster: { moon: '1996-06-14T21:30', text: 'Rana', font: 'display', color: '#F4F1E8', size: 0.09, y: 0.72 },
+      caption: { text: '14 June 1996, waning gibbous', font: 'ui', color: '#F4F1E8', size: 0.34 }
+    }
   };
 
   /* The scratch canvas has to be in the document and have a real box, because
@@ -111,6 +115,11 @@
         wanted.push(G.Recipe.loadImage(want.photo).then(function (img) {
           zs.photo = place(img, zone);
         }).catch(function () { /* the object renders blank, which is still an object */ }));
+      }
+      if (want.moon) {
+        wanted.push(G.State.moonPhoto(want.moon, zone).then(function (photo) {
+          zs.photo = photo;
+        }).catch(function () { /* an empty frame is still a frame */ }));
       }
     });
 

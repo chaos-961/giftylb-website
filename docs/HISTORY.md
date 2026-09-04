@@ -1452,3 +1452,81 @@ undo walking back through every one, and the snapshot carrying all of it.
 
 Nine routes at 375px in real headless Chrome: no console errors, no horizontal
 overflow, nothing left at opacity 0.
+
+## v0.3.6, 2026-09-04. Photoshop for a mug, a real cap, the moon, and no more box
+
+Authorised in session 2026-09-04 as one release: "more customizations,
+better controls, revamp the customization system; polish the main pages, add
+scrolling animations; fix all of the models; remove the gift option; bring the
+moon template in beside the cap and the cup."
+
+**The gift box is gone.** `box.html`, `js/box.js`, `js/bundle.js`,
+`css/box.css`, the `gift-box` recipe and its art, the `giftBox` settings key,
+the box cards on the shop and the cart, the packing sheet's box column in the
+admin. `firestore.rules` is untouched: it reads `totals.discount`
+unconditionally, so the checkout still writes `discount: 0` and the bound
+clause passes with nothing to bound. `products/gift-box` has to be deleted from
+production by hand, the seeder only ever upserts. An old cart still holding a
+box line drops it on load.
+
+**The engine grew two things and fixed one.** A partial lathe closes its two
+ends (ear clipped from the profile polygon, wound to face out), `droop` sags a
+sweep toward its ends so a bill curves instead of sitting on a saucer, and box
+uv is measured in distance across the face rather than in samples, which is
+why the tote's "63% panel" was really 94% and bled onto both rounded edges.
+
+**Every model was rebuilt** in `tools/build-models.mjs`, which writes the
+`model` blocks: seam paths resampled along the crown profile, a handle that
+enters the wall square on, a frame that leans as one piece. The cap is a five
+panel structured cap now: the front panel is a 92 degree sweep of the crown
+profile carrying the print, the rest of the crown is the other 268, five seam
+tubes sit on the panel edges, and the bill is a capped 98 degree slab with
+`droop 0.72`. The bottle has a shoulder, a threaded neck, a domed lid with a
+loop, a satin coat (`gloss 0.9 rough 0.18 metal 0.15 coat 0.45`), and its
+default colour is deep teal: measured against six material variants, a black
+bottle swallowed its own engraving in every one and teal and white read
+cleanly. The mug has a foot ring, a rolled rim, a tapered handle and a print
+rectangle with the zone's real aspect (it was 13.6% out). The tote's print is
+a centred panel with straps on the outside of the cloth and stitch patches.
+The etch pass is stronger so an engraved caption reads on oak and on teal.
+
+**The customizer is a control table.** Every slider is a row in
+`js/customize.js` naming the state key, its range and how to say its value;
+one builder makes it, wires touch and commit, syncs it after undo and resets
+it on a double tap. New on text: across, tilt, line spacing, weight, opacity,
+outline width, a second colour to fade into, and a pill, box or underline
+behind the words. New on a photo: free tilt, opacity, brightness, contrast,
+colour, soft edge, border, vignette, four more shapes, and a photo may now be
+smaller than its zone (a round picture on a coloured mug) down to a quarter of
+cover. New on a zone: a second fill for a gradient and a pattern (dots,
+stripes, grid, rays). A free colour picker sits at the end of every text and
+fill palette; product colours stay on the palette because those are the
+coats the workshop stocks. The Design view takes a drag on the words as well
+as the photo, a pinch or a wheel zooms, and there is a redo button.
+`State.snapshot` copies every scalar on a photo rather than a list, so a new
+option cannot be lost on undo by being forgotten there. `Design.textBox`
+gives the customizer the same rectangle the renderer drew, for hit testing.
+
+**The moon.** `C:\Development\Websites\Templates\moon` was a three.js page.
+It is ported with no library: `js/lunar.js` is the Meeus ephemeris verbatim
+(`tools/test-lunar.mjs`, 30 passed), `js/engine/moon.js` raycasts a sphere in
+one fragment shader against the 1k NASA colour and normal maps under
+`assets/moon/`, with a software path for stills where WebGL is missing.
+`moon.html` is the experience, restyled to the site: date and time, the sky
+as one dark card, six facts, every full moon since on a slider with play, and
+a button into the customizer with the date in the URL. The product is
+`moon-print`: a framed 30 by 40 print with a `poster` zone that accepts
+`moon` and text, a `caption` strip, six fills, and one colourable frame. The
+moon is a photo record that carries a date instead of pixels; `State.hydrate`
+draws it again on any page through `State.moon()`, which loads the two files
+on first use, so no other page pays for them. Templates may name a date
+(check-release 5c allows a photo that has `moon` and no `saveSrc`), the shop
+card hydrates before it paints, the homepage showcase takes `moon:`.
+
+**Motion.** Scroll driven, rest state finished: the eyebrow rule draws itself
+in, a step number pops as its step arrives, an object settles onto its tile,
+the footer columns rise, the FAQ rows rise, and the hero mug turns with the
+scroll once its opening turn has landed.
+
+Not done and said so: `tools/test-order.mjs` was not run this release (the
+rules and `js/order.js` are unchanged, the emulator was not started).

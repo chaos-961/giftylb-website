@@ -113,9 +113,12 @@
 
   function paintCard(art) {
     var recipe = recipes[art.dataset.product];
-    var state = JSON.parse(art.dataset.design);
+    var design = JSON.parse(art.dataset.design);
 
-    return ensure(recipe.id).then(function (p) {
+    /* A template that names a date carries no pixels: the moon of that night
+       is drawn on first use, by the same path a saved design takes. */
+    return Promise.all([ensure(recipe.id), G.State.hydrate(design, recipe)]).then(function (got) {
+      var p = got[0], state = got[1];
       var canvas = document.createElement('canvas');
       var scene = sceneFor(recipe.id);
 
@@ -328,9 +331,8 @@
     });
 
     /* The bar quotes the fastest thing in the shop, because that is the one the
-       sentence is true about. Only what the shop actually offers counts: the
-       gift box is a recipe like any other but it is not sold on its own, and
-       letting it in here would promise a date for something nobody can buy. */
+       sentence is true about. Only what settings.products lists counts, so a
+       recipe the shop does not sell on its own never promises a date here. */
     var quickest = Math.min.apply(null, (order.length ? order : Object.keys(recipes))
       .map(function (id) { return recipes[id].leadTimeDays; }));
     var p = G.Delivery.promise(quickest, zoneId);

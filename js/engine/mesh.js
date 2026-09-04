@@ -2,15 +2,16 @@
  *
  * Builds the real three dimensional shape of a product out of three primitives
  * and nothing else. The same rule as the flat renderer applies here: a product
- * is data. A mug, a cap, a bottle, a tote, a photo block and a gift box are all
- * described by a `model` block in their recipe, and this file has never heard
- * of any of them.
+ * is data. A mug, a cap, a bottle, a tote, a photo block and a framed print
+ * are all described by a `model` block in their recipe, and this file has never
+ * heard of any of them.
  *
  *   lathe   a 2D profile revolved around the Y axis, optionally through part of
- *           a turn. Mug body, bottle, cap crown, cap brim, lids, rings.
+ *           a turn, with closed ends and an optional sag toward those ends.
+ *           Mug body, bottle, cap crown, cap visor, lids, rings.
  *   box     a rounded box, built by subdividing a cube and pushing every point
- *           onto the rounded surface. Photo block, tote, gift box.
- *   tube    a circle swept along a 2D path. Mug handle, tote straps, ribbon.
+ *           onto the rounded surface. Photo block, tote, a picture frame.
+ *   tube    a circle swept along a 2D path. Mug handle, tote straps, seams.
  *
  * Every primitive emits position, normal and uv. The uv convention is the whole
  * trick and it is one sentence: uv runs 0 to 1 across the part of the surface
@@ -97,7 +98,70 @@
      tangent turned a quarter turn to the right, so tracing it the other way
      round lights the part inside out and the renderer culls it away. A mug goes
      out along the bottom, up the outside, over the rim and back down the
-     inside, and that closed loop is why it can be culled at all. */
+     inside, and that closed loop is why it can be culled at all.
+
+     `arcDeg` sweeps only part of a turn, centred on `arcMidDeg`. A partial sweep
+     of a closed profile is a solid slab, a cap visor say, and its two ends are
+     closed with a flat face each (`arcCaps: false` turns that off for a part
+     that is buried in another). `droop` bends the sweep down toward its ends:
+     every point drops by droop times its distance from the innermost radius
+     times one minus the cosine of its angle from the middle, so the inner edge
+     stays put and the outer corners sag. That is the difference between a
+     bill and a saucer. `droopMidDeg` moves the angle the sag is measured
+     from, so a crown built from two sweeps can slope toward one back: that
+     is what makes a cap tall at the front and low behind. Normals are
+     derived from the real surface, so the sag lights correctly. */
+
+  /* Triangulate a simple polygon of [x, y] points by ear clipping. A profile
+     has a dozen points, so the quadratic loop is nothing. Returns index
+     triples, wound the way the polygon is traced. */
+  function pointInTri(p, a, b, c) {
+    var s1 = (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]);
+    var s2 = (c[0] - b[0]) * (p[1] - b[1]) - (c[1] - b[1]) * (p[0] - b[0]);
+    var s3 = (a[0] - c[0]) * (p[1] - c[1]) - (a[1] - c[1]) * (p[0] - c[0]);
+    return s1 > 1e-12 && s2 > 1e-12 && s3 > 1e-12;
+  }
+
+  function earClip(pts) {
+    var n = pts.length, i, j;
+    if (n < 3) return [];
+    var idx = [];
+    for (i = 0; i < n; i++) idx.push(i);
+    var area = 0;
+    for (i = 0; i < n; i++) {
+      var p = pts[i], q = pts[(i + 1) % n];
+      area += p[0] * q[1] - q[0] * p[1];
+    }
+    if (Math.abs(area) < 1e-9) return [];
+    if (area < 0) idx.reverse();
+    var tris = [];
+    var guard = 0;
+    while (idx.length > 3 && guard++ < 4000) {
+      var found = false;
+      for (i = 0; i < idx.length; i++) {
+        var a = idx[(i + idx.length - 1) % idx.length];
+        var b = idx[i];
+        var c = idx[(i + 1) % idx.length];
+        var A = pts[a], B = pts[b], C = pts[c];
+        var cross = (B[0] - A[0]) * (C[1] - A[1]) - (B[1] - A[1]) * (C[0] - A[0]);
+        if (cross <= 1e-12) continue;
+        var blocked = false;
+        for (j = 0; j < idx.length; j++) {
+          var d = idx[j];
+          if (d === a || d === b || d === c) continue;
+          if (pointInTri(pts[d], A, B, C)) { blocked = true; break; }
+        }
+        if (blocked) continue;
+        tris.push(a, b, c);
+        idx.splice(i, 1);
+        found = true;
+        break;
+      }
+      if (!found) break;
+    }
+    if (idx.length === 3) tris.push(idx[0], idx[1], idx[2]);
+    return tris;
+  }
 
   Mesh.lathe = function (spec) {
     var profile = spec.profile;
@@ -105,14 +169,22 @@
     var arcDeg = spec.arcDeg == null ? 360 : spec.arcDeg;
     var arcMid = (spec.arcMidDeg || 0) * Math.PI / 180;
     var span = spec.printSpan;
+    var droop = spec.droop || 0;
+    /* Where the sag is measured from: the sweep's middle unless the part says
+       otherwise, so two sweeps of one crown can sag toward the same back. */
+    var droopMid = spec.droopMidDeg == null ? arcMid : spec.droopMidDeg * Math.PI / 180;
+    var caps = arcDeg < 360 && spec.arcCaps !== false;
 
     var arc = arcDeg * Math.PI / 180;
     var cols = segments + 1;
     var rows = profile.length;
+    var i, r, c;
 
     /* Arc length along the profile, used for v and for the normals. */
     var len = [0];
-    for (var i = 1; i < rows; i++) {
+    var rIn = Infinity;
+    for (i = 0; i < rows; i++) rIn = Math.min(rIn, profile[i][0]);
+    for (i = 1; i < rows; i++) {
       var dr = profile[i][0] - profile[i - 1][0];
       var dy = profile[i][1] - profile[i - 1][1];
       len[i] = len[i - 1] + Math.sqrt(dr * dr + dy * dy);
@@ -122,10 +194,33 @@
     var v1 = span ? len[span[1]] : len[rows - 1];
     var vSpan = (v1 - v0) || 1;
 
-    var m = build(rows * cols);
+    /* The cap polygon: the profile with duplicated points (creases, and the
+       closing point) removed, remembering which row each corner came from. */
+    var poly = [], polyRow = [];
+    if (caps) {
+      for (i = 0; i < rows; i++) {
+        var prev = poly.length ? profile[polyRow[poly.length - 1]] : null;
+        if (prev && Math.abs(prev[0] - profile[i][0]) < 1e-9 && Math.abs(prev[1] - profile[i][1]) < 1e-9) continue;
+        poly.push(profile[i]); polyRow.push(i);
+      }
+      var first = profile[polyRow[0]], last = profile[polyRow[poly.length - 1]];
+      if (poly.length > 1 && Math.abs(first[0] - last[0]) < 1e-9 && Math.abs(first[1] - last[1]) < 1e-9) {
+        poly.pop(); polyRow.pop();
+      }
+      if (poly.length < 3) caps = false;
+    }
+
+    var m = build(rows * cols + (caps ? 2 * poly.length : 0));
     var k = 0;
 
-    for (var r = 0; r < rows; r++) {
+    /* Where a profile row lands at an angle, sag included. */
+    function place(row, theta) {
+      var rad = profile[row][0];
+      var sag = droop ? -droop * (rad - rIn) * (1 - Math.cos(theta - droopMid)) : 0;
+      return [rad * Math.sin(theta), profile[row][1] + sag, rad * Math.cos(theta)];
+    }
+
+    for (r = 0; r < rows; r++) {
       var rad = profile[r][0];
       var y = profile[r][1];
 
@@ -143,19 +238,71 @@
         ? (r < span[0] || r > span[1] ? OFF : (v1 - len[r]) / vSpan)
         : (v1 - len[r]) / vSpan;
 
-      for (var c = 0; c < cols; c++) {
+      for (c = 0; c < cols; c++) {
         var t = c / segments;
         var theta = arcMid + (t - 0.5) * arc;
         var s = Math.sin(theta), co = Math.cos(theta);
+        var nx = nr * s, nyy = ny, nz = nr * co;
+        var py = y;
+
+        if (droop) {
+          /* The sagging surface, differentiated by hand: along the sweep and
+             along the profile, crossed the same way round as the flat case. */
+          var wob = 1 - Math.cos(theta - droopMid);
+          py = y - droop * (rad - rIn) * wob;
+          var dhdt = -droop * (rad - rIn) * Math.sin(theta - droopMid);
+          var dhdp = -droop * tr * wob;
+          var ax = rad * co, ay = dhdt, az = -rad * s;
+          var bx = tr * s, by = ty + dhdp, bz = tr * co;
+          var gx = ay * bz - az * by, gy = az * bx - ax * bz, gz = ax * by - ay * bx;
+          var gl = Math.sqrt(gx * gx + gy * gy + gz * gz);
+          if (gl > 1e-9) { nx = gx / gl; nyy = gy / gl; nz = gz / gl; }
+        }
+
         put(m, k++,
-            rad * s, y, rad * co,
-            nr * s, ny, nr * co,
+            rad * s, py, rad * co,
+            nx, nyy, nz,
             0.5 + theta / TAU, v);
       }
     }
 
     m.n = k;
     grid(m, 0, rows, cols);
+
+    if (caps) {
+      var tris = earClip(poly.map(function (p, n) {
+        var q = place(polyRow[n], arcMid - arc / 2);
+        /* Triangulate in the profile plane, sag included, so a bent slab still
+           reads as the simple polygon it is. */
+        return [p[0], q[1]];
+      }));
+      var ends = [
+        { theta: arcMid - arc / 2, sign: -1 },
+        { theta: arcMid + arc / 2, sign: 1 }
+      ];
+      ends.forEach(function (end) {
+        var th = end.theta;
+        /* Straight out of the end face: the sweep direction, or its opposite. */
+        var cnx = end.sign * Math.cos(th), cnz = -end.sign * Math.sin(th);
+        var base = k;
+        for (i = 0; i < poly.length; i++) {
+          var pos = place(polyRow[i], th);
+          put(m, k++, pos[0], pos[1], pos[2], cnx, 0, cnz, OFF, OFF);
+        }
+        for (i = 0; i < tris.length; i += 3) {
+          var ia = base + tris[i], ib = base + tris[i + 1], ic = base + tris[i + 2];
+          var P = m.position;
+          var ux = P[ib * 3] - P[ia * 3], uy = P[ib * 3 + 1] - P[ia * 3 + 1], uz = P[ib * 3 + 2] - P[ia * 3 + 2];
+          var vx = P[ic * 3] - P[ia * 3], vy = P[ic * 3 + 1] - P[ia * 3 + 1], vz = P[ic * 3 + 2] - P[ia * 3 + 2];
+          var fx = uy * vz - uz * vy, fz = ux * vy - uy * vx;
+          /* Wound to face out of the end, whichever way the polygon was traced. */
+          if (fx * cnx + fz * cnz < 0) m.index.push(ia, ic, ib);
+          else m.index.push(ia, ib, ic);
+        }
+      });
+      m.n = k;
+    }
+
     return finish(m);
   };
 
@@ -239,6 +386,8 @@
       var base = k;
       var us = ax[p.uAxis], vs = ax[p.vAxis];
       var printable = f.id === printFace;
+      var halfU = p.uAxis === 'x' ? sx : (p.uAxis === 'y' ? sy : sz);
+      var halfV = p.vAxis === 'x' ? sx : (p.vAxis === 'y' ? sy : sz);
 
       for (var r = 0; r < p.rows; r++) {
         for (var c = 0; c < p.cols; c++) {
@@ -263,10 +412,13 @@
           put(m, k++,
               qx + nx * rad, qy + ny * rad, qz + nz * rad,
               nx, ny, nz,
-              /* v is measured back down the face, because the basis above runs
+              /* uv is measured in distance across the face, not in samples,
+                 because the grid spends most of its samples on the rounded
+                 edges and a print placed by sample count spilled over them.
+                 v is measured back down the face, because the basis above runs
                  v up the object and the first row of an image is its top. */
-              printable ? c / (p.cols - 1) : OFF,
-              printable ? 1 - r / (p.rows - 1) : OFF);
+              printable ? (uu + halfU) / (2 * halfU) : OFF,
+              printable ? 1 - (vv + halfV) / (2 * halfV) : OFF);
         }
       }
       grid(m, base, p.rows, p.cols);

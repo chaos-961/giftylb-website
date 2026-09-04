@@ -77,6 +77,24 @@
         state = G.Recipe.initialState(recipe);
         scene.update(state);
 
+        /* The mug turns a little as the page scrolls away from it, so the
+           print comes round into view. It says "this turns" without a word,
+           and it waits for the opening turn to land before it starts. */
+        if (!reduced() && scene.turnTo && recipe.model && recipe.model.camera) {
+          var cam = recipe.model.camera;
+          var born = Date.now(), ticking = false;
+          window.addEventListener('scroll', function () {
+            if (ticking || Date.now() - born < 2400) return;
+            ticking = true;
+            requestAnimationFrame(function () {
+              ticking = false;
+              var y = window.scrollY || 0;
+              if (y > window.innerHeight * 1.2) return;
+              scene.turnTo((cam.yawDeg || 0) + y * 0.07, cam.pitchDeg == null ? 8 : cam.pitchDeg);
+            });
+          }, { passive: true });
+        }
+
         /* The photo, built by hand rather than through Photo.fromFile, which
            wants a File and an image cache neither of which exist here. Same
            five numbers the renderer reads. */

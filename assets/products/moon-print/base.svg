@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" width="900" height="700">
+<!-- Framed print, straight on. Grayscale. The frame is the one colourable
+     part; the sheet inside it is the print surface and is drawn by the
+     design, so it is left flat here. -->
+<defs>
+  <linearGradient id="frameG" x1="0" y1="70" x2="0" y2="600" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#f1f1f1"/><stop offset="0.5" stop-color="#cfcfcf"/>
+    <stop offset="1" stop-color="#9a9a9a"/>
+  </linearGradient>
+  <linearGradient id="lipG" x1="250" y1="0" x2="650" y2="0" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#8a8a8a"/><stop offset="0.5" stop-color="#e4e4e4"/>
+    <stop offset="1" stop-color="#7c7c7c"/>
+  </linearGradient>
+  <radialGradient id="dropM" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#000" stop-opacity="0.26"/><stop offset="1" stop-color="#000" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+<ellipse cx="450" cy="612" rx="250" ry="22" fill="url(#dropM)"/>
+<rect x="250" y="70" width="400" height="530" rx="4" fill="url(#frameG)"/>
+<rect x="250" y="70" width="400" height="530" rx="4" fill="none" stroke="#7a7a7a" stroke-width="2"/>
+<rect x="266" y="91" width="368" height="488" fill="url(#lipG)"/>
+<rect x="270" y="95" width="360" height="480" fill="#dedede"/>
+<path d="M270 95 h360 v6 h-360 z" fill="#000" opacity="0.22"/>
+<path d="M270 95 v480 h6 v-480 z" fill="#000" opacity="0.14"/>
+</svg>

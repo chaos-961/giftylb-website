@@ -7,20 +7,19 @@
 <meta name="description" content="What you have made so far, what it costs, and the day it lands.">
 <meta name="theme-color" content="#14B8A6">
 <meta name="robots" content="noindex">
-<link rel="icon" href="favicon.svg?v=0.3.5" type="image/svg+xml">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.3.5">
+<link rel="icon" href="favicon.svg?v=0.3.6" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.3.6">
 
-<meta name="version" content="0.3.5">
+<meta name="version" content="0.3.6">
 
-<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.3.5" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.3.5" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.3.6" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.3.6" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="css/tokens.css?v=0.3.5">
-<link rel="stylesheet" href="css/base.css?v=0.3.5">
-<link rel="stylesheet" href="css/atmosphere.css?v=0.3.5">
-<link rel="stylesheet" href="css/chrome.css?v=0.3.5">
-<link rel="stylesheet" href="css/shop.css?v=0.3.5">
-<link rel="stylesheet" href="css/box.css?v=0.3.5">
+<link rel="stylesheet" href="css/tokens.css?v=0.3.6">
+<link rel="stylesheet" href="css/base.css?v=0.3.6">
+<link rel="stylesheet" href="css/atmosphere.css?v=0.3.6">
+<link rel="stylesheet" href="css/chrome.css?v=0.3.6">
+<link rel="stylesheet" href="css/shop.css?v=0.3.6">
 <script>
 /* Two decisions, both before anything paints, both only ever ADDING a class.
    Nothing on this page is hidden unless one of them is present.
@@ -78,7 +77,7 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
 <div class="nav-sheet" id="navSheet" hidden>
   <nav class="nav-sheet__panel" aria-label="Menu">
       <a href="shop.html">All the designs <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
-      <a href="box.html">Build a gift box <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
+      <a href="moon.html">Your birth moon <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
       <a href="cart.html" aria-current="page">Your cart <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
     <div class="nav-sheet__minor">
       <a href="index.html#how">How it works</a>
@@ -107,25 +106,8 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
       <a class="btn btn--primary" href="shop.html">See the designs</a>
     </div>
 
-    <p class="cart-notice" id="cartNotice" hidden></p>
-
     <div class="cart-layout" id="cartLayout" hidden>
       <div>
-        <a class="box-cta" id="cartBoxCta" href="box.html" hidden>
-          <span class="box-cta__art" aria-hidden="true">
-            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="9" y="20" width="30" height="19" rx="2"/>
-              <rect x="7" y="14" width="34" height="7" rx="1.6"/>
-              <path d="M24 14v25"/>
-              <path d="M24 14c-6 0-9-2-9-5s5-3 9 5c4-8 9-8 9-5s-3 5-9 5z"/>
-            </svg>
-          </span>
-          <span class="box-cta__body">
-            <span class="box-cta__title" id="boxCtaTitle">Send them in one box</span>
-            <span class="box-cta__sub" id="boxCtaSub"></span>
-          </span>
-        </a>
-
         <ul class="cart-list" id="cartList" role="list"></ul>
       </div>
 
@@ -143,7 +125,6 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
 
         <div class="totals">
           <div><span>Things</span><span id="totalItems"></span></div>
-          <div class="cart-saving" id="totalSavingRow" hidden><span>Boxed together</span><span id="totalSaving"></span></div>
           <div><span>Delivery</span><span id="totalDelivery"></span></div>
           <div class="totals__grand"><span>Total</span><span id="totalGrand"></span></div>
         </div>
@@ -183,10 +164,10 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
           <li><a href="shop.html">All the designs</a></li>
           <li><a href="customize.html?p=mug">Mug</a></li>
           <li><a href="customize.html?p=cap">Cap</a></li>
+          <li><a href="moon.html">Birth moon print</a></li>
           <li><a href="customize.html?p=bottle">Bottle</a></li>
           <li><a href="customize.html?p=tote">Tote bag</a></li>
           <li><a href="customize.html?p=photo-block">Photo block</a></li>
-          <li><a href="box.html">Gift box</a></li>
         </ul>
       </nav>
 
@@ -208,16 +189,15 @@ if(!red)d.documentElement.classList.add('lift-in');})(window,document);
   </div>
 </footer>
 
-<script defer src="js/firebase-config.js?v=0.3.5"></script>
-<script defer src="js/data.js?v=0.3.5"></script>
-<script defer src="js/recipe.js?v=0.3.5"></script>
-<script defer src="js/engine/price.js?v=0.3.5"></script>
-<script defer src="js/delivery.js?v=0.3.5"></script>
-<script defer src="js/bundle.js?v=0.3.5"></script>
-<script defer src="js/cart.js?v=0.3.5"></script>
-<script defer src="js/nav.js?v=0.3.5"></script>
-<script defer src="js/cart-page.js?v=0.3.5"></script>
-<script defer src="js/main.js?v=0.3.5"></script>
-<script defer src="js/motion.js?v=0.3.5"></script>
+<script defer src="js/firebase-config.js?v=0.3.6"></script>
+<script defer src="js/data.js?v=0.3.6"></script>
+<script defer src="js/recipe.js?v=0.3.6"></script>
+<script defer src="js/engine/price.js?v=0.3.6"></script>
+<script defer src="js/delivery.js?v=0.3.6"></script>
+<script defer src="js/cart.js?v=0.3.6"></script>
+<script defer src="js/nav.js?v=0.3.6"></script>
+<script defer src="js/cart-page.js?v=0.3.6"></script>
+<script defer src="js/main.js?v=0.3.6"></script>
+<script defer src="js/motion.js?v=0.3.6"></script>
 </body>
 </html>

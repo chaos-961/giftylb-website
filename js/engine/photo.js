@@ -48,15 +48,14 @@
       .then(function (img) {
         var id = 'photo:' + (++seq) + ':' + Date.now();
         G.State.imageCache[id] = img;
-        var photo = {
+        var photo = Object.assign({}, G.Design.PHOTO_DEFAULTS, {
           id: id,
           image: img,
           natW: img.naturalWidth,
           natH: img.naturalHeight,
           saveSrc: downscale(img, G.State.AUTOSAVE_MAX_EDGE) || img.src,
-          k: 1, ox: 0, oy: 0,
-          rot: 0, flip: false, filter: 'none', shape: 'rect'
-        };
+          k: 1, ox: 0, oy: 0
+        });
         Photo.fitCover(photo, zone, canvasW);
         return photo;
       })
@@ -94,16 +93,30 @@
     return photo;
   };
 
-  /* Keep the photo covering the zone after any pan or zoom. Without this a
-     drag can pull an edge inside the print area and leave a white band that
-     the buyer will not notice until the thing is printed. */
+  /* Keep the photo on the zone after any pan or zoom. A photo may be smaller
+     than the print area now, a round picture on a coloured mug say, so the
+     rule is no longer "cover it": it is that a good part of the photo stays
+     inside, so a drag can never lose it off an edge. Zoom bottoms out at a
+     quarter of cover. */
+  Photo.MIN_ZOOM = 0.25;
   Photo.clamp = function (photo, zone) {
     var size = G.Design.sizeFor(zone);
-    var min = G.Design.coverScale(photo, size.w, size.h);
+    var min = G.Design.coverScale(photo, size.w, size.h) * Photo.MIN_ZOOM;
     if (photo.k < min) photo.k = min;
     var dw = photo.natW * photo.k, dh = photo.natH * photo.k;
-    photo.ox = Math.min(0, Math.max(size.w - dw, photo.ox));
-    photo.oy = Math.min(0, Math.max(size.h - dh, photo.oy));
+    var keepX = Math.min(dw, size.w) * 0.35, keepY = Math.min(dh, size.h) * 0.35;
+    photo.ox = Math.min(size.w - keepX, Math.max(keepX - dw, photo.ox));
+    photo.oy = Math.min(size.h - keepY, Math.max(keepY - dh, photo.oy));
+    return photo;
+  };
+
+  /* Where a generated picture (the moon) lands on a zone: centred across,
+     sitting in the upper part, at about seven tenths of the width. */
+  Photo.placeFeature = function (photo, zone) {
+    var size = G.Design.sizeFor(zone);
+    photo.k = (size.w * 0.72) / photo.natW;
+    photo.ox = (size.w - photo.natW * photo.k) / 2;
+    photo.oy = size.h * 0.36 - photo.natH * photo.k / 2;
     return photo;
   };
 

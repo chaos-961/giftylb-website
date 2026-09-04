@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The moon on the night you were born. Gifty</title>
+<meta name="description" content="Enter a date and see the real moon of that night, drawn from NASA surface maps, then every full moon since. Put it on a framed print.">
+<meta name="theme-color" content="#14B8A6">
+<link rel="canonical" href="https://chaos-961.github.io/giftylb-website/moon.html">
+<link rel="icon" href="favicon.svg?v=0.3.6" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.3.6">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Gifty">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="The moon on the night you were born. Gifty">
+<meta property="og:description" content="Enter a date and see the real moon of that night, then every full moon since. Put it on a framed print.">
+<meta property="og:url" content="https://chaos-961.github.io/giftylb-website/moon.html">
+<meta property="og:image" content="https://chaos-961.github.io/giftylb-website/assets/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A white mug with a photograph of a black puppy printed around it and the words For Mum underneath">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The moon on the night you were born. Gifty">
+<meta name="twitter:description" content="Enter a date and see the real moon of that night, then every full moon since. Put it on a framed print.">
+<meta name="twitter:image" content="https://chaos-961.github.io/giftylb-website/assets/og.jpg">
+
+<meta name="version" content="0.3.6">
+
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.3.6" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.3.6" as="font" type="font/woff2" crossorigin>
+
+<link rel="stylesheet" href="css/tokens.css?v=0.3.6">
+<link rel="stylesheet" href="css/base.css?v=0.3.6">
+<link rel="stylesheet" href="css/atmosphere.css?v=0.3.6">
+<link rel="stylesheet" href="css/chrome.css?v=0.3.6">
+<link rel="stylesheet" href="css/moon.css?v=0.3.6">
+<script>
+/* Two decisions, both before anything paints, both only ever ADDING a class.
+   See index.html for why they live here. */
+(function(w,d){var ok=w.CSS&&CSS.supports&&CSS.supports('animation-timeline','view()');
+var red=w.matchMedia&&w.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(!ok&&!red&&'IntersectionObserver' in w)d.documentElement.classList.add('reveal-js');
+if(!red)d.documentElement.classList.add('lift-in');})(window,document);
+</script>
+</head>
+<body>
+
+<div class="atmos" aria-hidden="true">
+  <div class="atmos__far"></div>
+  <div class="atmos__near"></div>
+</div>
+<div class="grain" aria-hidden="true"></div>
+<div class="scroll-line" aria-hidden="true"></div>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="wordmark" href="index.html">Gift<span>y</span></a>
+    <nav class="site-nav" aria-label="Main">
+      <a class="site-nav__primary" href="shop.html">Shop</a>
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#delivery">Delivery</a>
+    </nav>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="navSheet" aria-label="Menu">
+      <span class="bars" aria-hidden="true"></span>
+      <span class="x" aria-hidden="true"></span>
+    </button>
+    <a class="cart-link" href="cart.html" aria-label="Cart">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l1 12H4z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+      <span class="cart-link__count" data-cart-count hidden>0</span>
+    </a>
+  </div>
+</header>
+
+<div class="nav-sheet" id="navSheet" hidden>
+  <nav class="nav-sheet__panel" aria-label="Menu">
+      <a href="shop.html">All the designs <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
+      <a href="moon.html" aria-current="page">Your birth moon <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
+      <a href="cart.html">Your cart <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>
+    <div class="nav-sheet__minor">
+      <a href="index.html#how">How it works</a>
+      <a href="index.html#delivery">Delivery</a>
+      <a href="track.html">Follow an order</a>
+    </div>
+  </nav>
+</div>
+
+<main id="main">
+  <div class="wrap moon">
+
+    <div class="page-head moon__head">
+      <p class="eyebrow lift" style="--i:0">Birth moon print</p>
+      <h1 class="lift" style="--i:1">The moon on the night<br>you were born.</h1>
+      <p class="lede lift" style="--i:2">
+        Enter the date and see the exact moon that hung over it, down to the
+        tilt of its face. Then every full moon since, arriving at tonight.
+        Everything is worked out in your browser from NASA surface maps.
+      </p>
+
+      <form class="moon__form lift" id="moonForm" style="--i:3" novalidate>
+        <label class="moon__field">
+          <span>Date of birth</span>
+          <input type="date" id="birthDate" required autocomplete="bday" min="1900-01-01">
+        </label>
+        <label class="moon__field moon__field--narrow">
+          <span>Time <small>optional</small></span>
+          <input type="time" id="birthTime" value="12:00">
+        </label>
+        <button type="submit" class="btn btn--primary" data-magnet>Show my moon</button>
+      </form>
+      <p class="moon__error" id="moonError" role="status"></p>
+    </div>
+
+    <section class="moon__sky lift" style="--i:4" aria-label="The moon">
+      <canvas id="moonCanvas" role="img" aria-label="The moon, drawn for the chosen night"></canvas>
+      <div class="moon__caption">
+        <p class="moon__phase" id="phaseName">Reading the sky</p>
+        <p class="moon__when" id="phaseWhen">Tonight</p>
+      </div>
+      <p class="moon__nogl" id="moonNoGl" hidden>This phone cannot draw the moon live, but the print still can.</p>
+    </section>
+
+    <section class="moon__facts reveal" aria-label="What the sky did that night">
+      <dl>
+        <div><dt>Illuminated</dt><dd id="factIllum">&nbsp;</dd></div>
+        <div><dt>Age of the moon</dt><dd id="factAge">&nbsp;</dd></div>
+        <div><dt>Distance</dt><dd id="factDistance">&nbsp;</dd></div>
+        <div><dt>Moon sign</dt><dd id="factZodiac">&nbsp;</dd></div>
+        <div><dt>Full moons since</dt><dd id="factFulls">&nbsp;</dd></div>
+        <div><dt>Next full moon</dt><dd id="factNext">&nbsp;</dd></div>
+      </dl>
+    </section>
+
+    <section class="moon__journey reveal" id="journey" hidden aria-label="Every full moon since">
+      <div class="moon__journeyhead">
+        <h2>Every full moon since</h2>
+        <p id="journeySay">Slide through them, or press play.</p>
+      </div>
+      <div class="moon__transport">
+        <button type="button" class="btn btn--quiet" id="playBtn">Play</button>
+        <input type="range" id="scrub" min="0" max="0" value="0" step="1" aria-label="Scrub through the full moons since">
+        <button type="button" class="btn btn--quiet" id="birthBtn">That night</button>
+      </div>
+    </section>
+
+    <section class="moon__cta reveal reveal--scale" aria-label="Put it on a print">
+      <div>
+        <p class="eyebrow">Keep it</p>
+        <h2>Put this moon on a framed print.</h2>
+        <p class="lede">A name, the date, the moon exactly as it was. Printed on archival paper, framed, delivered anywhere in Lebanon.</p>
+      </div>
+      <a class="btn btn--primary" id="printLink" href="customize.html?p=moon-print" data-magnet>Make the print <span id="printFrom"></span></a>
+    </section>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="site-footer__inner">
+      <div class="site-footer__brand">
+        <a class="wordmark" href="index.html">Gift<span>y</span></a>
+        <p class="site-footer__say">
+          Custom gifts you design yourself and see before you buy. Printed and delivered in Lebanon.
+        </p>
+      </div>
+
+      <nav aria-labelledby="ft-make">
+        <h2 id="ft-make">Make</h2>
+        <ul role="list">
+          <li><a href="shop.html">All the designs</a></li>
+          <li><a href="customize.html?p=mug">Mug</a></li>
+          <li><a href="customize.html?p=cap">Cap</a></li>
+          <li><a href="moon.html">Birth moon print</a></li>
+          <li><a href="customize.html?p=bottle">Bottle</a></li>
+          <li><a href="customize.html?p=tote">Tote bag</a></li>
+          <li><a href="customize.html?p=photo-block">Photo block</a></li>
+        </ul>
+      </nav>
+
+      <nav aria-labelledby="ft-know">
+        <h2 id="ft-know">Know</h2>
+        <ul role="list">
+          <li><a href="index.html#how">How it works</a></li>
+          <li><a href="index.html#delivery">Delivery and zones</a></li>
+          <li><a href="track.html">Follow your order</a></li>
+          <li><a href="cart.html">Your cart</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="site-footer__base">
+      <p>Moon maps by NASA Goddard, LRO and LOLA. Positions after Meeus.</p>
+      <p><span id="year">2026</span> Gifty</p>
+    </div>
+  </div>
+</footer>
+
+<script defer src="js/firebase-config.js?v=0.3.6"></script>
+<script defer src="js/cart.js?v=0.3.6"></script>
+<script defer src="js/nav.js?v=0.3.6"></script>
+<script defer src="js/data.js?v=0.3.6"></script>
+<script defer src="js/recipe.js?v=0.3.6"></script>
+<script defer src="js/lunar.js?v=0.3.6"></script>
+<script defer src="js/engine/moon.js?v=0.3.6"></script>
+<script defer src="js/moon.js?v=0.3.6"></script>
+<script defer src="js/main.js?v=0.3.6"></script>
+<script defer src="js/motion.js?v=0.3.6"></script>
+</body>
+</html>

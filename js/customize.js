@@ -2,7 +2,14 @@
  *
  * This file owns the interface. It owns no drawing and no product knowledge:
  * everything it renders comes out of the recipe, which is why the same screen
- * serves a mug, a cap, a bottle, a tote and a photo block without a branch.
+ * serves a mug, a cap, a bottle, a tote, a photo block and a moon print
+ * without a branch.
+ *
+ * Every slider is one line in a table below. The table says which key on the
+ * state it moves, its range and how to say its value, and one builder makes
+ * the control, wires it, syncs it after undo and resets it on a double tap.
+ * Adding an option is adding a row, plus its default in Design and its bound
+ * in the release check.
  */
 (function (G) {
   'use strict';
@@ -10,28 +17,32 @@
   var $ = function (id) { return document.getElementById(id); };
 
   var recipe = null, images = null, cache = null, store = null;
-  var zone = null, rule = null, part0 = null;
+  var zone = null, rule = null;
   var frame = null, pending = 1, lastTotal = null;
   var editingId = null;   /* set when the buyer came back from the cart to edit */
 
-  /* Two previews of one design. 3D is the real object and is what opens; flat
-     is the same drawing the proof and the print file come from, and it is where
-     a photo is dragged into place, because in 3D a drag turns the object. Both
-     are redrawn on every finished change so neither can go stale behind the
-     other, and only the visible one is redrawn during a drag. */
+  /* Two previews of one design. 3D is the real object and is what opens; the
+     design view is the same drawing the proof and the print file come from,
+     and it is where a photo or a line of words is dragged into place, because
+     in 3D a drag turns the object. Both are redrawn on every finished change
+     so neither can go stale behind the other, and only the visible one is
+     redrawn during a drag. */
   var scene = null;
   var mode = '3d';
   var VIEW_KEY = 'gifty.view';
 
   var el = {};
   ['preview', 'preview3d', 'viewToggle', 'viewTurn', 'viewFlat',
-   'loading', 'productName', 'undoBtn', 'restoredChip', 'startOver', 'dpiChip',
+   'loading', 'productName', 'undoBtn', 'redoBtn', 'restoredChip', 'startOver', 'dpiChip',
+   'moonControls', 'moonDate', 'moonTime', 'moonSay', 'photoCta',
    'photoInput', 'photoBtnLabel', 'removePhoto', 'photoHint', 'photoControls',
-   'zoom', 'panX', 'panY', 'recentre', 'rotateBtn', 'flipBtn', 'photoFilters', 'photoShapes',
-   'textInput', 'charCount', 'linesHint', 'fontChips',
-   'textColours', 'textColourField', 'textSize', 'textY', 'textAlign', 'textArc', 'arcValue',
-   'textSpacing', 'textEffects', 'textCaps', 'textOutline', 'textShadow', 'colourParts',
-   'priceAmount', 'priceBreakdown', 'priceBreakdownBtn', 'addBtn', 'dock', 'zonePicker',
+   'photoSliders', 'photoAdjust', 'photoLookField', 'photoShapeField',
+   'recentre', 'rotateBtn', 'flipBtn', 'photoFilters', 'photoShapes',
+   'textInput', 'charCount', 'linesHint', 'textDragHint', 'fontChips',
+   'textColours', 'textColourField', 'textColours2', 'textColour2Field',
+   'textSliders', 'textFine', 'textAlign',
+   'textEffects', 'textCaps', 'textOutline', 'textShadow', 'textPlates', 'textPlateField',
+   'colourParts', 'priceAmount', 'priceBreakdown', 'priceBreakdownBtn', 'addBtn', 'dock', 'zonePicker',
    'addedChip', 'addedText', 'deliverLine']
     .forEach(function (id) { el[id] = $(id); });
 
@@ -51,8 +62,6 @@
     });
   }
 
-  /* `quick` skips rebuilding the artwork texture, which is what a colour change
-     wants: the photo and the words have not moved, only the glaze under them. */
   function draw3d(quick) {
     if (!scene || scene.lost()) return;
     try { scene.update(store.get(), quick); }
@@ -69,8 +78,6 @@
     setMode('flat');
   }
 
-  /* Which preview is on screen. Only one is, ever: two canvases stacked in the
-     same box with the other display:none, so nothing is being drawn behind. */
   function setMode(next, opts) {
     if (next === '3d' && (!scene || scene.lost())) next = 'flat';
     mode = next;
@@ -78,16 +85,10 @@
     el.preview.hidden = (mode === '3d');
     el.viewTurn.setAttribute('aria-pressed', String(mode === '3d'));
     el.viewFlat.setAttribute('aria-pressed', String(mode === 'flat'));
-    /* Only a choice is remembered. A device that cannot draw the object is
-       pushed to flat every time, and writing that down would mean a phone that
-       failed once opens flat forever after it stops failing. */
     if (opts && opts.remember) {
       try { localStorage.setItem(VIEW_KEY, mode); } catch (e) { /* private mode */ }
     }
-
     if (mode === '3d') {
-      /* The canvas had no size while it was hidden, so the renderer has to be
-         told to measure itself again before it draws anything. */
       draw3d(false);
       if (opts && opts.reveal && scene) scene.reveal();
     } else {
@@ -108,9 +109,8 @@
     updatePrice(state);
     updateDpi(state);
     el.undoBtn.disabled = !store.canUndo();
-    /* Once the design moves on, "in the cart" is no longer true of what is on
-       screen, so the confirmation goes rather than quietly becoming a lie. */
-    if (!el.addedChip.hidden && !(meta && meta.transient)) el.addedChip.hidden = true;
+    el.redoBtn.disabled = !store.canRedo();
+    if (!el.addedChip.hidden && !transient) el.addedChip.hidden = true;
   }
 
   /* ----------------------------------------------------------------- price */
@@ -142,11 +142,7 @@
       G.Delivery.sentence(G.Delivery.promise(recipe.leadTimeDays, G.Cart.zone()));
   }
 
-  /* ------------------------------------------------------------------ cart
-
-     The thumbnail is a downscale of the very canvas the buyer is looking at,
-     so the picture in the cart is the design and cannot drift from it. P4
-     re-renders the same state at print resolution for the proof. */
+  /* ------------------------------------------------------------------ cart */
 
   function thumbOf() {
     var view = recipe.views[0];
@@ -154,9 +150,6 @@
     c.width = 420;
     c.height = Math.round(420 * view.h / view.w);
     var ctx = c.getContext('2d');
-
-    /* JPEG has no alpha and both previews are drawn on nothing, so without a
-       ground every thumbnail in the cart comes back on black. */
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, c.width, c.height);
 
@@ -164,8 +157,6 @@
     if (src === el.preview) {
       ctx.drawImage(src, 0, 0, c.width, c.height);
     } else if (src.width && src.height) {
-      /* The 3D canvas is whatever shape the stage is, so it is fitted into the
-         card's ratio rather than squashed to it. */
       var k = Math.min(c.width / src.width, c.height / src.height);
       var w = src.width * k, h = src.height * k;
       ctx.drawImage(src, (c.width - w) / 2, (c.height - h) / 2, w, h);
@@ -199,8 +190,6 @@
     job.then(function (entry) {
       el.addBtn.disabled = false;
       if (!entry) {
-        /* The store is full, which is ours to explain and not the buyer's
-           fault. Give them the way out rather than a storage error. */
         say('We could not keep that one. This phone has run out of room for saved designs, so take something out of the cart and try again.', true);
         return;
       }
@@ -214,7 +203,7 @@
 
   function updateDpi(state) {
     var photo = state.zones[zone.id].photo;
-    if (!photo || !photo.image) { el.dpiChip.hidden = true; return; }
+    if (!photo || !photo.image || photo.moon) { el.dpiChip.hidden = true; return; }
 
     var check = G.Photo.check(zone, photo);
     if (!check || check.ok) { el.dpiChip.hidden = true; return; }
@@ -226,9 +215,6 @@
     text.textContent = 'This will print a little soft at that size. Zoom out a bit, or use a bigger photo.';
     el.dpiChip.appendChild(text);
 
-    /* Show what it will really look like rather than only saying it. The crop
-       is drawn at one screen pixel per printed pixel, so the softness on screen
-       is the softness on the mug. */
     if (!cropCanvas) {
       cropCanvas = document.createElement('canvas');
       cropCanvas.className = 'cz-crop';
@@ -239,7 +225,7 @@
 
     var size = G.Design.sizeFor(zone);
     var cw = cropCanvas.width, ch = cropCanvas.height;
-    var ratio = check.dpi / check.min;            /* how far under we are */
+    var ratio = check.dpi / check.min;
     var cx = size.w / 2, cy = size.h / 2;
     var ctx = cropCanvas.getContext('2d');
     ctx.clearRect(0, 0, cw, ch);
@@ -258,44 +244,190 @@
     ctx.restore();
   }
 
+  /* ---------------------------------------------------------------- sliders
+
+     One builder for every range control. A row names the key it moves on the
+     text or the photo, the slider's whole numbers, the divisor that turns
+     them into the state's value, and how to read the value back to a person.
+     `def` is what a double tap resets to; null means "the face's own", which
+     the state stores as null too. */
+
+  var sliders = [];
+
+  function pct(v) { return Math.round(v) + '%'; }
+  function deg(v) { return Math.round(v) + '°'; }
+  function signed(v) { return (v > 0 ? '+' : '') + Math.round(v); }
+
+  var TEXT_MAIN = [
+    { key: 'size', label: 'Size', min: 8, max: 34, step: 1, div: 100, def: 20, say: pct },
+    { key: 'y', label: 'Up and down', min: 10, max: 90, step: 1, div: 100, def: 50, say: pct },
+    { key: 'x', label: 'Across', min: 5, max: 95, step: 1, div: 100, def: null, say: pct,
+      read: function (t) { return t.x == null ? (t.align === 'left' ? 5 : t.align === 'right' ? 95 : 50) : t.x * 100; } },
+    { key: 'rotate', label: 'Tilt', min: -45, max: 45, step: 1, div: 1, def: 0, say: deg },
+    { key: 'arc', label: 'Curve', min: -60, max: 60, step: 5, div: 1, def: 0,
+      say: function (v) { return !v ? 'Straight' : (v > 0 ? 'Smile' : 'Frown'); } },
+    { key: 'spacing', label: 'Letter spacing', min: -5, max: 30, step: 1, div: 100, def: 0, say: signed }
+  ];
+  var TEXT_FINE = [
+    { key: 'lineHeight', label: 'Line spacing', min: 90, max: 160, step: 2, div: 100, def: 112, say: pct },
+    { key: 'weight', label: 'Weight', min: 300, max: 800, step: 50, div: 1, def: null,
+      read: function (t) { return t.weight || (t.font === 'display' ? 700 : 600); },
+      say: function (v) { return v <= 350 ? 'Light' : v <= 500 ? 'Regular' : v <= 650 ? 'Medium' : v <= 750 ? 'Bold' : 'Black'; } },
+    { key: 'opacity', label: 'Opacity', min: 20, max: 100, step: 1, div: 100, def: 100, say: pct },
+    { key: 'outlineWidth', label: 'Outline width', min: 3, max: 20, step: 1, div: 100, def: 9, say: pct }
+  ];
+  var PHOTO_ADJUST = [
+    { key: 'bright', label: 'Brightness', min: -50, max: 50, step: 1, div: 100, def: 0, say: signed },
+    { key: 'contrast', label: 'Contrast', min: -50, max: 50, step: 1, div: 100, def: 0, say: signed },
+    { key: 'sat', label: 'Colour', min: -100, max: 100, step: 1, div: 100, def: 0, say: signed },
+    { key: 'feather', label: 'Soft edge', min: 0, max: 100, step: 1, div: 100, def: 0, say: pct },
+    { key: 'border', label: 'Border', min: 0, max: 12, step: 1, div: 100, def: 0, say: pct },
+    { key: 'vignette', label: 'Vignette', min: 0, max: 100, step: 1, div: 100, def: 0, say: pct },
+    { key: 'opacity', label: 'Opacity', min: 20, max: 100, step: 1, div: 100, def: 100, say: pct }
+  ];
+
+  function textOf(s) { return s.zones[zone.id].text; }
+  function photoOf(s) { return s.zones[zone.id].photo; }
+
+  /* target: which object the key lives on. `get` and `set` may be replaced
+     for the two photo controls that are not a plain key. */
+  function slider(container, spec, target) {
+    var wrap = document.createElement('label');
+    wrap.className = 'cz-field cz-slider';
+    var label = document.createElement('span');
+    label.className = 'cz-label';
+    var name = document.createElement('span'); name.textContent = spec.label;
+    var out = document.createElement('span'); out.className = 'cz-count';
+    label.appendChild(name); label.appendChild(out);
+    var input = document.createElement('input');
+    input.type = 'range';
+    input.min = spec.min; input.max = spec.max; input.step = spec.step || 1;
+    wrap.appendChild(label); wrap.appendChild(input);
+    container.appendChild(wrap);
+
+    var get = spec.get || function (s) {
+      var o = target(s);
+      if (!o) return spec.def == null ? spec.min : spec.def;
+      if (spec.read) return spec.read(o);
+      var v = o[spec.key];
+      if (v == null) v = spec.def == null ? spec.min : spec.def;
+      else v = v * spec.div;
+      return v;
+    };
+    var set = spec.set || function (s, v) {
+      var o = target(s);
+      if (o) o[spec.key] = v / spec.div;
+    };
+
+    function show(v) { out.textContent = spec.say ? spec.say(v) : String(Math.round(v)); }
+
+    input.addEventListener('input', function () {
+      var v = +input.value;
+      store.touch(function (s) { set(s, v); });
+      show(v);
+    });
+    input.addEventListener('change', function () { store.commit(function () {}); syncAll(); });
+    /* A double tap puts a control back where it started, which is the one
+       thing a slider cannot say for itself. */
+    input.addEventListener('dblclick', function () {
+      store.commit(function (s) {
+        if (spec.reset) spec.reset(s);
+        else { var o = target(s); if (o) o[spec.key] = spec.def == null ? null : spec.def / spec.div; }
+      });
+      syncAll();
+    });
+
+    var handle = { input: input, sync: function (s) {
+      var v = get(s);
+      input.value = v;
+      show(v);
+      if (spec.enabled) input.disabled = !spec.enabled(s);
+    } };
+    sliders.push(handle);
+    return handle;
+  }
+
+  /* The photo's own placement: zoom about the centre, and two pans that only
+     have anything to do when the picture is bigger than the print area. */
+  function buildPhotoSliders() {
+    slider(el.photoSliders, {
+      key: 'zoom', label: 'Zoom', min: 25, max: 400, step: 1, say: pct, def: 100,
+      get: function (s) {
+        var p = photoOf(s); if (!p) return 100;
+        var size = G.Design.sizeFor(zone);
+        return Math.round(Math.min(400, Math.max(25, p.k / G.Design.coverScale(p, size.w, size.h) * 100)));
+      },
+      set: function (s, v) {
+        var p = photoOf(s); if (!p) return;
+        var size = G.Design.sizeFor(zone);
+        var min = G.Design.coverScale(p, size.w, size.h);
+        var cxd = (size.w / 2 - p.ox) / p.k, cyd = (size.h / 2 - p.oy) / p.k;
+        p.k = min * (v / 100);
+        p.ox = size.w / 2 - cxd * p.k;
+        p.oy = size.h / 2 - cyd * p.k;
+        G.Photo.clamp(p, zone);
+      },
+      reset: function (s) { var p = photoOf(s); if (p) G.Photo.fitCover(p, zone); }
+    }, photoOf);
+    ['x', 'y'].forEach(function (axis) {
+      slider(el.photoSliders, {
+        key: 'pan' + axis, label: axis === 'x' ? 'Move across' : 'Move up and down',
+        min: 0, max: 100, step: 1, say: pct, def: 50,
+        get: function (s) {
+          var p = photoOf(s); if (!p) return 50;
+          var size = G.Design.sizeFor(zone);
+          var range = axis === 'x' ? size.w - p.natW * p.k : size.h - p.natH * p.k;
+          var o = axis === 'x' ? p.ox : p.oy;
+          return Math.round(Math.min(100, Math.max(0, 50 + (o - range / 2) / Math.max(1, Math.abs(range) || size.w) * 100)));
+        },
+        set: function (s, v) {
+          var p = photoOf(s); if (!p) return;
+          var size = G.Design.sizeFor(zone);
+          var range = axis === 'x' ? size.w - p.natW * p.k : size.h - p.natH * p.k;
+          var o = range / 2 + (v - 50) / 100 * Math.max(1, Math.abs(range) || size.w);
+          if (axis === 'x') p.ox = o; else p.oy = o;
+          G.Photo.clamp(p, zone);
+        },
+        reset: function (s) { var p = photoOf(s); if (p) G.Photo.fitCover(p, zone); }
+      }, photoOf);
+    });
+    slider(el.photoSliders, { key: 'angle', label: 'Tilt', min: -45, max: 45, step: 1, div: 1, def: 0, say: deg }, photoOf);
+    PHOTO_ADJUST.forEach(function (spec) { slider(el.photoAdjust, spec, photoOf); });
+  }
+
+  function buildTextSliders() {
+    TEXT_MAIN.forEach(function (spec) { slider(el.textSliders, spec, textOf); });
+    TEXT_FINE.forEach(function (spec) { slider(el.textFine, spec, textOf); });
+  }
+
   /* ------------------------------------------------------------ photo pane */
+
+  function zoneTakes(kind) { return (zone.accepts || ['photo', 'text']).indexOf(kind) >= 0; }
 
   function syncPhotoControls() {
     var photo = store.get().zones[zone.id].photo;
     var has = !!(photo && photo.image);
+    var moon = zoneTakes('moon');
     el.photoControls.hidden = !has;
-    el.removePhoto.hidden = !has;
+    el.removePhoto.hidden = !has || moon;
     el.photoBtnLabel.textContent = has ? 'Change photo' : 'Add a photo';
-    /* In 3D a drag turns the object, so promising that it moves the photo
-       would be a lie. The sliders do the same job in both views. */
     var flat = (mode === 'flat');
-    el.photoHint.textContent = has
-      ? (flat ? 'Drag it on the preview to move it, or use the sliders.'
-              : 'Use the sliders to move it, or switch to Flat and drag it.')
-      : (flat ? 'Pick a photo from your phone. Drag it on the preview to move it.'
-              : 'Pick a photo from your phone, then turn it to see it wrap.');
+    if (moon) {
+      el.photoHint.textContent = has
+        ? (flat ? 'Drag the moon to place it, pinch or scroll to size it.' : 'Turn the frame to see it, or switch to Design to move the moon.')
+        : 'Pick the date, and the time if you know it.';
+    } else {
+      el.photoHint.textContent = has
+        ? (flat ? 'Drag it to move it, pinch or scroll to zoom. Drag the words too.'
+                : 'Use the sliders to place it, or switch to Design and drag it.')
+        : (flat ? 'Pick a photo from your phone, then drag it into place.'
+                : 'Pick a photo from your phone, then turn it to see it wrap.');
+    }
     if (!has) return;
-
-    var size = G.Design.sizeFor(zone);
-    var min = G.Design.coverScale(photo, size.w, size.h);
-    el.zoom.min = 100;
-    el.zoom.max = 400;
-    el.zoom.value = Math.round(Math.min(400, Math.max(100, photo.k / min * 100)));
-
-    var dw = photo.natW * photo.k, dh = photo.natH * photo.k;
-    var rangeX = size.w - dw, rangeY = size.h - dh;
-    el.panX.value = rangeX < 0 ? Math.round(photo.ox / rangeX * 100) : 50;
-    el.panY.value = rangeY < 0 ? Math.round(photo.oy / rangeY * 100) : 50;
-    el.panX.disabled = rangeX >= 0;
-    el.panY.disabled = rangeY >= 0;
-
     markChips(el.photoFilters, 'filter', photo.filter || 'none');
     markChips(el.photoShapes, 'shape', photo.shape || 'rect');
   }
 
-  /* One row of pressable words. The pressed one is whichever matches the
-     state, and pressing another commits it, so undo walks back through them
-     like any other change. */
   function buildChips(container, key, items, onPick) {
     container.innerHTML = '';
     items.forEach(function (it) {
@@ -318,14 +450,20 @@
   }
 
   var FILTER_NAMES = { none: 'As it is', mono: 'Black and white', sepia: 'Sepia', warm: 'Warm', cool: 'Cool', pop: 'Pop' };
-  var SHAPE_NAMES = { rect: 'Full', soft: 'Soft corners', round: 'Round', heart: 'Heart' };
+  var SHAPE_NAMES = { rect: 'Full', soft: 'Soft corners', round: 'Round', heart: 'Heart', arch: 'Arch', hex: 'Hexagon', diamond: 'Diamond', star: 'Star' };
+  var PLATE_NAMES = { none: 'Nothing', pill: 'Pill', box: 'Box', line: 'Underline' };
+  var PATTERN_NAMES = { none: 'Plain', dots: 'Dots', stripes: 'Stripes', grid: 'Grid', rays: 'Rays' };
+
+  function named(list, names) {
+    return list.map(function (id) { return { id: id, label: names[id] || id }; });
+  }
 
   function buildPhotoChips() {
-    buildChips(el.photoFilters, 'filter', G.Design.FILTERS.map(function (f) { return { id: f, label: FILTER_NAMES[f] || f }; }), function (f) {
-      store.commit(function (s) { s.zones[zone.id].photo.filter = f; });
+    buildChips(el.photoFilters, 'filter', named(G.Design.FILTERS, FILTER_NAMES), function (f) {
+      store.commit(function (s) { photoOf(s).filter = f; });
     });
-    buildChips(el.photoShapes, 'shape', G.Design.SHAPES.map(function (f) { return { id: f, label: SHAPE_NAMES[f] || f }; }), function (f) {
-      store.commit(function (s) { s.zones[zone.id].photo.shape = f; });
+    buildChips(el.photoShapes, 'shape', named(G.Design.SHAPES, SHAPE_NAMES), function (f) {
+      store.commit(function (s) { photoOf(s).shape = f; });
     });
   }
 
@@ -333,16 +471,82 @@
     G.Photo.fromFile(file, zone)
       .then(function (photo) {
         store.commit(function (s) { s.zones[zone.id].photo = photo; });
-        syncPhotoControls();
+        syncAll();
       })
       .catch(function (err) {
         el.photoHint.textContent = err.message;
       });
   }
 
+  /* ------------------------------------------------------------------ moon */
+
+  function moonIso() {
+    var d = el.moonDate.value, t = el.moonTime.value || '21:00';
+    if (!d) return null;
+    return d + 'T' + t;
+  }
+
+  var moonJob = 0;
+  function setMoon() {
+    var iso = moonIso();
+    if (!iso) return;
+    var mine = ++moonJob;
+    el.moonSay.textContent = 'Working out the sky';
+    G.State.moonPhoto(iso, zone).then(function (photo) {
+      if (mine !== moonJob) return;
+      store.commit(function (s) {
+        var old = photoOf(s);
+        /* A new date keeps the old placement, so a buyer who sized the disc
+           does not lose that to a change of night. */
+        if (old && old.moon) {
+          photo.k = old.k; photo.ox = old.ox; photo.oy = old.oy;
+          photo.shape = old.shape; photo.opacity = old.opacity;
+        }
+        s.zones[zone.id].photo = photo;
+        /* The caption fills itself in the first time, and never overwrites
+           words the buyer typed. */
+        var cap = s.zones.caption;
+        if (cap && cap.text && !String(cap.text.value || '').trim()) {
+          cap.text.value = G.State.moonCaption ? G.State.moonCaption(iso) : '';
+        }
+      });
+      sayMoon(iso);
+      syncAll();
+    }).catch(function () {
+      el.moonSay.textContent = 'We could not draw that night. Try another date.';
+    });
+  }
+
+  function sayMoon(iso) {
+    if (!G.Moon) return;
+    var d = G.Moon.describe(G.Moon.stateAt(new Date(iso)));
+    el.moonSay.textContent = d.phase + ', ' + d.illumination + '% lit, ' + d.ageDays + ' days old, ' + d.distanceLabel + '.';
+  }
+
+  /* "14 June 1996, waning gibbous" for the caption strip. Kept on State so
+     the same words can be built wherever a moon is drawn. */
+  G.State.moonCaption = function (iso) {
+    if (!G.Moon) return '';
+    var date = new Date(iso);
+    var d = G.Moon.describe(G.Moon.stateAt(date));
+    var when = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+    return when + ', ' + d.phase.toLowerCase();
+  };
+
+  function syncMoon() {
+    var photo = store.get().zones[zone.id].photo;
+    if (photo && photo.moon && photo.moon.iso) {
+      var parts = photo.moon.iso.split('T');
+      el.moonDate.value = parts[0];
+      el.moonTime.value = parts[1] || '21:00';
+      sayMoon(photo.moon.iso);
+    }
+  }
+
   /* --------------------------------------------------------------- controls */
 
   function buildFontChips() {
+    el.fontChips.innerHTML = '';
     var fonts = rule.allowedFonts || ['ui'];
     var names = { display: 'Bold', ui: 'Plain', hand: 'Handwritten' };
     fonts.forEach(function (f) {
@@ -353,67 +557,107 @@
       b.textContent = names[f] || f;
       b.setAttribute('aria-pressed', String(store.get().zones[zone.id].text.font === f));
       b.addEventListener('click', function () {
-        store.commit(function (s) { s.zones[zone.id].text.font = f; });
-        [].forEach.call(el.fontChips.children, function (c) {
-          c.setAttribute('aria-pressed', String(c.dataset.font === f));
-        });
+        store.commit(function (s) { textOf(s).font = f; textOf(s).weight = null; });
+        syncAll();
       });
       el.fontChips.appendChild(b);
     });
   }
 
-  function buildSwatches(container, palette, current, onPick) {
+  /* A row of colours, with an optional hollow "none" first and a free colour
+     last, because a print shop can print any colour and a palette is a
+     suggestion, not a wall. The free swatch is a native colour input. */
+  function buildSwatches(container, palette, current, onPick, opts) {
+    opts = opts || {};
     container.innerHTML = '';
-    palette.forEach(function (c) {
+    var list = (opts.none ? [{ hex: 'NONE', name: opts.none }] : []).concat(palette);
+    list.forEach(function (c) {
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = 'cz-swatch';
+      b.className = 'cz-swatch' + (c.hex === 'NONE' ? ' cz-swatch--none' : '');
       b.dataset.hex = c.hex.toUpperCase();
-      b.style.background = c.hex;
+      if (c.hex !== 'NONE') b.style.background = c.hex;
       b.title = c.name;
       b.setAttribute('aria-label', c.name);
-      b.setAttribute('aria-pressed', String(c.hex.toUpperCase() === String(current).toUpperCase()));
-      b.addEventListener('click', function () {
-        onPick(c.hex);
-        [].forEach.call(container.children, function (n) {
-          n.setAttribute('aria-pressed', String(n === b));
-        });
-      });
+      b.addEventListener('click', function () { onPick(c.hex === 'NONE' ? null : c.hex); markSwatch(container, c.hex); });
       container.appendChild(b);
     });
+    if (opts.custom !== false) {
+      var lab = document.createElement('label');
+      lab.className = 'cz-swatch cz-swatch--custom';
+      lab.title = 'Any colour';
+      var inp = document.createElement('input');
+      inp.type = 'color';
+      /* Visually hidden, not opacity zero: the label is the swatch and a
+         click on it opens the picker. */
+      inp.className = 'visually-hidden';
+      inp.setAttribute('aria-label', 'Any colour');
+      inp.addEventListener('input', function () {
+        store.touch(function () { onPick(inp.value.toUpperCase(), true); });
+        lab.style.background = inp.value;
+      });
+      inp.addEventListener('change', function () { store.commit(function () {}); markSwatch(container, inp.value); });
+      lab.appendChild(inp);
+      container.appendChild(lab);
+    }
+    markSwatch(container, current == null ? 'NONE' : current);
   }
 
   function markSwatch(container, hex) {
     if (!container) return;
-    var want = String(hex || '').toUpperCase();
+    var want = String(hex || 'NONE').toUpperCase();
+    var hit = false;
     [].forEach.call(container.children, function (n) {
-      n.setAttribute('aria-pressed', String(n.dataset.hex === want));
+      var on = n.dataset.hex === want;
+      if (on) hit = true;
+      n.setAttribute('aria-pressed', String(on));
     });
+    var custom = container.querySelector('.cz-swatch--custom');
+    if (custom) {
+      custom.setAttribute('aria-pressed', String(!hit && want !== 'NONE'));
+      if (!hit && want !== 'NONE') { custom.style.background = want; custom.firstChild.value = want; }
+    }
   }
 
-  /* A print zone that allows a background gets its own swatch row, with a
-     hollow "none" first. It lives on the colour tab because that is where a
-     buyer looks for colour, whichever part of the thing it lands on. */
+  /* A print zone that allows a background gets its own swatch row, a second
+     colour to fade into, and a pattern. They live on the style tab because
+     that is where a buyer looks for colour, whichever part it lands on. */
   function buildFillRows() {
     (recipe.printZones || []).forEach(function (z) {
       if (!z.fills || !z.fills.length) return;
+      var st = store.get().zones[z.id];
       var wrap = document.createElement('div');
       wrap.className = 'cz-part';
       wrap.dataset.fillZone = z.id;
-      var h = document.createElement('p');
-      h.className = 'cz-partname';
-      h.textContent = (z.name || z.id) + ' background';
-      var row = document.createElement('div');
-      row.className = 'cz-swatches';
-      row.setAttribute('role', 'group');
-      row.setAttribute('aria-label', h.textContent);
-      wrap.appendChild(h); wrap.appendChild(row);
-      el.colourParts.appendChild(wrap);
-      var palette = [{ hex: 'NONE', name: 'No background' }].concat(z.fills);
-      buildSwatches(row, palette, store.get().zones[z.id].fill || 'NONE', function (hex) {
-        store.commit(function (s) { s.zones[z.id].fill = hex === 'NONE' ? null : hex; });
+
+      function row(title, cls) {
+        var h = document.createElement('p'); h.className = 'cz-partname'; h.textContent = title;
+        var r = document.createElement('div'); r.className = cls;
+        r.setAttribute('role', 'group'); r.setAttribute('aria-label', title);
+        wrap.appendChild(h); wrap.appendChild(r);
+        return r;
+      }
+      var fill = row((z.name || z.id) + ' background', 'cz-swatches');
+      fill.dataset.role = 'fill';
+      buildSwatches(fill, z.fills, st.fill, function (hex, live) {
+        var apply = function (s) { s.zones[z.id].fill = hex; if (!hex) { s.zones[z.id].fill2 = null; } };
+        if (live) apply(store.get()); else store.commit(apply);
+        if (!live) syncAll();
+      }, { none: 'No background' });
+
+      var fill2 = row('Fade into', 'cz-swatches');
+      fill2.dataset.role = 'fill2';
+      buildSwatches(fill2, z.fills, st.fill2, function (hex, live) {
+        var apply = function (s) { s.zones[z.id].fill2 = hex; };
+        if (live) apply(store.get()); else store.commit(apply);
+      }, { none: 'One colour' });
+
+      var pat = row('Pattern', 'cz-chips');
+      pat.dataset.role = 'pattern';
+      buildChips(pat, 'pattern', named(G.Design.PATTERNS, PATTERN_NAMES), function (p) {
+        store.commit(function (s) { s.zones[z.id].pattern = p === 'none' ? null : p; });
       });
-      row.firstChild.classList.add('cz-swatch--none');
+      el.colourParts.appendChild(wrap);
     });
   }
 
@@ -422,6 +666,7 @@
     recipe.colorParts.forEach(function (part) {
       var wrap = document.createElement('div');
       wrap.className = 'cz-part';
+      wrap.dataset.part = part.id;
       var h = document.createElement('p');
       h.className = 'cz-partname';
       h.textContent = part.name;
@@ -431,11 +676,19 @@
       row.setAttribute('aria-label', part.name);
       wrap.appendChild(h); wrap.appendChild(row);
       el.colourParts.appendChild(wrap);
+      /* Product colours stay on the palette: those are the coats and cloths
+         the workshop actually stocks. */
       buildSwatches(row, part.palette, store.get().colors[part.id], function (hex) {
         store.commit(function (s) { s.colors[part.id] = hex; });
-      });
+      }, { custom: false });
     });
     buildFillRows();
+  }
+
+  function buildPlateChips() {
+    buildChips(el.textPlates, 'plate', named(G.Design.PLATES, PLATE_NAMES), function (p) {
+      store.commit(function (s) { textOf(s).plate = p; });
+    });
   }
 
   /* Switching the active zone re-points every text and photo control at it.
@@ -445,35 +698,44 @@
     zone = next;
     rule = (recipe.textRules || []).filter(function (t) { return t.zoneId === zone.id; })[0] || {};
 
-    var accepts = zone.accepts || ['photo', 'text'];
-    var canPhoto = accepts.indexOf('photo') >= 0;
-    var canText = accepts.indexOf('text') >= 0;
+    var canPhoto = zoneTakes('photo'), canMoon = zoneTakes('moon'), canText = zoneTakes('text');
 
-    document.getElementById('tab-photo').hidden = !canPhoto;
-    document.getElementById('tab-text').hidden = !canText;
+    $('tab-photo').hidden = !(canPhoto || canMoon);
+    $('tab-photo').textContent = canMoon ? 'Moon' : 'Photo';
+    $('tab-text').hidden = !canText;
+    el.moonControls.hidden = !canMoon;
+    el.photoCta.hidden = !canPhoto;
+    el.photoLookField.hidden = canMoon;
+    el.photoShapeField.hidden = canMoon;
+    $('photoMore').hidden = canMoon;
 
     el.textInput.maxLength = rule.maxChars || 40;
     var maxLines = rule.maxLines || 1;
     el.linesHint.hidden = maxLines < 2;
     el.linesHint.textContent = 'Up to ' + maxLines + ' lines. Press Enter for a new one.';
     /* An etch has no colour and no shadow, and a stroke around a groove is
-       nonsense, so those three go away on an engraved zone. */
+       nonsense, so those go away on an engraved zone. */
     el.textEffects.hidden = !!rule.engraved;
-    el.fontChips.innerHTML = '';
+    el.textPlateField.hidden = !!rule.engraved;
+    el.textColour2Field.hidden = !!rule.engraved || rule.colorLocked || !rule.palette;
     buildFontChips();
 
     if (rule.colorLocked || !rule.palette) {
       el.textColourField.hidden = true;
     } else {
       el.textColourField.hidden = false;
-      buildSwatches(el.textColours, rule.palette, store.get().zones[zone.id].text.color, function (hex) {
-        store.commit(function (st) { st.zones[zone.id].text.color = hex; });
+      buildSwatches(el.textColours, rule.palette, store.get().zones[zone.id].text.color, function (hex, live) {
+        var apply = function (st) { textOf(st).color = hex || rule.defaultColor; };
+        if (live) apply(store.get()); else store.commit(apply);
       });
+      buildSwatches(el.textColours2, rule.palette, store.get().zones[zone.id].text.color2, function (hex, live) {
+        var apply = function (st) { textOf(st).color2 = hex; };
+        if (live) apply(store.get()); else store.commit(apply);
+      }, { none: 'One colour' });
     }
 
-    /* Land on a tab this zone actually supports. */
-    var wanted = canPhoto ? 'tab-photo' : 'tab-text';
-    if (document.getElementById(wanted)) document.getElementById(wanted).click();
+    var wanted = (canPhoto || canMoon) ? 'tab-photo' : 'tab-text';
+    if ($(wanted)) $(wanted).click();
 
     [].forEach.call(el.zonePicker.children, function (b) {
       b.setAttribute('aria-pressed', String(b.dataset.zone === zone.id));
@@ -506,10 +768,6 @@
           t.setAttribute('aria-selected', String(on));
           var panel = $(t.getAttribute('aria-controls'));
           panel.hidden = !on;
-          /* Three panels share one rectangle, and swapping one for another with
-             nothing in between reads as a repaint rather than as a change. The
-             class is taken off when the animation ends, so it is never on a
-             panel that is simply sitting there. */
           if (!on) return;
           panel.classList.remove('is-switching');
           void panel.offsetWidth;
@@ -525,48 +783,139 @@
     }, true);
   }
 
-  /* ------------------------------------------------------------- canvas drag
-     Tracks the finger one to one. Every drag also has a slider, so the whole
-     screen is usable without dragging at all. */
+  /* ---------------------------------------------------------- design view
+
+     Direct manipulation on the flat preview. A finger on the words moves the
+     words; a finger anywhere else on the zone moves the photo; two fingers
+     zoom the photo; a wheel zooms it too. Every gesture also has a slider, so
+     the whole screen is usable without dragging at all. The canvas is
+     letterboxed inside its box by object-fit, so pointer positions are mapped
+     through the box the picture actually occupies. */
+
+  var hitCanvas = null;
+
+  function frameOf() {
+    var rect = el.preview.getBoundingClientRect();
+    var view = recipe.views[0];
+    var k = Math.min(rect.width / view.w, rect.height / view.h);
+    return { left: rect.left + (rect.width - view.w * k) / 2, top: rect.top + (rect.height - view.h * k) / 2, k: k };
+  }
+
+  /* A screen point in zone pixels. */
+  function zonePoint(e) {
+    var f = frameOf();
+    var size = G.Design.sizeFor(zone);
+    var vx = (e.clientX - f.left) / f.k, vy = (e.clientY - f.top) / f.k;
+    return { x: (vx - zone.rect.x) * size.w / zone.rect.w, y: (vy - zone.rect.y) * size.h / zone.rect.h,
+             sx: size.w / zone.rect.w / f.k, sy: size.h / zone.rect.h / f.k, size: size };
+  }
+
+  function overText(p) {
+    var t = store.get().zones[zone.id].text;
+    if (!t || !zoneTakes('text')) return false;
+    if (!hitCanvas) hitCanvas = document.createElement('canvas');
+    var box = G.Design.textBox(hitCanvas.getContext('2d'), zone, rule, t, p.size.w, p.size.h);
+    if (!box) return false;
+    var pad = box.px * 0.4;
+    return p.x >= box.x - pad && p.x <= box.x + box.w + pad && p.y >= box.y - pad && p.y <= box.y + box.h + pad;
+  }
 
   function wireDrag() {
-    var dragging = false, lastX = 0, lastY = 0, pointer = null;
+    var pointers = {}, count = 0;
+    var target = null, last = null, pinch = null;
+
+    function zoomPhoto(p, factor, about) {
+      var size = G.Design.sizeFor(zone);
+      var min = G.Design.coverScale(p, size.w, size.h);
+      var k = Math.min(min * 4, Math.max(min * G.Photo.MIN_ZOOM, p.k * factor));
+      var ax = about ? about.x : size.w / 2, ay = about ? about.y : size.h / 2;
+      var cxd = (ax - p.ox) / p.k, cyd = (ay - p.oy) / p.k;
+      p.k = k;
+      p.ox = ax - cxd * k;
+      p.oy = ay - cyd * k;
+      G.Photo.clamp(p, zone);
+    }
 
     el.preview.addEventListener('pointerdown', function (e) {
       if (mode !== 'flat') return;
-      var photo = store.get().zones[zone.id].photo;
-      if (!photo || !photo.image) return;
-      dragging = true; pointer = e.pointerId;
-      lastX = e.clientX; lastY = e.clientY;
-      el.preview.setPointerCapture(pointer);
-      el.preview.classList.add('is-dragging');
+      pointers[e.pointerId] = e;
+      count++;
+      el.preview.setPointerCapture(e.pointerId);
+      var p = zonePoint(e);
+      if (count === 1) {
+        var photo = photoOf(store.get());
+        target = overText(p) ? 'text' : (photo && photo.image ? 'photo' : null);
+        last = p;
+        if (target) el.preview.classList.add('is-dragging');
+      } else if (count === 2) {
+        var ids = Object.keys(pointers);
+        var a = zonePoint(pointers[ids[0]]), b = zonePoint(pointers[ids[1]]);
+        var photo2 = photoOf(store.get());
+        pinch = photo2 ? { d: Math.hypot(a.x - b.x, a.y - b.y), k: photo2.k } : null;
+        target = pinch ? 'pinch' : null;
+      }
     });
 
     el.preview.addEventListener('pointermove', function (e) {
-      if (!dragging || e.pointerId !== pointer) return;
-      var rect = el.preview.getBoundingClientRect();
-      var toView = recipe.views[0].w / rect.width;
-      var size = G.Design.sizeFor(zone);
-      var dx = (e.clientX - lastX) * toView * (size.w / zone.rect.w);
-      var dy = (e.clientY - lastY) * toView * (size.h / zone.rect.h);
-      lastX = e.clientX; lastY = e.clientY;
+      if (!pointers[e.pointerId] || !target) return;
+      pointers[e.pointerId] = e;
+      if (target === 'pinch' && count >= 2) {
+        var ids = Object.keys(pointers);
+        var a = zonePoint(pointers[ids[0]]), b = zonePoint(pointers[ids[1]]);
+        var d = Math.hypot(a.x - b.x, a.y - b.y);
+        store.touch(function (s) {
+          var p = photoOf(s);
+          if (!p || !pinch) return;
+          zoomPhoto(p, (pinch.k * d / Math.max(1, pinch.d)) / p.k, { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+        });
+        return;
+      }
+      var p = zonePoint(e);
+      var dx = p.x - last.x, dy = p.y - last.y;
+      last = p;
       store.touch(function (s) {
-        var p = s.zones[zone.id].photo;
-        p.ox += dx; p.oy += dy;
-        G.Photo.clamp(p, zone);
+        if (target === 'photo') {
+          var ph = photoOf(s);
+          ph.ox += dx; ph.oy += dy;
+          G.Photo.clamp(ph, zone);
+        } else if (target === 'text') {
+          var t = textOf(s);
+          var size = p.size;
+          var box = G.Design.textBox(hitCanvas.getContext('2d'), zone, rule, t, size.w, size.h);
+          if (!box) return;
+          t.x = Math.min(0.95, Math.max(0.05, (box.ax + dx) / size.w));
+          t.y = Math.min(0.9, Math.max(0.1, (box.ay + dy) / size.h));
+        }
       });
     });
 
     function end(e) {
-      if (!dragging || (e && e.pointerId !== pointer)) return;
-      dragging = false;
-      el.preview.classList.remove('is-dragging');
-      /* One undo entry for the whole gesture, not one per frame. */
-      store.commit(function () {});
-      syncPhotoControls();
+      if (!pointers[e.pointerId]) return;
+      delete pointers[e.pointerId];
+      count = Math.max(0, count - 1);
+      if (count > 0 && target === 'pinch') { target = null; pinch = null; return; }
+      if (target) {
+        el.preview.classList.remove('is-dragging');
+        /* One undo entry for the whole gesture, not one per frame. */
+        store.commit(function () {});
+        syncAll();
+      }
+      target = null; pinch = null;
     }
     el.preview.addEventListener('pointerup', end);
     el.preview.addEventListener('pointercancel', end);
+
+    var wheelTimer = null;
+    el.preview.addEventListener('wheel', function (e) {
+      if (mode !== 'flat') return;
+      var photo = photoOf(store.get());
+      if (!photo || !photo.image) return;
+      e.preventDefault();
+      var p = zonePoint(e);
+      store.touch(function (s) { zoomPhoto(photoOf(s), Math.pow(1.0015, -e.deltaY), p); });
+      clearTimeout(wheelTimer);
+      wheelTimer = setTimeout(function () { store.commit(function () {}); syncAll(); }, 200);
+    }, { passive: false });
   }
 
   /* ------------------------------------------------------------------ boot */
@@ -574,6 +923,9 @@
   function wire() {
     wireTabs();
     wireDrag();
+    buildPhotoSliders();
+    buildTextSliders();
+    buildPlateChips();
     buildColourParts();
     buildPhotoChips();
     buildZonePicker();
@@ -586,65 +938,35 @@
 
     el.removePhoto.addEventListener('click', function () {
       store.commit(function (s) { s.zones[zone.id].photo = null; });
-      syncPhotoControls();
+      syncAll();
     });
 
     el.recentre.addEventListener('click', function () {
-      store.commit(function (s) { G.Photo.fitCover(s.zones[zone.id].photo, zone); });
-      syncPhotoControls();
+      store.commit(function (s) {
+        var p = photoOf(s);
+        if (p && p.moon) G.Photo.placeFeature(p, zone); else if (p) G.Photo.fitCover(p, zone);
+      });
+      syncAll();
     });
     el.rotateBtn.addEventListener('click', function () {
-      store.commit(function (s) { G.Photo.turn(s.zones[zone.id].photo, zone); });
-      syncPhotoControls();
+      store.commit(function (s) { G.Photo.turn(photoOf(s), zone); });
+      syncAll();
     });
     el.flipBtn.addEventListener('click', function () {
-      store.commit(function (s) { G.Photo.mirror(s.zones[zone.id].photo, zone); });
-      syncPhotoControls();
+      store.commit(function (s) { G.Photo.mirror(photoOf(s), zone); });
+      syncAll();
     });
 
-    el.zoom.addEventListener('input', function () {
-      store.touch(function (s) {
-        var p = s.zones[zone.id].photo;
-        var size = G.Design.sizeFor(zone);
-        var min = G.Design.coverScale(p, size.w, size.h);
-        var cxd = (size.w / 2 - p.ox) / p.k, cyd = (size.h / 2 - p.oy) / p.k;
-        p.k = min * (+el.zoom.value / 100);
-        p.ox = size.w / 2 - cxd * p.k;
-        p.oy = size.h / 2 - cyd * p.k;
-        G.Photo.clamp(p, zone);
-      });
-    });
-    el.zoom.addEventListener('change', function () { store.commit(function () {}); syncPhotoControls(); });
-
-    function panHandler(input, axis) {
-      input.addEventListener('input', function () {
-        store.touch(function (s) {
-          var p = s.zones[zone.id].photo;
-          var size = G.Design.sizeFor(zone);
-          if (axis === 'x') {
-            var rx = size.w - p.natW * p.k;
-            if (rx < 0) p.ox = rx * (+input.value / 100);
-          } else {
-            var ry = size.h - p.natH * p.k;
-            if (ry < 0) p.oy = ry * (+input.value / 100);
-          }
-          G.Photo.clamp(p, zone);
-        });
-      });
-      input.addEventListener('change', function () { store.commit(function () {}); });
-    }
-    panHandler(el.panX, 'x');
-    panHandler(el.panY, 'y');
+    el.moonDate.addEventListener('change', setMoon);
+    el.moonTime.addEventListener('change', setMoon);
 
     el.textInput.addEventListener('input', function () {
       var v = G.Design.applyTextRules(rule, el.textInput.value);
-      store.touch(function (s) { s.zones[zone.id].text.value = v; });
+      store.touch(function (s) { textOf(s).value = v; });
       el.charCount.textContent = v.length + '/' + (rule.maxChars || 40);
       growTextBox();
     });
     el.textInput.addEventListener('change', function () { store.commit(function () {}); });
-    /* Enter is a new line only while the product has room for one. Past that
-       it does nothing, rather than adding a line that will never print. */
     el.textInput.addEventListener('keydown', function (e) {
       if (e.key !== 'Enter') return;
       var lines = el.textInput.value.split('\n').length;
@@ -653,24 +975,15 @@
 
     [].forEach.call(el.textAlign.children, function (b) {
       b.addEventListener('click', function () {
-        store.commit(function (s) { s.zones[zone.id].text.align = b.dataset.align; });
-        markSeg(b.dataset.align);
+        store.commit(function (s) { textOf(s).align = b.dataset.align; textOf(s).x = null; });
+        syncAll();
       });
     });
-    el.textArc.addEventListener('input', function () {
-      store.touch(function (s) { s.zones[zone.id].text.arc = +el.textArc.value; });
-      sayArc(+el.textArc.value);
-    });
-    el.textArc.addEventListener('change', function () { store.commit(function () {}); });
-    el.textSpacing.addEventListener('input', function () {
-      store.touch(function (s) { s.zones[zone.id].text.spacing = +el.textSpacing.value / 100; });
-    });
-    el.textSpacing.addEventListener('change', function () { store.commit(function () {}); });
 
     function toggle(btn, key) {
       btn.addEventListener('click', function () {
         var on = btn.getAttribute('aria-pressed') !== 'true';
-        store.commit(function (s) { s.zones[zone.id].text[key] = on; });
+        store.commit(function (s) { textOf(s)[key] = on; });
         btn.setAttribute('aria-pressed', String(on));
       });
     }
@@ -678,24 +991,13 @@
     toggle(el.textOutline, 'outline');
     toggle(el.textShadow, 'shadow');
 
-    el.textSize.addEventListener('input', function () {
-      store.touch(function (s) { s.zones[zone.id].text.size = +el.textSize.value / 100; });
-    });
-    el.textSize.addEventListener('change', function () { store.commit(function () {}); });
-
-    el.textY.addEventListener('input', function () {
-      store.touch(function (s) { s.zones[zone.id].text.y = +el.textY.value / 100; });
-    });
-    el.textY.addEventListener('change', function () { store.commit(function () {}); });
-
-    el.undoBtn.addEventListener('click', function () {
-      store.undo().then(function () { syncAll(); });
-    });
+    el.undoBtn.addEventListener('click', function () { store.undo().then(syncAll); });
+    el.redoBtn.addEventListener('click', function () { store.redo().then(syncAll); });
 
     document.addEventListener('keydown', function (e) {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
         e.preventDefault();
-        (e.shiftKey ? store.redo() : store.undo()).then(function () { syncAll(); });
+        (e.shiftKey ? store.redo() : store.undo()).then(syncAll);
       }
     });
 
@@ -707,16 +1009,9 @@
 
     el.addBtn.addEventListener('click', addToCart);
 
-    el.viewTurn.addEventListener('click', function () {
-      setMode('3d', { reveal: true, remember: true });
-    });
-    el.viewFlat.addEventListener('click', function () {
-      setMode('flat', { remember: true });
-    });
+    el.viewTurn.addEventListener('click', function () { setMode('3d', { reveal: true, remember: true }); });
+    el.viewFlat.addEventListener('click', function () { setMode('flat', { remember: true }); });
 
-    /* The stage changes shape when the dock grows, when the phone turns, and
-       when the keyboard opens. The 3D canvas has no intrinsic ratio to fall
-       back on, so it has to be told. */
     if (window.ResizeObserver) {
       new ResizeObserver(function () {
         if (mode === '3d' && scene && !scene.lost()) {
@@ -743,10 +1038,6 @@
     });
   }
 
-  function sayArc(v) {
-    el.arcValue.textContent = !v ? 'Straight' : (v > 0 ? 'Smile' : 'Frown');
-  }
-
   function growTextBox() {
     var rows = Math.min(rule.maxLines || 1, el.textInput.value.split('\n').length);
     el.textInput.rows = Math.max(1, rows);
@@ -755,34 +1046,35 @@
   function syncAll() {
     var s = store.get();
     syncPhotoControls();
+    syncMoon();
 
-    var t = Object.assign({}, G.Design.TEXT_DEFAULTS, s.zones[zone.id].text || {});
+    var t = Object.assign({}, G.Design.TEXT_DEFAULTS, textOf(s) || {});
     el.textInput.value = t.value || '';
     growTextBox();
     el.charCount.textContent = (t.value || '').length + '/' + (rule.maxChars || 40);
-    el.textSize.value = Math.round((t.size || 0.2) * 100);
-    el.textY.value = Math.round((t.y == null ? 0.5 : t.y) * 100);
-    el.textArc.value = t.arc || 0;
-    sayArc(t.arc || 0);
-    el.textSpacing.value = Math.round((t.spacing || 0) * 100);
     markSeg(t.align || 'center');
     el.textCaps.setAttribute('aria-pressed', String(!!t.caps));
     el.textOutline.setAttribute('aria-pressed', String(!!t.outline));
     el.textShadow.setAttribute('aria-pressed', String(!!t.shadow));
-
+    markChips(el.textPlates, 'plate', t.plate || 'none');
     [].forEach.call(el.fontChips.children, function (c) {
       c.setAttribute('aria-pressed', String(c.dataset.font === t.font));
     });
+    markSwatch(el.textColours, t.color);
+    markSwatch(el.textColours2, t.color2 || 'NONE');
+
+    sliders.forEach(function (h) { h.sync(s); });
 
     /* Undo changes the design, so every control has to follow it back. A stale
        swatch that still looks selected after an undo is a lie about the state. */
-    markSwatch(el.textColours, t.color);
-    var groups = el.colourParts.querySelectorAll('.cz-swatches');
-    recipe.colorParts.forEach(function (part, i) {
-      markSwatch(groups[i], s.colors[part.id]);
+    [].forEach.call(el.colourParts.querySelectorAll('[data-part]'), function (wrap) {
+      markSwatch(wrap.querySelector('.cz-swatches'), s.colors[wrap.dataset.part]);
     });
     [].forEach.call(el.colourParts.querySelectorAll('[data-fill-zone]'), function (wrap) {
-      markSwatch(wrap.querySelector('.cz-swatches'), s.zones[wrap.dataset.fillZone].fill || 'NONE');
+      var z = s.zones[wrap.dataset.fillZone];
+      markSwatch(wrap.querySelector('[data-role="fill"]'), z.fill || 'NONE');
+      markSwatch(wrap.querySelector('[data-role="fill2"]'), z.fill2 || 'NONE');
+      markChips(wrap.querySelector('[data-role="pattern"]'), 'pattern', z.pattern || 'none');
     });
   }
 
@@ -793,9 +1085,10 @@
 
   /* ---------------------------------------------------------- what to open
 
-     Three ways in, and the URL decides which. A template or a cart item wins
-     over the autosave and clears it, because the link is what says which
-     design this screen is showing and a refresh has to land on the same one. */
+     Four ways in, and the URL decides which. A template, a cart item or a
+     date from the moon page wins over the autosave and clears it, because
+     the link is what says which design this screen is showing and a refresh
+     has to land on the same one. */
 
   function fromTemplate(tpl) {
     var state = G.Recipe.initialState(recipe);
@@ -807,17 +1100,22 @@
 
     Object.keys(src.zones || {}).forEach(function (id) {
       if (!state.zones[id]) return;
-      if (src.zones[id].fill) state.zones[id].fill = src.zones[id].fill;
-      if (!src.zones[id].text) return;
-      var from = src.zones[id].text, into = state.zones[id].text;
-      ['value', 'font', 'color', 'size', 'y', 'align', 'spacing', 'caps', 'outline', 'shadow', 'arc'].forEach(function (k) {
-        if (from[k] != null) into[k] = from[k];
+      var from = src.zones[id], into = state.zones[id];
+      if (from.fill) into.fill = from.fill;
+      if (from.fill2) into.fill2 = from.fill2;
+      if (from.pattern) into.pattern = from.pattern;
+      if (from.photo && from.photo.moon) into.photo = Object.assign({}, from.photo);
+      if (!from.text) return;
+      Object.keys(from.text).forEach(function (k) {
+        if (from.text[k] != null) into.text[k] = from.text[k];
       });
       var zrule = (recipe.textRules || []).filter(function (r) { return r.zoneId === id; })[0] || {};
-      into.value = G.Design.applyTextRules(zrule, into.value);
+      into.text.value = G.Design.applyTextRules(zrule, into.text.value);
     });
 
-    return state;
+    /* The moon of a template's date is drawn by the same path a saved design
+       takes, so the template is a snapshot like any other. */
+    return G.State.hydrate(G.State.snapshot(state), recipe);
   }
 
   function openWith(params) {
@@ -827,7 +1125,7 @@
         editingId = item.id;
         el.addBtn.textContent = 'Update the cart';
         store.clearSaved();
-        return G.State.hydrate(item.snapshot).then(function (s) { store.replace(s); });
+        return G.State.hydrate(item.snapshot, recipe).then(function (s) { store.replace(s); });
       }
     }
 
@@ -836,14 +1134,30 @@
         .then(function (tpl) {
           if (!tpl || tpl.productId !== recipe.id) return;
           store.clearSaved();
-          store.replace(fromTemplate(tpl));
+          return fromTemplate(tpl).then(function (s) { store.replace(s); });
         })
         .catch(function () { /* a missing template opens a blank one, not an error */ });
     }
 
+    /* The moon page hands over a date. It lands on a blank print with the
+       moon of that night already on it. */
+    if (params.date) {
+      var moonZone = recipe.printZones.filter(function (z) { return (z.accepts || []).indexOf('moon') >= 0; })[0];
+      if (moonZone) {
+        store.clearSaved();
+        var iso = params.date + 'T' + (params.time || '21:00');
+        return G.State.moonPhoto(iso, moonZone).then(function (photo) {
+          var s = G.Recipe.initialState(recipe);
+          s.zones[moonZone.id].photo = photo;
+          if (s.zones.caption && s.zones.caption.text) s.zones.caption.text.value = G.State.moonCaption(iso);
+          store.replace(s);
+        }).catch(function () {});
+      }
+    }
+
     var saved = G.State.loadSaved(recipe.id);
     if (G.State.isMeaningful(saved)) {
-      return G.State.hydrate(saved).then(function (s) {
+      return G.State.hydrate(saved, recipe).then(function (s) {
         store.replace(s);
         el.restoredChip.hidden = false;
       });
@@ -854,10 +1168,8 @@
   function boot() {
     var q = new URLSearchParams(location.search);
     var id = q.get('p') || 'mug';
-    var params = { templateId: q.get('t'), cartId: q.get('c') };
+    var params = { templateId: q.get('t'), cartId: q.get('c'), date: q.get('date'), time: q.get('time') };
 
-    /* The date is not on the critical path for drawing, so it loads alongside
-       and fills itself in. A slow settings fetch never holds up the preview. */
     G.Delivery.load().then(function () {
       paintDeliver();
       setInterval(paintDeliver, 30000);
@@ -868,6 +1180,7 @@
         recipe = r;
         document.title = 'Make your ' + r.name.toLowerCase() + '. Gifty';
         el.productName.textContent = r.name;
+        el.loading.textContent = 'Getting the ' + r.name.toLowerCase() + ' ready';
         return G.Recipe.loadImages(r);
       })
       .then(function (imgs) {
@@ -878,7 +1191,6 @@
         cache = G.Render.prepare(recipe, images);
         zone = recipe.printZones[0];
         rule = (recipe.textRules || []).filter(function (t) { return t.zoneId === zone.id; })[0] || {};
-        part0 = recipe.colorParts[0];
 
         store = G.State.create(G.Recipe.initialState(recipe), onChange);
         wire();
@@ -888,9 +1200,6 @@
       .then(function () {
         el.loading.hidden = true;
 
-        /* The real object, if this recipe describes one and this device can
-           draw one. Everything below still works when it cannot: the flat
-           preview is the whole customizer on its own and always has been. */
         if (recipe.model && G.Scene && G.Scene.supported()) {
           try {
             scene = G.Scene.create(el.preview3d, recipe);
@@ -906,30 +1215,19 @@
         try { saved = localStorage.getItem(VIEW_KEY); } catch (e) {}
         var opening = (saved === 'flat' || !scene) ? 'flat' : '3d';
 
-        /* Draw straight away rather than through requestAnimationFrame. rAF does
-           not fire in a hidden or background tab, so a customizer opened in a
-           second tab would sit blank until it was looked at. */
         el.preview.classList.add('is-first');
         el.preview3d.classList.add('is-first');
         G.Render.draw(el.preview, recipe, cache, images, store.get(), 1);
         setMode(opening);
-        /* Two frames, so the hidden class is really in effect before the class
-           that reveals it lands, or the transition never runs at all. */
         requestAnimationFrame(function () {
           requestAnimationFrame(function () {
             el.preview.classList.add('is-ready');
             el.preview3d.classList.add('is-ready');
-            /* One turn, once, and only when the object is what is on screen.
-               It says "this can be turned" in a second and a half, which no
-               label on a button manages. */
             if (opening === '3d' && scene) {
               try { scene.reveal(); } catch (e) { dropScene(e); }
             }
           });
         });
-        /* And price it. Nothing has changed yet, so no change handler has run,
-           and the markup's placeholder would otherwise stand as the price of
-           every product on the site. */
         updatePrice(store.get());
         updateDpi(store.get());
         paintDeliver();

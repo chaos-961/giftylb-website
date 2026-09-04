@@ -337,11 +337,6 @@
 }
 .tile:hover .tile__go svg { transform: translateX(4px); }
 
-/* The gift box is not one of the five and should not read as one. A dashed
-   edge and the warm ground say "this is the thing you do with the others". */
-.tile--box { border-style: dashed; border-color: color-mix(in srgb, var(--teal-deep) 40%, var(--line)); }
-.tile--box .tile__art { background: linear-gradient(170deg, #FFFFFF 0%, var(--teal-wash) 100%); }
-
 /* ---------- Steps ----------
    A rail through the three of them, so they read as a sequence rather than as
    three unrelated cards. On a phone it runs down the side; on a desktop it runs
@@ -630,4 +625,74 @@
   margin-block-start: var(--space-6);
   font-size: var(--text-sm);
   color: var(--ink-soft);
+}
+
+/* ---------------------------------------------- v0.3.6. Scroll driven motion
+
+   Everything below is keyed to the scroll, never to a clock, and every rest
+   state is the finished picture: a browser without scroll timelines shows
+   the page exactly as it ends up. Each one orients or reveals. The eyebrow
+   rule draws itself in as a section arrives, a step number pops up as its
+   step is read, an object in the grid settles onto its tile, the footer
+   columns rise to close the page. */
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .section .eyebrow::before {
+      transform-origin: 0 50%;
+      animation: eyebrow-sweep linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+    .step__num {
+      animation: num-pop linear both;
+      animation-timeline: view();
+      animation-range: entry 15% cover 42%;
+    }
+    .tile__art {
+      animation: art-settle linear both;
+      animation-timeline: view();
+      animation-range: entry 8% cover 38%;
+    }
+    .zone__days {
+      animation: days-pop linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 40%;
+    }
+    .site-footer__brand, .site-footer__inner > nav {
+      animation: foot-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 80%;
+    }
+    .site-footer__inner > nav:nth-child(2) { animation-range: entry 6% entry 86%; }
+    .site-footer__inner > nav:nth-child(3) { animation-range: entry 12% entry 92%; }
+    .faq details {
+      animation: faq-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 24%;
+    }
+  }
+}
+
+@keyframes eyebrow-sweep { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes num-pop {
+  from { transform: scale(0.55) rotate(-14deg); opacity: 0; }
+  60%  { opacity: 1; }
+  to   { transform: none; }
+}
+@keyframes art-settle {
+  from { transform: translateY(26px) scale(0.9); opacity: 0.2; }
+  to   { transform: none; opacity: 1; }
+}
+@keyframes days-pop {
+  from { transform: translateY(10px) scale(0.86); opacity: 0.3; }
+  to   { transform: none; opacity: 1; }
+}
+@keyframes foot-rise {
+  from { transform: translateY(22px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+@keyframes faq-rise {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
 }

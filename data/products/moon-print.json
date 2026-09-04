@@ -1,0 +1,391 @@
+{
+  "id": "moon-print",
+  "name": "Birth moon print",
+  "blurb": "The real moon of any night you name, drawn from NASA surface maps, printed and framed.",
+  "method": "archival print, framed",
+  "basePrice": 24,
+  "currency": "USD",
+  "leadTimeDays": 4,
+  "views": [
+    {
+      "id": "front",
+      "label": "Front",
+      "w": 900,
+      "h": 700,
+      "baseImage": "assets/products/moon-print/base.svg"
+    }
+  ],
+  "colorParts": [
+    {
+      "id": "frame",
+      "name": "Frame",
+      "viewId": "front",
+      "maskUrl": "assets/products/moon-print/mask-frame.svg",
+      "default": "#14201F",
+      "palette": [
+        {
+          "hex": "#14201F",
+          "name": "Black"
+        },
+        {
+          "hex": "#FFFFFF",
+          "name": "White"
+        },
+        {
+          "hex": "#D9A066",
+          "name": "Oak"
+        },
+        {
+          "hex": "#8B5E34",
+          "name": "Walnut"
+        }
+      ]
+    }
+  ],
+  "printZones": [
+    {
+      "id": "poster",
+      "name": "The print",
+      "viewId": "front",
+      "rect": {
+        "x": 270,
+        "y": 95,
+        "w": 360,
+        "h": 480
+      },
+      "warp": {
+        "type": "quad",
+        "quad": [
+          [
+            270,
+            95
+          ],
+          [
+            630,
+            95
+          ],
+          [
+            630,
+            575
+          ],
+          [
+            270,
+            575
+          ]
+        ]
+      },
+      "widthMm": 300,
+      "heightMm": 400,
+      "minDpi": 150,
+      "bleedMm": 3,
+      "accepts": [
+        "moon",
+        "text"
+      ],
+      "background": "#0B1020",
+      "fills": [
+        {
+          "hex": "#0B1020",
+          "name": "Night"
+        },
+        {
+          "hex": "#0A0A0C",
+          "name": "Black"
+        },
+        {
+          "hex": "#14201F",
+          "name": "Ink"
+        },
+        {
+          "hex": "#0F766E",
+          "name": "Deep teal"
+        },
+        {
+          "hex": "#1E3A8A",
+          "name": "Navy"
+        },
+        {
+          "hex": "#F4F1E8",
+          "name": "Paper"
+        }
+      ]
+    },
+    {
+      "id": "caption",
+      "name": "The caption",
+      "viewId": "front",
+      "rect": {
+        "x": 306,
+        "y": 479,
+        "w": 288,
+        "h": 48
+      },
+      "warp": {
+        "type": "quad",
+        "quad": [
+          [
+            306,
+            479
+          ],
+          [
+            594,
+            479
+          ],
+          [
+            594,
+            527
+          ],
+          [
+            306,
+            527
+          ]
+        ]
+      },
+      "widthMm": 240,
+      "heightMm": 40,
+      "minDpi": 200,
+      "bleedMm": 0,
+      "accepts": [
+        "text"
+      ],
+      "background": null
+    }
+  ],
+  "textRules": [
+    {
+      "zoneId": "poster",
+      "maxChars": 24,
+      "maxLines": 2,
+      "allowedFonts": [
+        "display",
+        "hand",
+        "ui"
+      ],
+      "defaultFont": "display",
+      "engraved": false,
+      "colorLocked": false,
+      "defaultColor": "#F4F1E8",
+      "palette": [
+        {
+          "hex": "#F4F1E8",
+          "name": "Paper"
+        },
+        {
+          "hex": "#FFFFFF",
+          "name": "White"
+        },
+        {
+          "hex": "#D9A066",
+          "name": "Gold"
+        },
+        {
+          "hex": "#14B8A6",
+          "name": "Teal"
+        },
+        {
+          "hex": "#F8C8B8",
+          "name": "Blush"
+        },
+        {
+          "hex": "#14201F",
+          "name": "Ink"
+        }
+      ]
+    },
+    {
+      "zoneId": "caption",
+      "maxChars": 60,
+      "maxLines": 2,
+      "allowedFonts": [
+        "ui",
+        "display",
+        "hand"
+      ],
+      "defaultFont": "ui",
+      "engraved": false,
+      "colorLocked": false,
+      "defaultColor": "#F4F1E8",
+      "palette": [
+        {
+          "hex": "#F4F1E8",
+          "name": "Paper"
+        },
+        {
+          "hex": "#FFFFFF",
+          "name": "White"
+        },
+        {
+          "hex": "#D9A066",
+          "name": "Gold"
+        },
+        {
+          "hex": "#14B8A6",
+          "name": "Teal"
+        },
+        {
+          "hex": "#F8C8B8",
+          "name": "Blush"
+        },
+        {
+          "hex": "#14201F",
+          "name": "Ink"
+        }
+      ]
+    }
+  ],
+  "pricing": [
+    {
+      "id": "moon",
+      "label": "Your moon",
+      "amount": 0,
+      "when": {
+        "zoneHasPhoto": "poster"
+      }
+    },
+    {
+      "id": "frame",
+      "label": "Frame colour",
+      "amount": 3,
+      "when": {
+        "partNotDefault": "frame"
+      }
+    }
+  ],
+  "model": {
+    "camera": {
+      "fov": 28,
+      "yawDeg": -16,
+      "pitchDeg": 6,
+      "dist": 0.9
+    },
+    "shadow": 0.3,
+    "reflect": 0.3,
+    "parts": [
+      {
+        "kind": "box",
+        "color": "#141A22",
+        "gloss": 0.12,
+        "rough": 0.7,
+        "size": [
+          1.5,
+          2,
+          0.05
+        ],
+        "bevel": 0.006,
+        "arcSteps": 2,
+        "flatSteps": 6,
+        "printFace": "+z",
+        "at": [
+          0,
+          0,
+          0
+        ],
+        "rotX": -6,
+        "prints": [
+          {
+            "zoneId": "poster",
+            "rect": [
+              0,
+              0,
+              1,
+              1
+            ]
+          },
+          {
+            "zoneId": "caption",
+            "rect": [
+              0.1,
+              0.8,
+              0.8,
+              0.1
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "box",
+        "colorPart": "frame",
+        "gloss": 0.3,
+        "rough": 0.45,
+        "size": [
+          1.64,
+          0.07,
+          0.1
+        ],
+        "bevel": 0.012,
+        "arcSteps": 3,
+        "flatSteps": 3,
+        "printFace": "none",
+        "at": [
+          0,
+          1.0319,
+          -0.0833
+        ],
+        "rotX": -6
+      },
+      {
+        "kind": "box",
+        "colorPart": "frame",
+        "gloss": 0.3,
+        "rough": 0.45,
+        "size": [
+          1.64,
+          0.07,
+          0.1
+        ],
+        "bevel": 0.012,
+        "arcSteps": 3,
+        "flatSteps": 3,
+        "printFace": "none",
+        "at": [
+          0,
+          -1.0267,
+          0.1331
+        ],
+        "rotX": -6
+      },
+      {
+        "kind": "box",
+        "colorPart": "frame",
+        "gloss": 0.3,
+        "rough": 0.45,
+        "size": [
+          0.07,
+          2.14,
+          0.1
+        ],
+        "bevel": 0.012,
+        "arcSteps": 3,
+        "flatSteps": 3,
+        "printFace": "none",
+        "at": [
+          -0.785,
+          0.0026,
+          0.0249
+        ],
+        "rotX": -6
+      },
+      {
+        "kind": "box",
+        "colorPart": "frame",
+        "gloss": 0.3,
+        "rough": 0.45,
+        "size": [
+          0.07,
+          2.14,
+          0.1
+        ],
+        "bevel": 0.012,
+        "arcSteps": 3,
+        "flatSteps": 3,
+        "printFace": "none",
+        "at": [
+          0.785,
+          0.0026,
+          0.0249
+        ],
+        "rotX": -6
+      }
+    ]
+  }
+}

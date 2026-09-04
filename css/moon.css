@@ -1,0 +1,166 @@
+/* Gifty. The birth moon page.
+   A light page with one dark card in it: the sky. The card is the print the
+   page ends by selling, so it is the same deep navy as the poster's ground.
+   Logical properties only. */
+
+.moon { padding-block: var(--space-6) var(--section-y); }
+
+.moon__head { max-inline-size: var(--measure); }
+.moon__head h1 { margin-block: var(--space-3) var(--space-4); }
+
+.moon__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: end;
+  margin-block-start: var(--space-5);
+}
+.moon__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1 1 12rem;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.moon__field small { text-transform: none; letter-spacing: 0; font-weight: 600; }
+.moon__field--narrow { flex: 0 1 9rem; }
+.moon__field input {
+  min-block-size: 48px;
+  padding-inline: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-base);
+  inline-size: 100%;
+}
+.moon__field input:focus-visible { border-color: var(--teal-deep); }
+.moon__form .btn { flex: 1 1 12rem; min-block-size: 48px; }
+.moon__error { color: var(--signal); font-size: var(--text-sm); min-block-size: 1.4em; margin-block-start: var(--space-2); }
+
+/* The sky. One dark card, and the moon drawn straight into it. The canvas
+   is square by ratio, so the disc is the same size at every width. */
+.moon__sky {
+  position: relative;
+  margin-block-start: var(--space-6);
+  border-radius: var(--radius-xl);
+  background: radial-gradient(120% 90% at 50% 100%, #16213a 0%, #0B1020 55%, #05070d 100%);
+  box-shadow: var(--elev-3), inset 0 1px 0 rgb(255 255 255 / 0.06);
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  max-block-size: 78svb;
+  margin-inline: auto;
+}
+#moonCanvas { display: block; inline-size: 100%; block-size: 100%; }
+
+.moon__caption {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  padding: var(--space-4) var(--space-5);
+  background: linear-gradient(to top, rgb(5 7 13 / 0.72), transparent);
+  color: #F4F1E8;
+}
+.moon__phase {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.1;
+}
+.moon__when { font-size: var(--text-sm); opacity: 0.8; margin-block-start: 2px; font-variant-numeric: tabular-nums; }
+
+.moon__nogl {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  text-align: center;
+  color: #F4F1E8;
+  font-size: var(--text-sm);
+}
+
+/* The facts. A quiet grid of labelled numbers, tabular so a scrub does not
+   make the column breathe. */
+.moon__facts { margin-block-start: var(--space-5); }
+.moon__facts dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+.moon__facts dl > div {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+}
+.moon__facts dt {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.moon__facts dd {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The journey. Every full moon since, on one slider. */
+.moon__journey { margin-block-start: var(--space-7); }
+.moon__journeyhead h2 { font-size: var(--text-2xl); }
+.moon__journeyhead p { color: var(--ink-soft); margin-block-start: var(--space-2); font-variant-numeric: tabular-nums; }
+.moon__transport {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-block-start: var(--space-4);
+  flex-wrap: wrap;
+}
+.moon__transport input[type="range"] {
+  flex: 1 1 14rem;
+  block-size: 44px;
+  accent-color: var(--teal-deep);
+  cursor: pointer;
+  background: transparent;
+}
+.moon__transport .btn { min-block-size: 44px; }
+
+/* The ask. Warm ground, the same card as the closer on the homepage. */
+.moon__cta {
+  margin-block-start: var(--space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+  background: var(--paper-warm);
+  border: 1px solid var(--line);
+  box-shadow: var(--elev-2);
+}
+.moon__cta h2 { margin-block: var(--space-2) var(--space-3); }
+.moon__cta .lede { color: var(--ink-soft); }
+.moon__cta .btn { align-self: start; min-block-size: 48px; }
+#printFrom { opacity: 0.85; margin-inline-start: 0.4em; font-weight: 600; }
+
+@media (min-width: 46rem) {
+  .moon__facts dl { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .moon__cta { flex-direction: row; align-items: center; justify-content: space-between; }
+  .moon__cta > div { max-inline-size: var(--measure); }
+}
+
+@media (min-width: 62rem) {
+  .moon__sky { max-inline-size: 40rem; }
+  .moon__facts dl { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}

@@ -7,8 +7,8 @@
 <meta name="description" content="Put your photo and your name on it, and watch it change as you go.">
 <meta name="theme-color" content="#14B8A6">
 <meta name="robots" content="noindex">
-<link rel="icon" href="favicon.svg?v=0.3.5" type="image/svg+xml">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.3.5">
+<link rel="icon" href="favicon.svg?v=0.3.6" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=0.3.6">
 
 <!-- Share card. The picture is a real render by the product engine, not a
      mock up of one, so what gets shared is what gets made. Absolute URLs
@@ -28,15 +28,15 @@
 <meta name="twitter:description" content="Put your photo and your name on it, and watch it change as you go.">
 <meta name="twitter:image" content="https://chaos-961.github.io/giftylb-website/assets/og.jpg">
 
-<meta name="version" content="0.3.5">
+<meta name="version" content="0.3.6">
 
-<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.3.5" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.3.5" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/bricolage-grotesque-var-latin.woff2?v=0.3.6" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-var-latin.woff2?v=0.3.6" as="font" type="font/woff2" crossorigin>
 
-<link rel="stylesheet" href="css/tokens.css?v=0.3.5">
-<link rel="stylesheet" href="css/base.css?v=0.3.5">
-<link rel="stylesheet" href="css/chrome.css?v=0.3.5">
-<link rel="stylesheet" href="css/customize.css?v=0.3.5">
+<link rel="stylesheet" href="css/tokens.css?v=0.3.6">
+<link rel="stylesheet" href="css/base.css?v=0.3.6">
+<link rel="stylesheet" href="css/chrome.css?v=0.3.6">
+<link rel="stylesheet" href="css/customize.css?v=0.3.6">
 </head>
 <body class="customizer">
 
@@ -50,6 +50,9 @@
   <button class="cz-icon" id="undoBtn" type="button" disabled aria-label="Undo the last change">
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h11a5 5 0 0 1 0 10h-4"/><path d="M8 5L4 9l4 4"/></svg>
   </button>
+  <button class="cz-icon" id="redoBtn" type="button" disabled aria-label="Redo">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 9H9a5 5 0 0 0 0 10h4"/><path d="M16 5l4 4-4 4"/></svg>
+  </button>
   <a class="cz-icon cz-cart" href="cart.html" aria-label="Cart">
     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l1 12H4z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
     <span class="cart-link__count" data-cart-count hidden>0</span>
@@ -62,8 +65,9 @@
     <div class="cz-canvas-wrap">
       <!-- Two previews, one design. The 3D one is the real object and is what
            opens; the flat one is the same render the proof and the print file
-           come from, and it is where a photo is dragged into place. Neither is
-           a picture of the other: both are drawn from the same state. -->
+           come from, and it is where a photo or a line of words is dragged
+           into place. Neither is a picture of the other: both are drawn from
+           the same state. -->
       <canvas id="preview3d" class="cz-3d" tabindex="0" role="img" hidden
               aria-label="Your design on the real shape. Drag it, or use the arrow keys, to turn it."></canvas>
       <canvas id="preview" width="900" height="700" role="img"
@@ -72,7 +76,7 @@
 
       <div class="cz-view" id="viewToggle" role="group" aria-label="How to see it" hidden>
         <button type="button" class="cz-viewbtn" id="viewTurn" aria-pressed="true">Turn it</button>
-        <button type="button" class="cz-viewbtn" id="viewFlat" aria-pressed="false">Flat</button>
+        <button type="button" class="cz-viewbtn" id="viewFlat" aria-pressed="false">Design</button>
       </div>
     </div>
 
@@ -96,13 +100,30 @@
     <div class="cz-tabs" role="tablist" aria-label="What to change">
       <button class="cz-tab" role="tab" id="tab-photo" aria-controls="panel-photo" aria-selected="true" type="button">Photo</button>
       <button class="cz-tab" role="tab" id="tab-text" aria-controls="panel-text" aria-selected="false" type="button">Text</button>
-      <button class="cz-tab" role="tab" id="tab-colour" aria-controls="panel-colour" aria-selected="false" type="button">Colour</button>
+      <button class="cz-tab" role="tab" id="tab-colour" aria-controls="panel-colour" aria-selected="false" type="button">Style</button>
     </div>
 
     <div class="cz-panels">
 
       <div class="cz-panel" id="panel-photo" role="tabpanel" aria-labelledby="tab-photo">
-        <div class="cz-row cz-row--cta">
+
+        <!-- The moon of a date, for the print that takes one. Everything a
+             date does to the sky is worked out here in the browser. -->
+        <div class="cz-moon" id="moonControls" hidden>
+          <div class="cz-row">
+            <label class="cz-field cz-half">
+              <span class="cz-label">Date</span>
+              <input type="date" id="moonDate" min="1900-01-01" max="2099-12-31">
+            </label>
+            <label class="cz-field cz-half">
+              <span class="cz-label">Time</span>
+              <input type="time" id="moonTime" value="21:00">
+            </label>
+          </div>
+          <p class="cz-moonsay" id="moonSay">Pick a date and the real moon of that night appears.</p>
+        </div>
+
+        <div class="cz-row cz-row--cta" id="photoCta">
           <label class="btn btn--primary cz-file">
             <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp,image/avif" hidden>
             <span id="photoBtnLabel">Add a photo</span>
@@ -110,34 +131,27 @@
           <button class="btn btn--quiet" type="button" id="removePhoto" hidden>Remove</button>
         </div>
 
-        <p class="cz-hint" id="photoHint">Pick a photo from your phone. Drag it on the preview to move it.</p>
+        <p class="cz-hint" id="photoHint">Pick a photo from your phone. Drag it on the preview to move it, pinch to zoom.</p>
 
         <div class="cz-photo-controls" id="photoControls" hidden>
-          <label class="cz-field">
-            <span class="cz-label">Zoom</span>
-            <input type="range" id="zoom" min="100" max="400" value="100" step="1" aria-describedby="dpiChip">
-          </label>
-          <label class="cz-field">
-            <span class="cz-label">Move across</span>
-            <input type="range" id="panX" min="0" max="100" value="50" step="1">
-          </label>
-          <label class="cz-field">
-            <span class="cz-label">Move up and down</span>
-            <input type="range" id="panY" min="0" max="100" value="50" step="1">
-          </label>
+          <div id="photoSliders"></div>
           <div class="cz-row">
             <button class="btn btn--quiet cz-half" type="button" id="rotateBtn">Turn it 90</button>
             <button class="btn btn--quiet cz-half" type="button" id="flipBtn">Mirror it</button>
+            <button class="btn btn--quiet cz-half" type="button" id="recentre">Fill it</button>
           </div>
-          <button class="btn btn--quiet cz-wide" type="button" id="recentre">Centre it again</button>
-          <div class="cz-field">
+          <div class="cz-field" id="photoLookField">
             <span class="cz-label">Look</span>
             <div class="cz-chips" id="photoFilters" role="group" aria-label="Photo look"></div>
           </div>
-          <div class="cz-field">
+          <div class="cz-field" id="photoShapeField">
             <span class="cz-label">Shape</span>
-            <div class="cz-chips" id="photoShapes" role="group" aria-label="Photo shape"></div>
+            <div class="cz-chips cz-chips--shapes" id="photoShapes" role="group" aria-label="Photo shape"></div>
           </div>
+          <details class="cz-more" id="photoMore">
+            <summary>Adjust</summary>
+            <div id="photoAdjust"></div>
+          </details>
         </div>
       </div>
 
@@ -147,6 +161,7 @@
           <textarea id="textInput" rows="1" placeholder="A name, a date, a line" autocomplete="off" spellcheck="false"></textarea>
         </label>
         <p class="cz-hint" id="linesHint" hidden></p>
+        <p class="cz-hint" id="textDragHint">Drag the words on the Design view to place them.</p>
 
         <div class="cz-field">
           <span class="cz-label">Style</span>
@@ -158,14 +173,12 @@
           <div class="cz-swatches" id="textColours" role="group" aria-label="Text colour"></div>
         </div>
 
-        <label class="cz-field">
-          <span class="cz-label">Size</span>
-          <input type="range" id="textSize" min="8" max="34" value="20" step="1">
-        </label>
-        <label class="cz-field">
-          <span class="cz-label">Height</span>
-          <input type="range" id="textY" min="10" max="90" value="50" step="1">
-        </label>
+        <div class="cz-field" id="textColour2Field">
+          <span class="cz-label">Fade into</span>
+          <div class="cz-swatches" id="textColours2" role="group" aria-label="Second colour"></div>
+        </div>
+
+        <div id="textSliders"></div>
 
         <div class="cz-field">
           <span class="cz-label">Place it</span>
@@ -176,15 +189,6 @@
           </div>
         </div>
 
-        <label class="cz-field">
-          <span class="cz-label">Curve <span class="cz-count" id="arcValue">Straight</span></span>
-          <input type="range" id="textArc" min="-60" max="60" value="0" step="5">
-        </label>
-        <label class="cz-field">
-          <span class="cz-label">Letter spacing</span>
-          <input type="range" id="textSpacing" min="-5" max="30" value="0" step="1">
-        </label>
-
         <div class="cz-field" id="textEffects">
           <span class="cz-label">Finish</span>
           <div class="cz-chips" role="group" aria-label="Text finish">
@@ -193,6 +197,16 @@
             <button type="button" class="cz-chipbtn" id="textShadow" aria-pressed="false">Shadow</button>
           </div>
         </div>
+
+        <div class="cz-field" id="textPlateField">
+          <span class="cz-label">Behind the words</span>
+          <div class="cz-chips" id="textPlates" role="group" aria-label="A ground behind the words"></div>
+        </div>
+
+        <details class="cz-more" id="textMore">
+          <summary>Fine tune</summary>
+          <div id="textFine"></div>
+        </details>
       </div>
 
       <div class="cz-panel" id="panel-colour" role="tabpanel" aria-labelledby="tab-colour" hidden>
@@ -215,20 +229,19 @@
   </section>
 </main>
 
-<script defer src="js/firebase-config.js?v=0.3.5"></script>
-<script defer src="js/data.js?v=0.3.5"></script>
-<script defer src="js/recipe.js?v=0.3.5"></script>
-<script defer src="js/engine/warp.js?v=0.3.5"></script>
-<script defer src="js/engine/mesh.js?v=0.3.5"></script>
-<script defer src="js/engine/design.js?v=0.3.5"></script>
-<script defer src="js/engine/render.js?v=0.3.5"></script>
-<script defer src="js/engine/scene.js?v=0.3.5"></script>
-<script defer src="js/engine/state.js?v=0.3.5"></script>
-<script defer src="js/engine/photo.js?v=0.3.5"></script>
-<script defer src="js/engine/price.js?v=0.3.5"></script>
-<script defer src="js/delivery.js?v=0.3.5"></script>
-<script defer src="js/bundle.js?v=0.3.5"></script>
-<script defer src="js/cart.js?v=0.3.5"></script>
-<script defer src="js/customize.js?v=0.3.5"></script>
+<script defer src="js/firebase-config.js?v=0.3.6"></script>
+<script defer src="js/data.js?v=0.3.6"></script>
+<script defer src="js/recipe.js?v=0.3.6"></script>
+<script defer src="js/engine/warp.js?v=0.3.6"></script>
+<script defer src="js/engine/mesh.js?v=0.3.6"></script>
+<script defer src="js/engine/design.js?v=0.3.6"></script>
+<script defer src="js/engine/render.js?v=0.3.6"></script>
+<script defer src="js/engine/scene.js?v=0.3.6"></script>
+<script defer src="js/engine/state.js?v=0.3.6"></script>
+<script defer src="js/engine/photo.js?v=0.3.6"></script>
+<script defer src="js/engine/price.js?v=0.3.6"></script>
+<script defer src="js/delivery.js?v=0.3.6"></script>
+<script defer src="js/cart.js?v=0.3.6"></script>
+<script defer src="js/customize.js?v=0.3.6"></script>
 </body>
 </html>
